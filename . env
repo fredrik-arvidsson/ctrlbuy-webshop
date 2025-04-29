@@ -1,0 +1,7 @@
+spring.jpa.hibernate.ddl-auto=none
+
+
+# Exempel på innehåll i .env
+DB_URL=jdbc:mysql://localhost:3306/webshop
+DB_USERNAME=root
+DB_PASSWORD=infoTeeeeek25@
