@@ -1,0 +1,65 @@
+package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.dto.RegisterRequest;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class RegisterPageController {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        model.addAttribute("registerRequest", new RegisterRequest());
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String registerViaForm(@ModelAttribute("registerRequest") @Valid RegisterRequest request,
+                                  BindingResult bindingResult,
+                                  Model model) {
+        List<String> errors = new ArrayList<>();
+
+        // Valideringsfel från DTO
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(e -> errors.add(e.getDefaultMessage()));
+        }
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            errors.add("Lösenorden matchar inte.");
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            errors.add("Användarnamnet är redan taget.");
+        }
+
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+            return "register";
+        }
+
+        User newUser = new User();
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setEnabled(true);
+        newUser.addRole("ROLE_USER");
+
+        userRepository.save(newUser);
+
+        return "redirect:/login?registered";
+    }
+}

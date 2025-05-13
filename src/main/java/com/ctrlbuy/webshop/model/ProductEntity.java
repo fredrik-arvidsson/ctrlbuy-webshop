@@ -24,7 +24,7 @@ public class ProductEntity {
     @Column(length = 1000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     private String imageUrl;

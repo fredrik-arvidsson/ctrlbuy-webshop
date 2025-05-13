@@ -7,6 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "order_items")
 public class OrderItem {
 
     @Id
@@ -22,7 +23,7 @@ public class OrderItem {
     @Column(nullable = false)
     private double price;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity order; // Koppling tillbaka till ordern
+    private OrderEntity order;
 }

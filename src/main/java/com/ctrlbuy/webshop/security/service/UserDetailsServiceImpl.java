@@ -1,13 +1,12 @@
-package com.ctrlbuy.webshop.service;
-
+package com.ctrlbuy.webshop.security.service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public class UserService implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Här kommer din implementation för att ladda användaren
-        return null;
+        throw new UsernameNotFoundException("Dummy implementation");
     }
 }

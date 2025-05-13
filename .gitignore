@@ -1,10 +1,24 @@
-HELP.md
+# === Byggmappar ===
 target/
-!.mvn/wrapper/maven-wrapper.jar
+build/
+dist/
+nbbuild/
+nbdist/
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# === Maven Wrapper ===
+!.mvn/wrapper/maven-wrapper.jar
+
+# === IDE: IntelliJ IDEA ===
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# === IDE: Spring Tool Suite (STS) ===
 .apt_generated
 .classpath
 .factorypath
@@ -13,21 +27,19 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# === IDE: NetBeans ===
 /nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
+# === IDE: Visual Studio Code ===
 .vscode/
+
+# === Operativsystem ===
+.DS_Store
+
+# === Loggar & tillfälliga filer ===
+*.log
+*.tmp
+
+# === Miljöfiler ===
+*.env

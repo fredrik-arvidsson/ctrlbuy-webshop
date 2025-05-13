@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.security;
 
-import com.ctrlbuy.webshop.model.User;
+import com.ctrlbuy.webshop.security.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

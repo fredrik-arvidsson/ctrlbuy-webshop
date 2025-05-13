@@ -1,87 +1,186 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Logga in - CtrlBuy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logga in - CtrlBuy Webshop</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
     }
-
-    .login-container {
-      background-color: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 300px;
-      text-align: center;
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
     }
-
-    .login-container h2 {
-      margin-bottom: 1rem;
-    }
-
-    .login-container input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .login-container button {
+    header {
       background-color: #333;
       color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .nav-menu {
+      background-color: #444;
+      padding: 10px 0;
+    }
+    .nav-menu ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .nav-menu li {
+      display: inline;
+      margin: 0 10px;
+    }
+    .nav-menu a {
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+    }
+    .nav-menu a:hover {
+      background-color: #555;
+      border-radius: 3px;
+    }
+    .login-form {
+      background-color: white;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
       border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+    .btn {
+      background-color: #333;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 3px;
       cursor: pointer;
     }
-
-    .login-container button:hover {
+    .btn:hover {
       background-color: #555;
     }
-
-    .logo {
-      width: 120px;
-      margin-bottom: 1rem;
+    .alert {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 3px;
     }
-
-    .register-link {
-      margin-top: 1rem;
-      display: block;
-      font-size: 0.9rem;
-      color: #333;
-      text-decoration: none;
+    .alert-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
-
-    .register-link:hover {
-      text-decoration: underline;
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      margin-top: 20px;
+    }
+    .user-status {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .logout-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #d32f2f;
     }
   </style>
 </head>
 <body>
+<!-- Inkludera header fragment -->
+<div th:replace="~{fragments/header :: header}"></div>
 
-<div class="login-container">
-  <img src="/Hemsida.png" alt="Logotyp" class="logo">
-  <h2>Logga in</h2>
+<!-- Inkludera navigation fragment -->
+<div th:replace="~{fragments/header :: navigation}"></div>
 
-  <form method="post" action="/login">
-    <input type="text" name="username" placeholder="Användarnamn" required>
-    <input type="password" name="password" placeholder="Lösenord" required>
-    <button type="submit">Logga in</button>
-  </form>
+<div class="container">
+  <div class="login-form">
+    <h2>Logga in</h2>
 
-  <a href="/register" class="register-link">Skapa ett konto</a>
+    <!-- Visa felmeddelande vid misslyckad inloggning -->
+    <div th:if="${param.error}" class="alert alert-danger">
+      Felaktigt användarnamn eller lösenord. Försök igen.
+    </div>
+
+    <!-- Meddelande vid utloggning -->
+    <div th:if="${param.logout}" class="alert alert-success">
+      Du har loggat ut.
+    </div>
+
+    <!-- Bekräftelse efter registrering -->
+    <div th:if="${param.registered}" class="alert alert-success">
+      Ditt konto har skapats! Du kan nu logga in.
+    </div>
+
+    <!-- Felsökningsmeddelande för 405-fel -->
+    <div th:if="${param.methodNotAllowed}" class="alert alert-danger">
+      Ett tekniskt fel har uppstått. POST-metoden stöds inte för inloggning.
+    </div>
+
+    <!-- Formulärets action-URL -->
+    <form action="/login-process" method="post">
+      <div class="form-group">
+        <label for="username">Användarnamn</label>
+        <input type="text" id="username" name="username" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Lösenord</label>
+        <input type="password" id="password" name="password" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn">Logga in</button>
+      </div>
+
+      <div>
+        <p>Har du inget konto? <a href="/register">Registrera dig här</a></p>
+      </div>
+    </form>
+  </div>
 </div>
 
+<footer>
+  <div class="container">
+    <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+  </div>
+</footer>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>CtrlBuy Webshop</title>
+</head>
+<body>
+<!-- Header Fragment -->
+<header th:fragment="header">
+  <div class="container">
+    <h1>CtrlBuy Webshop</h1>
+  </div>
+</header>
+
+<!-- Navigation Fragment -->
+<nav th:fragment="navigation" class="nav-menu">
+  <div class="container">
+    <ul>
+      <li><a href="/">Hem</a></li>
+      <li><a href="/products">Produkter</a></li>
+      <li><a href="/about">Om oss</a></li>
+      <li><a href="/contact">Kontakt</a></li>
+      <!-- Visa olika navigationslänkar baserat på inloggningsstatus -->
+      <li sec:authorize="isAuthenticated()">
+        <a href="/profile">Min profil</a>
+      </li>
+      <li sec:authorize="isAuthenticated()">
+        <a href="/logout-process">Logga ut</a>
+      </li>
+      <li sec:authorize="!isAuthenticated()">
+        <a href="/login">Logga in</a>
+      </li>
+      <li sec:authorize="!isAuthenticated()">
+        <a href="/register">Registrera</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- User Status Fragment -->
+<div th:fragment="user-status" class="container">
+  <div sec:authorize="isAuthenticated()" class="user-status">
+    <p>Du är inloggad som: <strong sec:authentication="name"></strong></p>
+    <form action="/logout-process" method="post" style="display: inline;">
+      <button type="submit" class="logout-btn">Logga ut</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.security.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequiredArgsConstructor
+public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    // Metod för att hantera HTML-formulärinloggning
+    @PostMapping("/login-process")
+    public String processLoginForm(@RequestParam String username,
+                                   @RequestParam String password,
+                                   HttpServletResponse response,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            log.debug("Försöker autentisera användare: {}", username);
+
+            // Försök autentisera användaren
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Generera token
+            String accessToken = jwtService.generateToken(authentication.getName());
+            String refreshToken = jwtService.generateRefreshToken(authentication.getName());
+
+            // Skapa cookies för tokens
+            Cookie accessTokenCookie = new Cookie("jwt_token", accessToken);
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setMaxAge(86400); // 24 timmar
+
+            Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setMaxAge(604800); // 7 dagar
+
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
+
+            log.info("Användare {} inloggad framgångsrikt", username);
+
+            // Omdirigera till välkomstsidan
+            return "redirect:/welcome";
+
+        } catch (AuthenticationException e) {
+            // Vid fel, omdirigera tillbaka till inloggningssidan med felmeddelande
+            log.warn("Inloggningsförsök misslyckades för användare: {}", username, e);
+            redirectAttributes.addAttribute("error", true);
+            return "redirect:/login";
+        }
+    }
+
+    // Metod för att hantera utloggning och rensa cookies
+    @GetMapping("/logout-process")
+    public String logout(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        log.debug("Loggar ut användare");
+
+        // Rensa cookies
+        Cookie accessTokenCookie = new Cookie("jwt_token", null);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(0);
+
+        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        // Rensa säkerhetskontexten
+        SecurityContextHolder.clearContext();
+
+        log.info("Användare utloggad");
+
+        // Omdirigera till inloggningssidan med utloggningsmeddelande
+        redirectAttributes.addAttribute("logout", true);
+        return "redirect:/login";
+    }
+}

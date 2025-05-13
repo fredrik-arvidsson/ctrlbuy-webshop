@@ -1,4 +1,4 @@
-package com.ctrlbuy.webshop.model;
+package com.ctrlbuy.webshop.security.entity;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;

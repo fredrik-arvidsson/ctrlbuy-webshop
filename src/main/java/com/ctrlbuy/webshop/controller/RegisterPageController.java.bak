@@ -1,7 +1,7 @@
 package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.dto.RegisterRequest;
-import com.ctrlbuy.webshop.model.User;
+import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,31 +31,23 @@ public class RegisterPageController {
     @PostMapping("/register")
     public String registerViaForm(@ModelAttribute("registerRequest") @Valid RegisterRequest request,
                                   BindingResult bindingResult,
-                                  Model model) {
+                                  Model model,
+                                  RedirectAttributes redirectAttributes) {
+        List<String> errors = new ArrayList<>();
+
         // Valideringsfel från DTO
         if (bindingResult.hasErrors()) {
-            return "register";
+            bindingResult.getAllErrors().forEach(e -> errors.add(e.getDefaultMessage()));
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            model.addAttribute("error", "Lösenorden matchar inte.");
-            return "register";
+            errors.add("Lösenorden matchar inte.");
         }
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            model.addAttribute("error", "Användarnamnet är redan taget.");
-            return "register";
+            errors.add("Användarnamnet är redan taget.");
         }
 
-        User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setEmail(request.getEmail());
-        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-        newUser.setEnabled(true);  // Uppdaterad metod
-        newUser.addRole("ROLE_USER");
-
-        userRepository.save(newUser);
-
-        return "redirect:/login";
-    }
-}
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+            return "register";

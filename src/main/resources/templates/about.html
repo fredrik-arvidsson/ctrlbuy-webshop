@@ -1,53 +1,114 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
 <head>
     <meta charset="UTF-8">
-    <title>Om oss</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Om oss - CtrlBuy Webshop</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
         }
         header {
             background-color: #333;
             color: white;
-            padding: 1rem 0;
+            padding: 20px 0;
+            text-align: center;
         }
-        nav {
-            margin: 1rem 0;
+        .nav-menu {
+            background-color: #444;
+            padding: 10px 0;
         }
-        nav a {
-            margin: 0 15px;
-            color: #333;
+        .nav-menu ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .nav-menu li {
+            display: inline;
+            margin: 0 10px;
+        }
+        .nav-menu a {
+            color: white;
             text-decoration: none;
-            font-weight: bold;
+            padding: 5px 10px;
         }
-        nav a:hover {
-            text-decoration: underline;
+        .nav-menu a:hover {
+            background-color: #555;
+            border-radius: 3px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+        .user-status {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f;
         }
         .content {
             padding: 2rem;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-<header>
-    <h1>Om CtrlBuy</h1>
-</header>
+<!-- Inkludera header fragment -->
+<div th:replace="~{fragments/header :: header}"></div>
 
-<nav>
-    <a href="/welcome">Hem</a>
-    <a href="/products">Produkter</a>
-    <a href="/about">Om oss</a>
-    <a href="/contact">Kontakt</a>
-    <a href="/logout">Logga ut</a>
-</nav>
+<!-- Inkludera navigation fragment -->
+<div th:replace="~{fragments/header :: navigation}"></div>
+
+<!-- Inkludera user-status fragment -->
+<div th:replace="~{fragments/header :: user-status}"></div>
 
 <div class="content">
+    <h2>Om CtrlBuy</h2>
     <p>Vi är ett passionerat team som vill göra shopping enkelt och tryggt online.</p>
+
+    <!-- Mer innehåll om företaget -->
+    <div class="container">
+        <h3>Vår historia</h3>
+        <p>CtrlBuy grundades 2022 med målet att skapa en modern e-handelsplattform med fokus på användarvänlighet och säkerhet.</p>
+
+        <h3>Vårt team</h3>
+        <p>Vårt team består av erfarna utvecklare, designers och e-handelsexperter som brinner för att skapa den bästa shoppingupplevelsen online.</p>
+
+        <h3>Vår vision</h3>
+        <p>Vi strävar efter att bli den mest betrodda e-handelsplattformen i Sverige genom att erbjuda högkvalitativa produkter, utmärkt kundservice och en sömlös shoppingupplevelse.</p>
+    </div>
 </div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+    </div>
+</footer>
 </body>
 </html>
