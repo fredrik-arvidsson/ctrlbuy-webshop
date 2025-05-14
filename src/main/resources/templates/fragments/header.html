@@ -3,50 +3,106 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>CtrlBuy Webshop</title>
+    <meta charset="UTF-8">
+    <title>CtrlBuy Webshop</title>
+    <style>
+        /* Container för hela huvudet */
+        .header-container {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        /* Container för loggan */
+        .logo-container {
+            width: 100%;
+            height: 35px; /* Ändrat från 60px till 35px (ca 3.5cm) */
+            overflow: hidden; /* Klipp bort allt som sticker utanför */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Stilar för logotypbilden - absolut begränsad höjd */
+        .logo-banner {
+            height: 35px !important; /* Ändrat från 60px till 35px (ca 3.5cm) */
+            width: auto; /* Låt bredden justeras automatiskt */
+            max-width: 100%; /* Förhindra att bilden är bredare än container */
+            display: block;
+        }
+
+        /* Navigationsstilar */
+        .nav-container {
+            width: 100%;
+            background-color: #f8f8f8;
+            margin-top: 10px;
+        }
+
+        .nav-container ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-container li {
+            margin: 0 15px;
+        }
+
+        .nav-container a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px 0;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 <!-- Header Fragment -->
-<header th:fragment="header">
-  <div class="container">
-    <h1>CtrlBuy Webshop</h1>
-  </div>
+<header th:fragment="header" class="header-container">
+    <div class="logo-container">
+        <!-- Logotypbild som länkar till hemsidan -->
+        <a href="/">
+            <img src="/Hemsida.png" alt="CtrlBuy Logotyp" class="logo-banner" style="height: 35px !important; max-height: 35px !important; width: auto;" />
+        </a>
+    </div>
 </header>
 
 <!-- Navigation Fragment -->
-<nav th:fragment="navigation" class="nav-menu">
-  <div class="container">
-    <ul>
-      <li><a href="/">Hem</a></li>
-      <li><a href="/products">Produkter</a></li>
-      <li><a href="/about">Om oss</a></li>
-      <li><a href="/contact">Kontakt</a></li>
-      <!-- Visa olika navigationslänkar baserat på inloggningsstatus -->
-      <li sec:authorize="isAuthenticated()">
-        <a href="/profile">Min profil</a>
-      </li>
-      <li sec:authorize="isAuthenticated()">
-        <a href="/logout-process">Logga ut</a>
-      </li>
-      <li sec:authorize="!isAuthenticated()">
-        <a href="/login">Logga in</a>
-      </li>
-      <li sec:authorize="!isAuthenticated()">
-        <a href="/register">Registrera</a>
-      </li>
-    </ul>
-  </div>
+<nav th:fragment="navigation" class="nav-container">
+    <div class="container">
+        <ul>
+            <li><a href="/">Hem</a></li>
+            <li><a href="/products">Produkter</a></li>
+            <li><a href="/about">Om oss</a></li>
+            <li><a href="/contact">Kontakt</a></li>
+            <!-- Visa olika navigationslänkar baserat på inloggningsstatus -->
+            <li sec:authorize="isAuthenticated()">
+                <a href="/profile">Min profil</a>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <a href="/logout-process">Logga ut</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/login">Logga in</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/register">Registrera</a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
 <!-- User Status Fragment -->
 <div th:fragment="user-status" class="container">
-  <div sec:authorize="isAuthenticated()" class="user-status">
-    <p>Du är inloggad som: <strong sec:authentication="name"></strong></p>
-    <form action="/logout-process" method="post" style="display: inline;">
-      <button type="submit" class="logout-btn">Logga ut</button>
-    </form>
-  </div>
+    <div sec:authorize="isAuthenticated()" class="user-status">
+        <p>Du är inloggad som: <strong sec:authentication="name"></strong></p>
+        <form action="/logout-process" method="post" style="display: inline;">
+            <button type="submit" class="logout-btn">Logga ut</button>
+        </form>
+    </div>
 </div>
 </body>
 </html>

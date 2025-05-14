@@ -139,3 +139,29 @@
       <div class="form-group">
         <label for="username">Användarnamn</label>
         <input type="text" id="username" th:field="*{username}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-post</label>
+        <input type="email" id="email" th:field="*{email}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Lösenord</label>
+        <input type="password" id="password" th:field="*{password}" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Bekräfta lösenord</label>
+        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn">Registrera</button>
+    </form>
+  </div>
+</div>
+
+<!-- Inkludera footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
