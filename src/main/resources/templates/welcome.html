@@ -1,172 +1,60 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Välkommen - CtrlBuy Webshop</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-        }
-        .nav-menu {
-            background-color: #444;
-            padding: 10px 0;
-        }
-        .nav-menu ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        .nav-menu li {
-            display: inline;
-            margin: 0 10px;
-        }
-        .nav-menu a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-        }
-        .nav-menu a:hover {
-            background-color: #555;
-            border-radius: 3px;
-        }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 20px;
-        }
-        .user-status {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .logout-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            margin-left: 10px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .logout-btn:hover {
-            background-color: #d32f2f;
-        }
-        .welcome-content {
-            background-color: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .product-recommendations {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .product-card {
-            background-color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: calc(33.333% - 20px);
-            box-sizing: border-box;
-        }
-        .product-card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 3px;
-        }
-        .product-card h4 {
-            margin: 10px 0 5px;
-        }
-        .product-card .price {
-            font-weight: bold;
-            color: #4CAF50;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <!-- Inkludera header fragment -->
 <div th:replace="~{fragments/header :: header}"></div>
 
-<!-- Inkludera navigation fragment -->
-<div th:replace="~{fragments/header :: navigation}"></div>
+<div class="content">
+    <!-- Välkomstsection -->
+    <div class="welcome-section">
+        <h1>Välkommen till CtrlBuy, <span th:text="${#authentication.name}">user</span>!</h1>
+        <p>Din nya favorit för produkter online</p>
 
-<!-- Inkludera user-status fragment -->
-<div th:replace="~{fragments/header :: user-status}"></div>
-
-<div class="container">
-    <div class="welcome-content">
-        <h2>Välkommen till vår webbutik!</h2>
-        <p>Här hittar du ett brett urval av produkter till konkurrenskraftiga priser. Vi erbjuder snabb leverans och utmärkt kundservice.</p>
-        <p>Ta en titt på våra senaste produkter nedan eller använd navigeringsmenyn för att utforska webbplatsen.</p>
-    </div>
-
-    <!-- Anpassat innehåll baserat på inloggningsstatus -->
-    <div th:if="${#authorization.expression('isAuthenticated()')}">
-        <div class="welcome-content">
-            <h3>Dina senaste beställningar</h3>
-            <p>Du har inte gjort några beställningar än.</p>
-        </div>
-
-        <div class="welcome-content">
-            <h3>Rekommenderade produkter för dig</h3>
-            <p>Baserat på dina tidigare köp tror vi att du kan vara intresserad av dessa produkter:</p>
-
-            <div class="product-recommendations">
-                <div class="product-card">
-                    <img src="https://via.placeholder.com/150" alt="Produkt 1">
-                    <h4>Premium produkt</h4>
-                    <p>En högkvalitativ produkt som passar dina behov.</p>
-                    <p class="price">999 kr</p>
-                </div>
-                <div class="product-card">
-                    <img src="https://via.placeholder.com/150" alt="Produkt 2">
-                    <h4>Populärt val</h4>
-                    <p>Vår bästsäljare denna månad.</p>
-                    <p class="price">799 kr</p>
-                </div>
-                <div class="product-card">
-                    <img src="https://via.placeholder.com/150" alt="Produkt 3">
-                    <h4>Nyhet!</h4>
-                    <p>Nyligen tillagd i vårt sortiment.</p>
-                    <p class="price">1 299 kr</p>
-                </div>
-            </div>
+        <div class="welcome-buttons">
+            <a href="/produkter" class="welcome-button">Utforska produkter</a>
+            <a href="/om-oss" class="welcome-button">Om oss</a>
         </div>
     </div>
 
-    <div th:unless="${#authorization.expression('isAuthenticated()')}" class="welcome-content">
-        <p>Logga in för att se dina beställningar och få personliga rekommendationer!</p>
+    <!-- Produktsection -->
+    <h2>Utvalda produkter</h2>
+
+    <div class="product-grid">
+        <!-- Produkt 1 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 1</h3>
+            <p class="price">199 kr</p>
+            <a href="/produkt/1" class="product-link">Visa detaljer</a>
+        </div>
+
+        <!-- Produkt 2 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 2</h3>
+            <p class="price">299 kr</p>
+            <a href="/produkt/2" class="product-link">Visa detaljer</a>
+        </div>
+
+        <!-- Produkt 3 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 3</h3>
+            <p class="price">399 kr</p>
+            <a href="/produkt/3" class="product-link">Visa detaljer</a>
+        </div>
     </div>
 </div>
 
+<!-- Footer -->
 <footer>
-    <div class="container">
-        <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
-    </div>
+    <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
 </footer>
 </body>
 </html>

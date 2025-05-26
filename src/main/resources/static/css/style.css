@@ -1,0 +1,129 @@
+/* Grundläggande stilar */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Header med svart bakgrund, 4cm hög */
+.header-container {
+    background-color: #1a1a1a;
+    height: 4cm;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* Logotyp-container */
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Logotypbild */
+.logo {
+    height: 60px;
+    margin-right: 15px;
+}
+
+/* Logotyptext */
+.logo-text {
+    text-align: center;
+}
+
+.logo-text h1 {
+    font-size: 2.2rem;
+    margin: 0;
+    font-weight: bold;
+    color: #4fc3f7;
+}
+
+.logo-text p {
+    font-size: 1rem;
+    margin: 0;
+    color: white;
+}
+
+/* Anpassad navbar med grön bakgrund */
+.navbar-custom {
+    background-color: #4caf50;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-custom .nav-link {
+    color: white !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-custom .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-custom .nav-link.active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Inloggningsmeddelande (grön banner) */
+.login-status {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.login-status .logout-btn {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    float: right;
+}
+
+/* Produkt-kort */
+.product-card {
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.product-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.product-price {
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Knappar */
+.btn-custom {
+    background-color: #333;
+    color: white;
+    border: none;
+}
+
+.btn-custom:hover {
+    background-color: #555;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+}

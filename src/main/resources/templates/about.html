@@ -1,114 +1,240 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Om oss - CtrlBuy Webshop</title>
+    <title>Om oss - CTRL+BUY</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <style>
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f5f5f5;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
+
+        /* Header - FIXAD LOGO */
+        .header-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        header {
-            background-color: #333;
+
+        .logo-container {
+            text-align: center;
             color: white;
-            padding: 20px 0;
-            text-align: center;
         }
-        .nav-menu {
-            background-color: #444;
-            padding: 10px 0;
+
+        /* 🔥 FIXAD LOGO: Lika hög som bakgrunden och 3x bredare */
+        .logo-icon {
+            width: 1800px;  /* 3x bredare än 600px */
+            height: 250px; /* Lika hög som header-container */
+            background: transparent;
+            border-radius: 20px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        .nav-menu ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            text-align: center;
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
-        .nav-menu li {
-            display: inline;
-            margin: 0 10px;
+
+        /* 🔥 GÖMD TEXT - tar bort CTRL+BUY texten */
+        .logo-text {
+            display: none;
         }
-        .nav-menu a {
+
+        /* Grön navigation - EXAKT som login-sidan */
+        .top-nav {
+            background-color: #28a745;
+            padding: 15px 0;
+        }
+
+        .top-nav a {
             color: white;
             text-decoration: none;
+            margin: 0 20px;
+        }
+
+        .top-nav a:hover {
+            background-color: rgba(255,255,255,0.1);
             padding: 5px 10px;
+            border-radius: 4px;
         }
-        .nav-menu a:hover {
-            background-color: #555;
-            border-radius: 3px;
-        }
-        footer {
-            background-color: #333;
+
+        /* Login status bar */
+        .login-status {
+            background-color: #28a745;
             color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 20px;
-        }
-        .user-status {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            margin-bottom: 20px;
+            padding: 10px 15px;
             border-radius: 5px;
-            text-align: center;
         }
+
         .logout-btn {
-            background-color: #f44336;
+            background-color: #dc3545;
             color: white;
             border: none;
-            padding: 5px 10px;
-            margin-left: 10px;
-            border-radius: 3px;
-            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }
+
         .logout-btn:hover {
-            background-color: #d32f2f;
+            background-color: #c82333;
         }
-        .content {
-            padding: 2rem;
-            text-align: center;
+
+        /* Card styling */
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #343a40 !important;
         }
     </style>
 </head>
 <body>
-<!-- Inkludera header fragment -->
-<div th:replace="~{fragments/header :: header}"></div>
+<!-- Header med logotyp - FIXAD LOGO -->
+<header class="header-container">
+    <div class="logo-container">
+        <div class="logo-icon">
+            <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+        </div>
+        <div class="logo-text">
+            <h1>CTRL+BUY</h1>
+            <p>SOLUTIONS</p>
+        </div>
+    </div>
+</header>
 
-<!-- Inkludera navigation fragment -->
-<div th:replace="~{fragments/header :: navigation}"></div>
+<!-- Grön navigation - EXAKT som login-sidan -->
+<div class="top-nav text-center">
+    <a th:href="@{/}">Hem</a>
+    <a th:href="@{/produkter}">Produkter</a>
+    <a th:href="@{/om-oss}" style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px;">Om oss</a>
+    <a th:href="@{/kontakt}">Kontakt</a>
+    <a th:href="@{/support}">Support</a>
+</div>
 
-<!-- Inkludera user-status fragment -->
-<div th:replace="~{fragments/header :: user-status}"></div>
-
-<div class="content">
-    <h2>Om CtrlBuy</h2>
-    <p>Vi är ett passionerat team som vill göra shopping enkelt och tryggt online.</p>
-
-    <!-- Mer innehåll om företaget -->
-    <div class="container">
-        <h3>Vår historia</h3>
-        <p>CtrlBuy grundades 2022 med målet att skapa en modern e-handelsplattform med fokus på användarvänlighet och säkerhet.</p>
-
-        <h3>Vårt team</h3>
-        <p>Vårt team består av erfarna utvecklare, designers och e-handelsexperter som brinner för att skapa den bästa shoppingupplevelsen online.</p>
-
-        <h3>Vår vision</h3>
-        <p>Vi strävar efter att bli den mest betrodda e-handelsplattformen i Sverige genom att erbjuda högkvalitativa produkter, utmärkt kundservice och en sömlös shoppingupplevelse.</p>
+<!-- Inloggningsstatusmeddelande (grön banner), visas endast för inloggade användare -->
+<div class="container mt-3" sec:authorize="isAuthenticated()">
+    <div class="login-status">
+        <div class="row">
+            <div class="col-md-9">
+                Du är inloggad som: <span sec:authentication="name">user</span>
+            </div>
+            <div class="col-md-3 text-right">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">Logga ut</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
-<footer>
-    <div class="container">
-        <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+<!-- Huvudinnehåll - Om oss -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">Om CTRL+BUY</h1>
+            <p class="lead">Vi erbjuder innovativa produkter med hög kvalitet till konkurrenskraftiga priser.</p>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Vår Historia</h2>
+                    <p>CTRL+BUY grundades 2020 med målsättningen att förenkla online-shopping för teknikintresserade konsumenter. Vi startade som en liten e-handelsbutik med fokus på datortillbehör, men har sedan dess expanderat vårt sortiment till att omfatta en bred kategori av teknikprodukter.</p>
+                    <p>Idag är vi en ledande aktör inom vår nisch med tusentals nöjda kunder över hela Sverige.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Vår Vision</h2>
+                    <p>På CTRL+BUY strävar vi efter att göra kvalitetsprodukter tillgängliga för alla. Vi tror på transparens, kundnöjdhet och hållbarhet i allt vi gör.</p>
+                    <p>Vår vision är att bli den mest betrodda e-handelsplatsen i Norden där kunder kan hitta innovativa produkter som förenklar deras vardag.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Varför välja oss?</h2>
+                    <ul>
+                        <li>Snabba leveranser - oftast inom 1-3 arbetsdagar</li>
+                        <li>Gratis frakt på alla beställningar över 499 kr</li>
+                        <li>30 dagars öppet köp</li>
+                        <li>Kunnig kundsupport som hjälper dig med alla frågor</li>
+                        <li>Säkra betalningar</li>
+                        <li>Miljöcertifierade</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">Teamet</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h4>Anna Andersson</h4>
+                        <p class="text-muted">VD & Grundare</p>
+                    </div>
+                    <div class="mb-3">
+                        <h4>Erik Svensson</h4>
+                        <p class="text-muted">Produktchef</p>
+                    </div>
+                    <div class="mb-3">
+                        <h4>Maria Johansson</h4>
+                        <p class="text-muted">Kundtjänstchef</p>
+                    </div>
+                    <div class="mb-3">
+                        <h4>Johan Karlsson</h4>
+                        <p class="text-muted">Logistikansvarig</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">Kontakta oss</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>E-post:</strong> info@ctrlbuy.se</p>
+                    <p><strong>Telefon:</strong> 08-123 45 67</p>
+                    <p><strong>Adress:</strong><br>
+                        CTRL+BUY AB<br>
+                        Teknikgatan 123<br>
+                        112 33 Stockholm</p>
+                    <a th:href="@{/kontakt}" class="btn btn-success btn-block mt-3">Kontakta oss</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-5 py-3 bg-dark text-white">
+    <div class="container text-center">
+        <p>&copy; 2025 CTRL+Buy Webshop. Alla rättigheter förbehållna.</p>
     </div>
 </footer>
+
+<!-- Bootstrap & JQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

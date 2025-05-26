@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support - CTRL+BUY</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Header - EXAKT som login-sidan */
+    .header-container {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+      height: 189px; /* 5cm */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-container {
+      text-align: center;
+      color: white;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: transparent;
+      border-radius: 12px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text h1 {
+      font-size: 2.8rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .logo-text p {
+      font-size: 1.2rem;
+      color: #bdc3c7;
+      margin: 5px 0 0 0;
+      letter-spacing: 1px;
+    }
+
+    /* Grön navigation - EXAKT som login-sidan */
+    .top-nav {
+      background-color: #28a745;
+      padding: 15px 0;
+    }
+
+    .top-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+    }
+
+    .top-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    /* Login status bar */
+    .login-status {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+
+    /* Card styling */
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+      border-radius: 8px 8px 0 0 !important;
+    }
+
+    /* FAQ styling */
+    .faq-item {
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      font-weight: bold;
+      color: #495057;
+      margin-bottom: 8px;
+    }
+
+    .faq-answer {
+      color: #6c757d;
+      margin-bottom: 0;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: #343a40 !important;
+    }
+  </style>
+</head>
+<body>
+<!-- Header med logotyp - EXAKT som login-sidan -->
+<header class="header-container">
+  <div class="logo-container">
+    <div class="logo-icon">
+      <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+    </div>
+    <div class="logo-text">
+      <h1>CTRL+BUY</h1>
+      <p>SOLUTIONS</p>
+    </div>
+  </div>
+</header>
+
+<!-- Grön navigation - EXAKT som login-sidan -->
+<div class="top-nav text-center">
+  <a th:href="@{/}">Hem</a>
+  <a th:href="@{/produkter}">Produkter</a>
+  <a th:href="@{/om-oss}">Om oss</a>
+  <a th:href="@{/kontakt}">Kontakt</a>
+  <a th:href="@{/support}" style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px;">Support</a>
+</div>
+
+<!-- Inloggningsstatusmeddelande (grön banner), visas endast för inloggade användare -->
+<div class="container mt-3" th:if="${#authorization.expression('isAuthenticated()')}">
+  <div class="login-status">
+    <div class="row">
+      <div class="col-md-9">
+        Du är inloggad som: <span th:text="${#authentication.name}">user</span>
+      </div>
+      <div class="col-md-3 text-right">
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="logout-btn">Logga ut</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Huvudinnehåll - Support -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8">
+      <h1 class="mb-4">Support & Hjälp</h1>
+      <p class="lead">Vi finns här för att hjälpa dig! Här hittar du svar på vanliga frågor och kontaktuppgifter.</p>
+
+      <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+          <h2 class="mb-0">Vanliga frågor (FAQ)</h2>
+        </div>
+        <div class="card-body">
+          <div class="faq-item">
+            <div class="faq-question">Hur lång tid tar leveransen?</div>
+            <div class="faq-answer">Vi levererar normalt inom 1-3 arbetsdagar. Gratis frakt på beställningar över 499 kr.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">Kan jag returnera en vara?</div>
+            <div class="faq-answer">Ja, vi har 30 dagars öppet köp. Varan ska vara i originalförpackning och oanvänd.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">Vilka betalningsmetoder accepterar ni?</div>
+            <div class="faq-answer">Vi accepterar Visa, Mastercard, Swish, Klarna och bankgiro.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">Hur spårar jag min beställning?</div>
+            <div class="faq-answer">Du får ett spårningsnummer via e-post när din beställning skickas. Logga in på din profil för att se aktuell status.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">Har ni fysisk butik?</div>
+            <div class="faq-answer">Nej, vi är endast en e-handelsbutik. Men du kan kontakta vår kundsupport för personlig hjälp.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">Vad gör jag om en vara är defekt?</div>
+            <div class="faq-answer">Kontakta vår kundsupport omedelbart så hjälper vi dig med retur eller utbyte enligt garantivillkoren.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">Behöver du mer hjälp?</h2>
+        </div>
+        <div class="card-body">
+          <p>Om du inte hittar svar på din fråga i FAQ:n, tveka inte att kontakta oss direkt!</p>
+          <div class="row">
+            <div class="col-md-6">
+              <h4>E-post Support</h4>
+              <p>support@ctrlbuy.se<br>
+                <small class="text-muted">Svarstid: Inom 24 timmar</small></p>
+            </div>
+            <div class="col-md-6">
+              <h4>Telefonsupport</h4>
+              <p>08-123 45 67<br>
+                <small class="text-muted">Mån-Fre 09:00-17:00</small></p>
+            </div>
+          </div>
+          <a th:href="@{/kontakt}" class="btn btn-success">Kontakta oss</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+          <h3 class="mb-0">Snabblänkar</h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li><a th:href="@{/min-profil}" class="text-decoration-none">📋 Min profil</a></li>
+            <li><a th:href="@{/varukorg}" class="text-decoration-none">🛒 Varukorg</a></li>
+            <li><a th:href="@{/produkter}" class="text-decoration-none">🛍️ Produkter</a></li>
+            <li><a href="#" class="text-decoration-none">📦 Spåra beställning</a></li>
+            <li><a href="#" class="text-decoration-none">🔄 Returer</a></li>
+            <li><a href="#" class="text-decoration-none">📋 Garantivillkor</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+          <h3 class="mb-0">Supporttider</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>E-post:</strong> 24/7<br>
+            <small class="text-muted">Svar inom 24 timmar</small></p>
+
+          <p><strong>Telefon:</strong><br>
+            Måndag-Fredag: 09:00-17:00<br>
+            Lördag: 10:00-15:00<br>
+            Söndag: Stängt</p>
+
+          <p><strong>Live Chat:</strong><br>
+            Måndag-Fredag: 09:00-17:00<br>
+            <small class="text-muted">Kommer snart!</small></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header bg-dark text-white">
+          <h3 class="mb-0">Nödlänkar</h3>
+        </div>
+        <div class="card-body">
+          <p><a href="#" class="text-decoration-none">🔒 Glömt lösenord?</a></p>
+          <p><a href="#" class="text-decoration-none">❗ Rapportera problem</a></p>
+          <p><a href="#" class="text-decoration-none">🛡️ Säkerhet & Integritet</a></p>
+          <p><a href="#" class="text-decoration-none">📱 Mobilapp support</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-5 py-3 bg-dark text-white">
+  <div class="container text-center">
+    <p>&copy; 2025 CTRL+Buy Webshop. Alla rättigheter förbehållna.</p>
+  </div>
+</footer>
+
+<!-- Bootstrap & JQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,85 +1,110 @@
 package com.ctrlbuy.webshop.controller;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.ctrlbuy.webshop.repository.ProductRepository;
 
 @Controller
 public class MainController {
 
-    private static final Logger log = LoggerFactory.getLogger(MainController.class);
+    @Autowired
+    private ProductRepository productRepository;
 
-    @GetMapping({"/", "/home"})
-    public String home(Model model) {
-        log.info("Rendering home page");
-
-        // Explicit loggning för felsökning
+    @GetMapping("/")
+    public String home(Model model, @RequestParam(value = "logout", required = false) String logout) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            log.debug("Authentication object exists. Name: {}, Principal: {}, Authenticated: {}",
-                    auth.getName(), auth.getPrincipal(), auth.isAuthenticated());
+
+        // Kontrollera om användaren är inloggad
+        boolean isAuthenticated = auth != null && auth.isAuthenticated() &&
+                !auth.getName().equals("anonymousUser");
+
+        if (isAuthenticated) {
+            model.addAttribute("username", auth.getName());
+            // LÄGG TILL PRODUKTER NÄR ANVÄNDAREN ÄR INLOGGAD
+            model.addAttribute("products", productRepository.findAll());
+            model.addAttribute("isAuthenticated", true);
         } else {
-            log.debug("Authentication object is null");
+            model.addAttribute("isAuthenticated", false);
         }
 
-        // Viktigt: Lägg till autentiseringsinformation eftersom din HTML använder dessa attribut
-        addAuthenticationToModel(model);
+        // Visa meddelande när användaren loggat ut
+        if (logout != null) {
+            model.addAttribute("success", "Du har loggats ut framgångsrikt.");
+        }
 
-        // Lägg till välkomstmeddelande
-        model.addAttribute("welcomeMessage", "Välkommen till CtrlBuy Webshop");
-
-        // Logga alla attribut i modellen för felsökning
-        log.debug("Model attributes: {}", model.asMap().keySet());
-
-        return "home";
+        model.addAttribute("title", "Hem - CtrlBuy");
+        return "index";
     }
 
     @GetMapping("/welcome")
     public String welcome(Model model) {
-        log.info("Rendering welcome page");
-        addAuthenticationToModel(model);
-        model.addAttribute("welcomeMessage", "Välkommen tillbaka till CtrlBuy Webshop");
-        return "welcome";
+        // Omdirigera till hem istället
+        return "redirect:/";
     }
 
-    @GetMapping("/about")
-    public String about(Model model) {
-        log.info("Rendering about page");
-        addAuthenticationToModel(model);
-        return "about";
-    }
-
-    @GetMapping("/contact")
-    public String contact(Model model) {
-        log.info("Rendering contact page");
-        addAuthenticationToModel(model);
-        return "contact";
-    }
-
-    @GetMapping("/products")
+    @GetMapping("/produkter")
     public String products(Model model) {
-        log.info("Rendering products page");
-        addAuthenticationToModel(model);
+        // Lägg till alla produkter på produktsidan
+        model.addAttribute("products", productRepository.findAll());
+        model.addAttribute("title", "Produkter - CtrlBuy");
         return "products";
     }
 
-    // Viktigt: Se till att denna metod anropas för att lägga till de attribut din HTML använder
-    private void addAuthenticationToModel(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() &&
-                !authentication.getName().equals("anonymousUser")) {
-            log.debug("User is authenticated: {}", authentication.getName());
-            model.addAttribute("username", authentication.getName());
-            model.addAttribute("isAuthenticated", true);
-            // Lägg till behörigheter om det behövs
-            model.addAttribute("authorities", authentication.getAuthorities());
-        } else {
-            log.debug("User is not authenticated or is anonymous");
-            model.addAttribute("isAuthenticated", false);
+    @GetMapping("/om-oss")
+    public String about(Model model) {
+        model.addAttribute("title", "Om oss - CtrlBuy");
+        return "about";
+    }
+
+    @GetMapping("/kontakt")
+    public String contact(Model model) {
+        model.addAttribute("title", "Kontakt - CtrlBuy");
+        return "contact";
+    }
+
+    @GetMapping("/support")
+    public String support(Model model) {
+        model.addAttribute("title", "Support - CtrlBuy");
+        return "support";
+    }
+
+    @GetMapping("/registrera")
+    public String register(Model model) {
+        model.addAttribute("title", "Registrera dig - CtrlBuy");
+        return "register";
+    }
+
+    @GetMapping("/min-profil")
+    public String profile(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+            return "redirect:/login";
         }
+
+        model.addAttribute("title", "Min profil - CtrlBuy");
+        model.addAttribute("username", authentication.getName());
+        return "profile";
+    }
+
+    @GetMapping("/varukorg")
+    public String cart(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("title", "Varukorg - CtrlBuy");
+        return "cart";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        model.addAttribute("title", "Glömt lösenord - CtrlBuy");
+        return "forgot-password";
     }
 }

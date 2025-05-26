@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CtrlBuy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .stats-icon.users { background: linear-gradient(45deg, #007bff, #0056b3); }
+        .stats-icon.verified { background: linear-gradient(45deg, #28a745, #155724); }
+        .stats-icon.pending { background: linear-gradient(45deg, #ffc107, #e0a800); }
+        .stats-icon.system { background: linear-gradient(45deg, #6f42c1, #542788); }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .user-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .table th {
+            background-color: #495057;
+            color: white;
+            border: none;
+            padding: 15px;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        .badge-verified {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            margin-bottom: 30px;
+        }
+
+        .btn-admin {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-admin:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+
+        .btn-danger-admin {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .system-info {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-shield-alt me-2"></i>CTRL+BUY Admin
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link text-white" href="/">
+                <i class="fas fa-home me-1"></i>Hem
+            </a>
+            <a class="nav-link text-white" href="/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logga ut
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Admin Header -->
+<div class="admin-header text-center">
+    <div class="container">
+        <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+        <p class="mb-0">Välkommen tillbaka! Hantera användare och systemet härifrån.</p>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Statistik Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <a href="/admin/users" class="stats-card text-center text-decoration-none">
+                <div class="stats-icon users mx-auto">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="stats-number" th:text="${totalUsers ?: '0'}">0</h3>
+                <p class="stats-label">Totala användare</p>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/users" class="stats-card text-center text-decoration-none">
+                <div class="stats-icon verified mx-auto">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="stats-number" th:text="${verifiedUsers ?: '0'}">0</h3>
+                <p class="stats-label">Verifierade användare</p>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/users" class="stats-card text-center text-decoration-none">
+                <div class="stats-icon pending mx-auto">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="stats-number" th:text="${pendingUsers ?: '0'}">0</h3>
+                <p class="stats-label">Väntande verifiering</p>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-icon system mx-auto">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h3 class="stats-number text-success">Online</h3>
+                <p class="stats-label">Systemstatus</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons text-center">
+        <a href="/register" class="btn btn-admin">
+            <i class="fas fa-user-plus me-2"></i>Skapa ny användare
+        </a>
+        <button class="btn btn-admin" onclick="refreshUserList()">
+            <i class="fas fa-sync-alt me-2"></i>Uppdatera lista
+        </button>
+    </div>
+
+    <!-- Användarlista -->
+    <div class="row">
+        <div class="col-12">
+            <div class="user-table">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Användarlista</h5>
+                    <small class="text-muted">Senast uppdaterad: <span id="lastUpdated">Nu</span></small>
+                </div>
+
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Användarnamn</th>
+                        <th><i class="fas fa-envelope me-2"></i>E-post</th>
+                        <th><i class="fas fa-shield-alt me-2"></i>Roller</th>
+                        <th><i class="fas fa-check-circle me-2"></i>Status</th>
+                        <th><i class="fas fa-calendar me-2"></i>Registrerad</th>
+                        <th><i class="fas fa-cogs me-2"></i>Åtgärder</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Om inga användare finns -->
+                    <tr th:if="${#lists.isEmpty(users)}">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                            Inga användare hittades
+                        </td>
+                    </tr>
+
+                    <!-- Användarlista -->
+                    <tr th:each="user : ${users}">
+                        <td>
+                            <strong th:text="${user.username}">admin</strong>
+                            <span th:if="${user.roles.contains('ROLE_ADMIN')}" class="badge bg-danger ms-2">Admin</span>
+                        </td>
+                        <td th:text="${user.email}">admin@example.com</td>
+                        <td>
+                <span th:each="role : ${user.roles}"
+                      th:text="${role}"
+                      class="badge bg-secondary me-1">ROLE_USER</span>
+                        </td>
+                        <td>
+                <span th:if="${user.emailVerified}" class="badge-verified">
+                  <i class="fas fa-check me-1"></i>Verifierad
+                </span>
+                            <span th:unless="${user.emailVerified}" class="badge-pending">
+                  <i class="fas fa-clock me-1"></i>Väntande
+                </span>
+                        </td>
+                        <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</td>
+                        <td>
+                            <button th:unless="${user.roles.contains('ROLE_ADMIN')}"
+                                    class="btn btn-danger-admin btn-sm"
+                                    th:onclick="'deleteUser(\'' + ${user.username} + '\')'">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button th:unless="${user.emailVerified}"
+                                    class="btn btn-warning btn-sm"
+                                    th:onclick="'verifyUser(\'' + ${user.username} + '\')'">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="system-info">
+                <h6><i class="fas fa-info-circle me-2"></i>Systeminfo</h6>
+                <ul class="list-unstyled mb-0">
+                    <li><strong>Version:</strong> 1.0.0</li>
+                    <li><strong>Databas:</strong> MySQL</li>
+                    <li><strong>E-postsystem:</strong> Gmail SMTP</li>
+                    <li><strong>Säkerhet:</strong> Spring Security + BCrypt</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="system-info">
+                <h6><i class="fas fa-chart-line me-2"></i>Senaste aktivitet</h6>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check text-success me-2"></i>Admin-inloggning lyckades</li>
+                    <li><i class="fas fa-envelope text-info me-2"></i>E-postsystem fungerar</li>
+                    <li><i class="fas fa-database text-success me-2"></i>Databasanslutning OK</li>
+                    <li><i class="fas fa-shield-alt text-success me-2"></i>Säkerhetssystem aktivt</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function refreshUserList() {
+        location.reload();
+    }
+
+    function deleteUser(username) {
+        if (confirm('Är du säker på att du vill ta bort användaren "' + username + '"?')) {
+            // TODO: Implementera delete-funktionalitet
+            alert('Delete-funktionalitet kommer att implementeras senare');
+        }
+    }
+
+    function verifyUser(username) {
+        if (confirm('Verifiera användaren "' + username + '" manuellt?')) {
+            // TODO: Implementera verify-funktionalitet
+            alert('Verify-funktionalitet kommer att implementeras senare');
+        }
+    }
+
+    // Uppdatera tidsstämpel
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('sv-SE');
+</script>
+
+</body>
+</html>

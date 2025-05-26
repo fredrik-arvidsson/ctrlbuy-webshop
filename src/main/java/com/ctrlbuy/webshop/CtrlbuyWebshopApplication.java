@@ -7,20 +7,11 @@ import javax.crypto.SecretKey;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {
-		"com.ctrlbuy.webshop",
-		"com.ctrlbuy.webshop.repository",
-		"com.ctrlbuy.webshop.security",
-		"com.ctrlbuy.webshop.model",
-		"com.ctrlbuy.webshop.controller",
-		"com.ctrlbuy.webshop.service"
-})
 public class CtrlbuyWebshopApplication implements WebMvcConfigurer {
 
 	public static void main(String[] args) {

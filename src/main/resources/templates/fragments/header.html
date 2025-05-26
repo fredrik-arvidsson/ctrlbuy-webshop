@@ -1,108 +1,404 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      lang="sv">
+<html lang="sv" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>CtrlBuy Webshop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'CtrlBuy - Din nya favorit för produkter online'">CtrlBuy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Container för hela huvudet */
-        .header-container {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
+        :root {
+            --primary-green: #28a745;
+            --dark-bg: #2c3e50;
+            --light-gray: #f8f9fa;
         }
 
-        /* Container för loggan */
-        .logo-container {
-            width: 100%;
-            height: 35px; /* Ändrat från 60px till 35px (ca 3.5cm) */
-            overflow: hidden; /* Klipp bort allt som sticker utanför */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+        }
+
+        /* Header med logga */
+        .header-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            height: 250px; /* Ökat för större logo */
             display: flex;
-            justify-content: center;
             align-items: center;
-        }
-
-        /* Stilar för logotypbilden - absolut begränsad höjd */
-        .logo-banner {
-            height: 35px !important; /* Ändrat från 60px till 35px (ca 3.5cm) */
-            width: auto; /* Låt bredden justeras automatiskt */
-            max-width: 100%; /* Förhindra att bilden är bredare än container */
-            display: block;
-        }
-
-        /* Navigationsstilar */
-        .nav-container {
-            width: 100%;
-            background-color: #f8f8f8;
-            margin-top: 10px;
-        }
-
-        .nav-container ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
             justify-content: center;
+            border-bottom: 3px solid var(--primary-green);
         }
 
-        .nav-container li {
-            margin: 0 15px;
+        .logo-container {
+            text-align: center;
+            color: white;
         }
 
-        .nav-container a {
-            text-decoration: none;
-            color: #333;
-            padding: 10px 0;
-            display: block;
+        .logo-icon {
+            width: 200px;
+            height: 200px;
+            background: transparent;
+            border-radius: 20px;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-container .brand-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .logo-container .brand-subtitle {
+            font-size: 1.1rem;
+            color: #bdc3c7;
+            margin: 5px 0 0 0;
+            letter-spacing: 1px;
+        }
+
+        /* Grön navigationsbar */
+        .main-navigation {
+            background-color: var(--primary-green);
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-navigation .navbar-nav {
+            width: 100%;
+        }
+
+        .main-navigation .nav-link {
+            color: white !important;
+            padding: 15px 20px !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+        }
+
+        .main-navigation .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateY(-1px);
+        }
+
+        .main-navigation .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* Status meddelande */
+        .status-message {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin: 0;
+        }
+
+        .status-message .btn-sm {
+            padding: 4px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Huvudinnehåll */
+        .main-content {
+            min-height: calc(100vh - 300px);
+            padding: 40px 0;
+        }
+
+        /* Välkomstsektion */
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .welcome-section h1 {
+            color: var(--dark-bg);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .welcome-section p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        /* Produktkort */
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .product-card h5 {
+            color: var(--dark-bg);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .product-price {
+            color: var(--primary-green);
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Knappar */
+        .btn-primary-custom {
+            background-color: var(--dark-bg);
+            border-color: var(--dark-bg);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #34495e;
+            border-color: #34495e;
+            transform: translateY(-1px);
+        }
+
+        .btn-success-custom {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success-custom:hover {
+            background-color: #218838;
+            border-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark-bg);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 60px;
+        }
+
+        /* Responsiv design */
+        @media (max-width: 768px) {
+            .header-section {
+                height: 180px;
+            }
+
+            .logo-icon {
+                width: 120px;
+                height: 120px;
+            }
+
+            .logo-container .brand-name {
+                font-size: 1.8rem;
+            }
+
+            .main-navigation .nav-link {
+                padding: 12px 15px !important;
+            }
+
+            .welcome-section {
+                padding: 25px;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-<!-- Header Fragment -->
-<header th:fragment="header" class="header-container">
+<!-- Header med logga -->
+<header class="header-section">
     <div class="logo-container">
-        <!-- Logotypbild som länkar till hemsidan -->
-        <a href="/">
-            <img src="/Hemsida.png" alt="CtrlBuy Logotyp" class="logo-banner" style="height: 35px !important; max-height: 35px !important; width: auto;" />
-        </a>
+        <div class="logo-icon">
+            <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+        </div>
+        <h1 class="brand-name">CTRL+BUY</h1>
+        <p class="brand-subtitle">SOLUTIONS</p>
     </div>
 </header>
 
-<!-- Navigation Fragment -->
-<nav th:fragment="navigation" class="nav-container">
-    <div class="container">
-        <ul>
-            <li><a href="/">Hem</a></li>
-            <li><a href="/products">Produkter</a></li>
-            <li><a href="/about">Om oss</a></li>
-            <li><a href="/contact">Kontakt</a></li>
-            <!-- Visa olika navigationslänkar baserat på inloggningsstatus -->
-            <li sec:authorize="isAuthenticated()">
-                <a href="/profile">Min profil</a>
+<!-- Status meddelande för inloggade användare -->
+<div th:if="${#authorization.expression('isAuthenticated()')}" class="status-message">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <span th:text="'Du är inloggad som: ' + ${#authentication.name}">Du är inloggad som: user</span>
+        <a href="/logout" class="btn btn-outline-light btn-sm">Logga ut</a>
+    </div>
+</div>
+
+<!-- Navigation fragment för error-sidan -->
+<div th:fragment="navigation" class="main-navigation">
+    <div class="container-fluid">
+        <ul class="navbar-nav me-auto d-flex flex-row justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i> Hem
+                </a>
             </li>
-            <li sec:authorize="isAuthenticated()">
-                <a href="/logout-process">Logga ut</a>
+            <li class="nav-item">
+                <a class="nav-link" href="/produkter">
+                    <i class="fas fa-shopping-bag me-1"></i> Produkter
+                </a>
             </li>
-            <li sec:authorize="!isAuthenticated()">
-                <a href="/login">Logga in</a>
+            <li class="nav-item">
+                <a class="nav-link" href="/om-oss">
+                    <i class="fas fa-info-circle me-1"></i> Om oss
+                </a>
             </li>
-            <li sec:authorize="!isAuthenticated()">
-                <a href="/register">Registrera</a>
+            <li class="nav-item">
+                <a class="nav-link" href="/kontakt">
+                    <i class="fas fa-envelope me-1"></i> Kontakt
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/login">
+                    <i class="fas fa-sign-in-alt me-1"></i> Logga in
+                </a>
             </li>
         </ul>
     </div>
+</div>
+
+<!-- Huvudnavigation -->
+<nav class="navbar navbar-expand-lg main-navigation">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}" href="/">
+                        <i class="fas fa-home me-1"></i> Hem
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#request.requestURI == '/produkter' ? 'active' : ''}" href="/produkter">
+                        <i class="fas fa-shopping-bag me-1"></i> Produkter
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#request.requestURI == '/om-oss' ? 'active' : ''}" href="/om-oss">
+                        <i class="fas fa-info-circle me-1"></i> Om oss
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#request.requestURI == '/kontakt' ? 'active' : ''}" href="/kontakt">
+                        <i class="fas fa-envelope me-1"></i> Kontakt
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link" href="/min-profil">
+                        <i class="fas fa-user me-1"></i> Min profil
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link" href="/varukorg">
+                        <i class="fas fa-shopping-cart me-1"></i> Varukorg
+                    </a>
+                </li>
+                <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link" href="/registrera">
+                        <i class="fas fa-user-plus me-1"></i> Registrera dig
+                    </a>
+                </li>
+                <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link" href="/login">
+                        <i class="fas fa-sign-in-alt me-1"></i> Logga in
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
 </nav>
 
-<!-- User Status Fragment -->
-<div th:fragment="user-status" class="container">
-    <div sec:authorize="isAuthenticated()" class="user-status">
-        <p>Du är inloggad som: <strong sec:authentication="name"></strong></p>
-        <form action="/logout-process" method="post" style="display: inline;">
-            <button type="submit" class="logout-btn">Logga ut</button>
-        </form>
+<!-- Huvudinnehåll -->
+<main class="main-content">
+    <div class="container">
+        <!-- Alert meddelanden -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Sidspecifikt innehåll -->
+        <div th:fragment="content">
+            <!-- Detta kommer att ersättas av specifikt sidinnehåll -->
+        </div>
     </div>
-</div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

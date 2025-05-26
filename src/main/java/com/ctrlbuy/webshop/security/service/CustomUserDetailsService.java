@@ -13,29 +13,45 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    @Autowired  // Explicit @Autowired kan hjälpa i vissa fall
+    @Autowired
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @Override  // Se till att @Override är korrekt använt
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("DEBUG: Attempting to load user: " + username);
+
+        // Sök efter användare med username ELLER email
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .or(() -> userRepository.findByEmail(username))
+                .orElseThrow(() -> {
+                    System.out.println("DEBUG: User not found: " + username);
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
+
+        System.out.println("DEBUG: User found: " + user.getUsername());
+        System.out.println("DEBUG: User active: " + user.isActive());
+        System.out.println("DEBUG: User email verified: " + user.isEmailVerified());
+        System.out.println("DEBUG: User roles: " + user.getRoles());
 
         return createUserDetails(user);
     }
 
     private UserDetails createUserDetails(User user) {
-        // Metoden måste ta emot ett User-objekt, inte en lambda-parameter
+        // VIKTIGT: Admin-användare ska alltid kunna logga in
+        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+        System.out.println("DEBUG: Is admin user: " + isAdmin);
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities("USER")  // Simplifierad exempel - ändra efter behov
+                .authorities(user.getRoles().toArray(new String[0]))
                 .accountExpired(false)
-                .accountLocked(false)
+                .accountLocked(!isAdmin && !user.isEmailVerified())  // Admin aldrig låst, andra låsta om ej verifierade
                 .credentialsExpired(false)
-                .disabled(false)
+                .disabled(!user.isActive())
                 .build();
     }
 }

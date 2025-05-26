@@ -1,181 +1,573 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontakt - CtrlBuy Webshop</title>
+    <title>Kontakt - CTRL+BUY</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f5f5f5;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
+
+        /* Header - EXAKT som login-sidan */
+        .header-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            height: 189px; /* 5cm */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        header {
-            background-color: #333;
+
+        .logo-container {
+            text-align: center;
             color: white;
-            padding: 20px 0;
-            text-align: center;
         }
-        .nav-menu {
-            background-color: #444;
-            padding: 10px 0;
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            border-radius: 12px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        .nav-menu ul {
-            list-style-type: none;
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-text h1 {
+            font-size: 2.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
             margin: 0;
-            padding: 0;
-            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
-        .nav-menu li {
-            display: inline;
-            margin: 0 10px;
+
+        .logo-text p {
+            font-size: 1.2rem;
+            color: #bdc3c7;
+            margin: 5px 0 0 0;
+            letter-spacing: 1px;
         }
-        .nav-menu a {
+
+        /* Grön navigation - EXAKT som login-sidan */
+        .top-nav {
+            background-color: #28a745;
+            padding: 15px 0;
+        }
+
+        .top-nav a {
             color: white;
             text-decoration: none;
+            margin: 0 20px;
+        }
+
+        .top-nav a:hover {
+            background-color: rgba(255,255,255,0.1);
             padding: 5px 10px;
+            border-radius: 4px;
         }
-        .nav-menu a:hover {
-            background-color: #555;
-            border-radius: 3px;
-        }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 20px;
-        }
-        .user-status {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .logout-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            margin-left: 10px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .logout-btn:hover {
-            background-color: #d32f2f;
-        }
-        .content {
-            padding: 2rem;
-            text-align: center;
-        }
-        .contact-form {
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: left;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            box-sizing: border-box;
-        }
-        .btn {
-            background-color: #333;
+
+        /* Login status bar */
+        .login-status {
+            background-color: #28a745;
             color: white;
             padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
             border: none;
-            border-radius: 3px;
-            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }
-        .btn:hover {
-            background-color: #555;
+
+        .logout-btn:hover {
+            background-color: #c82333;
         }
-        .contact-info {
-            margin: 20px 0;
+
+        /* Card styling */
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        .card-header {
+            border-radius: 8px 8px 0 0 !important;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        /* Kontaktformulär */
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 12px 30px;
+            font-weight: bold;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        /* Kontaktinfo cards */
+        .contact-info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            height: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .contact-info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Öppettider styling */
+        .opening-hours {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .opening-hours .day {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .opening-hours .day:last-child {
+            border-bottom: none;
+        }
+
+        .day.today {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            margin: 0 -15px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #343a40 !important;
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        /* Karta placeholder */
+        .map-placeholder {
+            background: #e9ecef;
+            height: 300px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 1.2rem;
+            border: 2px dashed #dee2e6;
         }
     </style>
 </head>
 <body>
-<!-- Inkludera header fragment -->
-<div th:replace="~{fragments/header :: header}"></div>
-
-<!-- Inkludera navigation fragment -->
-<div th:replace="~{fragments/header :: navigation}"></div>
-
-<!-- Inkludera user-status fragment -->
-<div th:replace="~{fragments/header :: user-status}"></div>
-
-<div class="content">
-    <h2>Kontakta oss</h2>
-
-    <div class="contact-info">
-        <p>Du kan nå oss via e-post på <a href="mailto:support@ctrlbuy.se">support@ctrlbuy.se</a></p>
-        <p>Eller fyll i formuläret nedan så återkommer vi så snart som möjligt.</p>
+<!-- Header med logotyp - EXAKT som login-sidan -->
+<header class="header-container">
+    <div class="logo-container">
+        <div class="logo-icon">
+            <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+        </div>
+        <div class="logo-text">
+            <h1>CTRL+BUY</h1>
+            <p>SOLUTIONS</p>
+        </div>
     </div>
+</header>
 
-    <div class="contact-form">
-        <form action="/contact" method="post">
-            <div class="form-group">
-                <label for="name">Namn</label>
-                <input type="text" id="name" name="name" class="form-control" required>
+<!-- Grön navigation - EXAKT som login-sidan -->
+<div class="top-nav text-center">
+    <a th:href="@{/}">Hem</a>
+    <a th:href="@{/produkter}">Produkter</a>
+    <a th:href="@{/about}">Om oss</a>
+    <a th:href="@{/kontakt}" style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px;">Kontakt</a>
+    <a th:href="@{/support}">Support</a>
+</div>
+
+<!-- Inloggningsstatusmeddelande (grön banner), visas endast för inloggade användare -->
+<div class="container mt-3" th:if="${#authorization.expression('isAuthenticated()')}">
+    <div class="login-status">
+        <div class="row">
+            <div class="col-md-9">
+                Du är inloggad som: <span th:text="${#authentication.name}">user</span>
             </div>
-
-            <div class="form-group">
-                <label for="email">E-post</label>
-                <input type="email" id="email" name="email" class="form-control" required>
+            <div class="col-md-3 text-right">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">Logga ut</button>
+                </form>
             </div>
-
-            <div class="form-group">
-                <label for="subject">Ämne</label>
-                <input type="text" id="subject" name="subject" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="message">Meddelande</label>
-                <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn">Skicka meddelande</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="contact-info">
-        <h3>Företagsinformation</h3>
-        <p>CtrlBuy AB</p>
-        <p>Storagatan 123</p>
-        <p>123 45 Stockholm</p>
-        <p>Telefon: 08-123 45 67</p>
-        <p>Org.nr: 123456-7890</p>
+        </div>
     </div>
 </div>
 
-<footer>
+<!-- Huvudinnehåll - Kontakt -->
+<div class="container mt-4">
+
+    <!-- Sidhuvud -->
+    <div class="text-center mb-5">
+        <h1>Kontakta oss</h1>
+        <p class="lead">Vi finns här för att hjälpa dig! Tveka inte att höra av dig med frågor eller feedback.</p>
+    </div>
+
+    <!-- Kontaktinformation -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h5>Telefon</h5>
+                <p class="mb-2"><strong>08-123 45 67</strong></p>
+                <p class="text-muted small">Vardagar 9:00-17:00</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h5>E-post</h5>
+                <p class="mb-2"><strong>info@ctrlbuy.se</strong></p>
+                <p class="text-muted small">Svarar inom 24 timmar</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h5>Besöksadress</h5>
+                <p class="mb-2"><strong>Teknikgatan 123</strong></p>
+                <p class="text-muted small">112 33 Stockholm</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Kontaktformulär -->
+        <div class="col-md-8">
+            <div class="contact-form">
+                <h3 class="mb-4">Skicka meddelande</h3>
+
+                <!-- Bekräftelsemeddelande (dolt som standard) -->
+                <div id="success-message" class="alert alert-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Tack för ditt meddelande!</strong> Vi återkommer till dig inom kort.
+                </div>
+
+                <form id="contact-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="firstName">Förnamn *</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="lastName">Efternamn *</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">E-postadress *</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Telefonnummer</label>
+                        <input type="tel" class="form-control" id="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Ämne *</label>
+                        <select class="form-control" id="subject" required>
+                            <option value="">Välj ämne...</option>
+                            <option value="general">Allmän fråga</option>
+                            <option value="order">Fråga om beställning</option>
+                            <option value="support">Teknisk support</option>
+                            <option value="return">Retur/Reklamation</option>
+                            <option value="billing">Faktura/Betalning</option>
+                            <option value="partnership">Partnerskap</option>
+                            <option value="other">Övrigt</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Meddelande *</label>
+                        <textarea class="form-control" id="message" rows="6" placeholder="Beskriv ditt ärende här..." required></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="newsletter">
+                        <label class="form-check-label" for="newsletter">
+                            Jag vill prenumerera på nyhetsbrev med erbjudanden och produktnyheter
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="privacy" required>
+                        <label class="form-check-label" for="privacy">
+                            Jag godkänner att mina personuppgifter behandlas enligt vår integritetspolicy *
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-paper-plane"></i> Skicka meddelande
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidopanel -->
+        <div class="col-md-4">
+
+            <!-- Öppettider -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Öppettider</h5>
+                </div>
+                <div class="card-body">
+                    <div class="opening-hours">
+                        <div class="day today">
+                            <span>Måndag</span>
+                            <span>9:00 - 17:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Tisdag</span>
+                            <span>9:00 - 17:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Onsdag</span>
+                            <span>9:00 - 17:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Torsdag</span>
+                            <span>9:00 - 17:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Fredag</span>
+                            <span>9:00 - 16:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Lördag</span>
+                            <span>Stängt</span>
+                        </div>
+                        <div class="day">
+                            <span>Söndag</span>
+                            <span>Stängt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Snabblänkar -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> Behöver du hjälp?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shipping-fast text-success"></i>
+                            Leveransinformation
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-undo text-success"></i>
+                            Returer & Reklamationer
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-credit-card text-success"></i>
+                            Betalningsmetoder
+                        </a>
+                        <a th:href="@{/support}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-headset text-success"></i>
+                            Teknisk Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hitta till oss -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-map"></i> Hitta till oss</h5>
+                </div>
+                <div class="card-body">
+                    <div class="map-placeholder mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt fa-3x mb-2"></i>
+                            <br>
+                            Karta kommer här
+                        </div>
+                    </div>
+                    <p><strong>CTRL+BUY AB</strong><br>
+                        Teknikgatan 123<br>
+                        112 33 Stockholm</p>
+                    <small class="text-muted">
+                        Närmaste tunnelbana: T-Centralen (5 min promenad)<br>
+                        Parkering finns i närområdet
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer bg-dark text-white">
     <div class="container">
-        <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+        <div class="row">
+            <div class="col-md-3">
+                <h5>CTRL+BUY</h5>
+                <p>Din pålitliga partner för teknikprodukter av högsta kvalitet.</p>
+            </div>
+            <div class="col-md-3">
+                <h5>Kundservice</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-light">Kontakta oss</a></li>
+                    <li><a href="#" class="text-light">Leveranser</a></li>
+                    <li><a href="#" class="text-light">Returer</a></li>
+                    <li><a href="#" class="text-light">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Företaget</h5>
+                <ul class="list-unstyled">
+                    <li><a th:href="@{/about}" class="text-light">Om oss</a></li>
+                    <li><a href="#" class="text-light">Karriär</a></li>
+                    <li><a href="#" class="text-light">Press</a></li>
+                    <li><a href="#" class="text-light">Integritetspolicy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Följ oss</h5>
+                <div>
+                    <a href="#" class="text-light mr-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-light mr-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-light mr-3"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="text-center">
+            <p>&copy; 2025 CTRL+Buy Webshop. Alla rättigheter förbehållna.</p>
+        </div>
     </div>
 </footer>
+
+<!-- Bootstrap & JQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Formulärhantering
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Simulera formulärinlämning
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        // Visa loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Skickar...';
+        submitBtn.disabled = true;
+
+        // Simulera API-anrop
+        setTimeout(() => {
+            // Visa bekräftelsemeddelande
+            document.getElementById('success-message').style.display = 'block';
+
+            // Rensa formulär
+            this.reset();
+
+            // Återställ knapp
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+
+            // Scrolla till bekräftelsemeddelandet
+            document.getElementById('success-message').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+        }, 2000);
+    });
+
+    // Markera dagens öppettider
+    const today = new Date().getDay(); // 0 = Söndag, 1 = Måndag, etc.
+    const days = document.querySelectorAll('.opening-hours .day');
+
+    // Ta bort existing today class
+    days.forEach(day => day.classList.remove('today'));
+
+    // Lägg till today class på rätt dag (måndag = index 0 i vårt system)
+    if (today >= 1 && today <= 5) { // Måndag-Fredag
+        const dayIndex = today - 1; // Konvertera till vårt 0-baserade system
+        if (days[dayIndex]) {
+            days[dayIndex].classList.add('today');
+        }
+    }
+</script>
 </body>
 </html>

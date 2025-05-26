@@ -1,124 +1,76 @@
 package com.ctrlbuy.webshop.config;
 
-import com.ctrlbuy.webshop.security.filter.JwtAuthenticationFilter;
+import com.ctrlbuy.webshop.security.service.CustomUserDetailsService;
+import com.ctrlbuy.webshop.security.handler.CustomAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final Environment environment;
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, Environment environment) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.environment = environment;
-        log.info("Initierar SecurityConfig");
-    }
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
 
-    // API säkerhetskonfiguration (högre prioritet)
     @Bean
-    @Order(1)
-    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        log.info("Konfigurerar API-säkerhet");
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> authz
+                        // Statiska resurser
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
 
-        // Identifiera de olika testmiljöerna
-        String[] activeProfiles = environment.getActiveProfiles();
-        boolean isApiTest = Arrays.asList(activeProfiles).contains("test");
+                        // Publika sidor
+                        .requestMatchers("/", "/home", "/about", "/produkter", "/kontakt", "/support").permitAll()
 
-        return http
-                .securityMatcher("/api/**") // Denna konfiguration gäller bara för API-endpoints
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> {
-                    // Specifikt för API-tester
-                    if (isApiTest) auth.requestMatchers("/api/protected").permitAll();
+                        // Autentisering och registrering
+                        .requestMatchers("/login", "/register", "/register/**").permitAll()
 
-                    // API endpoints som är öppna för alla
-                    auth.requestMatchers("/api/auth/**", "/api/register/**").permitAll()
-                            // Alla andra API endpoints kräver autentisering
-                            .anyRequest().authenticated();
-                })
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+                        // E-postverifiering och relaterade endpoints
+                        .requestMatchers("/verify-email", "/verify-email/**").permitAll()
+                        .requestMatchers("/resend-verification", "/resend-verification/**").permitAll()
 
-    // Web säkerhetskonfiguration (lägre prioritet)
-    @Bean
-    @Order(2)
-    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        log.info("Konfigurerar Webb-säkerhet");
+                        // TEST ENDPOINTS - VIKTIGT FÖR DEBUGGING
+                        .requestMatchers("/test-email", "/test-email/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()
 
-        // Identifiera de olika testmiljöerna
-        String[] activeProfiles = environment.getActiveProfiles();
-        boolean isMinimalTest = Arrays.asList(activeProfiles).contains("minimal-test") ||
-                Arrays.asList(activeProfiles).contains("test") &&
-                        (Arrays.toString(activeProfiles).contains("repository") ||
-                                Arrays.toString(activeProfiles).contains("unit"));
+                        // ADMIN ENDPOINTS - TILLÅT ADMIN-PANEL
+                        .requestMatchers("/admin/**").permitAll()
 
-        // För enhets- och repository-tester, tillåt allt
-        if (isMinimalTest) {
-            log.debug("Minimal test-miljö detekterad, tillåt alla förfrågningar");
-            return http
-                    .csrf(csrf -> csrf.disable())
-                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                    .build();
-        }
-
-        // För produktion och andra testmiljöer
-        log.debug("Normal miljö detekterad, konfigurerar standard säkerhet");
-        return http
-                .csrf(csrf -> csrf.disable()) // Inaktivera CSRF för enkelhetens skull, aktivera i produktion om det behövs
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/welcome", "/about", "/contact", "/products",
-                                "/login", "/login-process", "/logout-process", "/register",
-                                "/error", // Viktigt för att hantera fel
-                                "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        // Alla andra requests kräver autentisering
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")  // Sidan där inloggningsformuläret visas
-                        .loginProcessingUrl("/login-process")  // URL dit formuläret skickar POST-förfrågan
-                        .defaultSuccessUrl("/welcome", true)  // Sidan att omdirigera till efter inloggning
-                        .failureUrl("/login?error=true")  // Sidan att visa vid misslyckad inloggning
-                        .permitAll()  // Tillåt alla att komma åt inloggningsfunktionaliteten
+                        .loginPage("/login")
+                        .successHandler(successHandler)  // 🔥 Använd vår smarta routing
+                        .failureUrl("/login?error=true")
+                        .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout-process")  // URL för att logga ut
-                        .logoutSuccessUrl("/login?logout=true")  // Sidan att visa efter utloggning
-                        .invalidateHttpSession(true)  // Invalidera HTTP-sessionen
-                        .deleteCookies("JSESSIONID", "jwt_token", "refresh_token")  // Radera relevanta cookies
-                        .clearAuthentication(true)  // Rensa autentiseringsinformation
-                        .permitAll()  // Tillåt alla att logga ut
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
-                .build();
-    }
+                .csrf(csrf -> csrf
+                        // Inaktivera CSRF för test-endpoints (kan vara behövligt för debugging)
+                        .ignoringRequestMatchers("/test-email/**", "/api/test/**", "/admin/**")
+                )
+                // VIKTIGT: Använd vår CustomUserDetailsService för verifieringskontroll
+                .userDetailsService(customUserDetailsService);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
+        return http.build();
     }
 
     @Bean

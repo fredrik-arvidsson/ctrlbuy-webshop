@@ -1,60 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Error</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.6;
-    }
-    .error-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .error-title {
-      color: #dc3545;
-    }
-    .error-details {
-      margin-top: 20px;
-      background-color: #f1f1f1;
-      padding: 15px;
-      border-radius: 5px;
-      overflow-wrap: break-word;
-    }
-    .error-message {
-      font-weight: bold;
-    }
-    .back-link {
-      display: inline-block;
-      margin-top: 20px;
-      color: #007bff;
-      text-decoration: none;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - CtrlBuy Webshop</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="error-container">
-  <h1 class="error-title">Ett fel har inträffat</h1>
-  <p>Vi beklagar, men ett fel har uppstått när sidan skulle visas.</p>
+<!-- Inkludera header fragment -->
+<div th:replace="~{fragments/header :: header}"></div>
 
-  <div class="error-details">
-    <p><strong>Status:</strong> <span th:text="${status}">500</span></p>
-    <p class="error-message"><strong>Felmeddelande:</strong> <span th:text="${message}">Error message</span></p>
-    <p><strong>Sökväg:</strong> <span th:text="${path}">Path</span></p>
-    <p><strong>Feldetaljer:</strong> <span th:text="${error}">Error details</span></p>
+<!-- Inkludera navigation fragment -->
+<div th:replace="~{fragments/header :: navigation}"></div>
+
+<!-- Inkludera user-status fragment om användaren är inloggad -->
+<div th:replace="~{fragments/header :: user-status}"></div>
+
+<div class="container">
+  <div class="error-container">
+    <h1 class="error-title">Ett fel har inträffat</h1>
+    <p>Vi beklagar, men ett fel har uppstått när sidan skulle visas.</p>
+
+    <div class="error-details">
+      <p><strong>Status:</strong> <span th:text="${status}">500</span></p>
+      <p class="error-message"><strong>Felmeddelande:</strong> <span th:text="${message}">Error message</span></p>
+      <p><strong>Sökväg:</strong> <span th:text="${path}">Path</span></p>
+      <p><strong>Feldetaljer:</strong> <span th:text="${error}">Error details</span></p>
+    </div>
+
+    <a href="/" class="back-link">Tillbaka till hemsidan</a>
   </div>
-
-  <a href="/" class="back-link">Tillbaka till hemsidan</a>
 </div>
+
+<!-- Inkludera footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

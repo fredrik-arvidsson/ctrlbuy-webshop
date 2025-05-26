@@ -43,3 +43,5 @@ nbdist/
 
 # === Miljöfiler ===
 *.env
+*.swp
+*.gz

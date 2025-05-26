@@ -1,6 +1,7 @@
 package com.ctrlbuy.webshop.security.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,30 @@ public class User {
 
     private boolean active;
 
+    // Nya fält för namn (behövs för RegisterRequest)
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    // Fält för e-postbekräftelse
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;  // Boolean istället för boolean för att hantera null
+
+    // Fält för lösenordsåterställning
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
@@ -38,9 +63,16 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.active = true;
+        this.active = false; // Inaktiv tills e-post bekräftas
+        this.emailVerified = false;
         this.roles = new ArrayList<>();
         this.roles.add("ROLE_USER"); // Standardroll
+    }
+
+    public User(String username, String email, String password, String firstName, String lastName) {
+        this(username, email, password);
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     // Getters och setters
@@ -61,8 +93,53 @@ public class User {
 
     // För att stödja befintliga anrop i koden
     public void setEnabled(boolean enabled) { this.active = enabled; }
+    public boolean isEnabled() { return active; }
+
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+
+    // Verifikationsfält
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public LocalDateTime getVerificationTokenExpiry() { return verificationTokenExpiry; }
+    public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) {
+        this.verificationTokenExpiry = verificationTokenExpiry;
+    }
+
+    public Boolean isEmailVerified() { return emailVerified != null ? emailVerified : false; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    // Lösenordsåterställningsfält
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
 
     public List<String> getRoles() { return roles; }
     public void setRoles(List<String> roles) { this.roles = roles; }
     public void addRole(String role) { this.roles.add(role); }
+
+    // Hjälpmetoder
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    public boolean isVerificationTokenValid() {
+        return verificationToken != null &&
+                verificationTokenExpiry != null &&
+                verificationTokenExpiry.isAfter(LocalDateTime.now());
+    }
+
+    public boolean isResetTokenValid() {
+        return resetToken != null &&
+                resetTokenExpiry != null &&
+                resetTokenExpiry.isAfter(LocalDateTime.now());
+    }
 }
