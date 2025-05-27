@@ -15,7 +15,7 @@
 
         /* Header - FIXAD LOGO */
         .header-container {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            background: #000000;  /* Ren svart som loggan */
             height: 250px;
             display: flex;
             align-items: center;
@@ -27,12 +27,12 @@
             color: white;
         }
 
-        /* 🔥 FIXAD LOGO: Lika hög som bakgrunden och 3x bredare */
+        /* 🔥 FIXAD LOGO: Fyller hela headern! */
         .logo-icon {
-            width: 1800px;  /* 3x bredare än 600px */
-            height: 250px; /* Lika hög som header-container */
-            background: transparent;
-            border-radius: 20px;
+            width: 100%;    /* Fyller hela bredden */
+            height: 250px;  /* Lika hög som header-container */
+            background: #000000;  /* Samma svarta som headern */
+            border-radius: 0px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -41,8 +41,8 @@
         }
 
         .logo-icon img {
-            width: 100%;
-            height: 100%;
+            width: 20vw;  /* 20% av viewport-bredden */
+            height: 250px;
             object-fit: contain;
         }
 

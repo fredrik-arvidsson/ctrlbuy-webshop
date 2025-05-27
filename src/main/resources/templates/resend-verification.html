@@ -6,17 +6,37 @@
     <title>Skicka nytt bekräftelsemail - CtrlBuy</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .header {
-            background-color: black;
-            height: 5cm;
+        /* Header - FIXAD LOGO */
+        .header-container {
+            background: #000000;  /* Ren svart som loggan */
+            height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .logo {
-            width: 80px;
-            height: 80px;
+
+        .logo-icon {
+            width: 100%;    /* Fyller hela bredden */
+            height: 250px;  /* Lika hög som header-container */
+            background: #000000;  /* Samma svarta som headern */
+            border-radius: 0px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
+
+        .logo-icon img {
+            width: 20vw;  /* 20% av viewport-bredden */
+            height: 250px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            display: none;  /* Dölj text */
+        }
+
         .navigation {
             background-color: #28a745;
             padding: 15px 0;
@@ -58,8 +78,14 @@
 </head>
 <body>
 <!-- Header med logga -->
-<div class="header">
-    <img src="/images/logo.png" alt="CtrlBuy Logo" class="logo">
+<div class="header-container">
+    <div class="logo-icon">
+        <img src="/images/logo.png" alt="CtrlBuy Logo">
+        <div class="logo-text">
+            <h1 class="brand-name">CTRL+BUY</h1>
+            <p class="brand-subtitle">SOLUTIONS</p>
+        </div>
+    </div>
 </div>
 
 <!-- Navigation -->

@@ -20,14 +20,13 @@
       background-color: var(--light-gray);
     }
 
-    /* Header med logga */
-    .header-section {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
-      height: 150px;
+    /* Header - FIXAD LOGO samma som andra sidor */
+    .header-container {
+      background: #000000;  /* Ren svart som loggan */
+      height: 250px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 3px solid var(--primary-green);
     }
 
     .logo-container {
@@ -35,62 +34,67 @@
       color: white;
     }
 
-    .logo-container .brand-name {
-      font-size: 3rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      margin: 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    /* 🔥 FIXAD LOGO: Fyller hela headern! */
+    .logo-icon {
+      width: 100%;    /* Fyller hela bredden */
+      height: 250px;  /* Lika hög som header-container */
+      background: #000000;  /* Samma svarta som headern */
+      border-radius: 0px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    .logo-container .brand-subtitle {
-      font-size: 1.2rem;
-      color: #bdc3c7;
-      margin: 5px 0 0 0;
-      letter-spacing: 1px;
+    .logo-icon img {
+      width: 20vw;  /* 20% av viewport-bredden */
+      height: 250px;
+      object-fit: contain;
     }
 
-    /* Grön navigationsbar */
-    .main-navigation {
-      background-color: var(--primary-green);
-      padding: 0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* 🔥 GÖMD TEXT - tar bort CTRL+BUY texten */
+    .logo-text {
+      display: none;
     }
 
-    .main-navigation .navbar-nav {
-      width: 100%;
+    /* Grön navigation - EXAKT som andra sidor */
+    .top-nav {
+      background-color: #28a745;
+      padding: 15px 0;
     }
 
-    .main-navigation .nav-link {
-      color: white !important;
-      padding: 15px 20px !important;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      border: none;
-      background: none;
-    }
-
-    .main-navigation .nav-link:hover {
-      background-color: rgba(255,255,255,0.1);
-      transform: translateY(-1px);
-    }
-
-    .main-navigation .nav-link.active {
-      background-color: rgba(255,255,255,0.2);
-    }
-
-    /* Status meddelande */
-    .status-message {
-      background-color: var(--primary-green);
+    .top-nav a {
       color: white;
-      padding: 10px;
-      text-align: center;
-      margin: 0;
+      text-decoration: none;
+      margin: 0 20px;
     }
 
-    .status-message .btn-sm {
-      padding: 4px 12px;
-      font-size: 0.8rem;
+    .top-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    /* Login status bar */
+    .login-status {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
     }
 
     /* Huvudinnehåll */
@@ -101,245 +105,4 @@
 
     /* Välkomstsektion */
     .welcome-section {
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      margin-bottom: 40px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border: 1px solid #e9ecef;
-    }
-
-    .welcome-section h1 {
-      color: var(--dark-bg);
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-
-    .welcome-section p {
-      color: #6c757d;
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-
-    /* Produktkort */
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border: 1px solid #e9ecef;
-      transition: all 0.3s ease;
-      height: 100%;
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .product-image {
-      width: 80px;
-      height: 80px;
-      background: var(--primary-green);
-      border-radius: 50%;
-      margin: 0 auto 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.5rem;
-    }
-
-    .product-card h5 {
-      color: var(--dark-bg);
-      font-weight: 600;
-      margin-bottom: 15px;
-    }
-
-    .product-price {
-      color: var(--primary-green);
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .product-description {
-      color: #6c757d;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-
-    /* Knappar */
-    .btn-primary-custom {
-      background-color: var(--dark-bg);
-      border-color: var(--dark-bg);
-      color: white;
-      padding: 10px 25px;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary-custom:hover {
-      background-color: #34495e;
-      border-color: #34495e;
-      transform: translateY(-1px);
-    }
-
-    .btn-success-custom {
-      background-color: var(--primary-green);
-      border-color: var(--primary-green);
-      color: white;
-      padding: 10px 25px;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .btn-success-custom:hover {
-      background-color: #218838;
-      border-color: #218838;
-      transform: translateY(-1px);
-    }
-
-    /* Footer */
-    .footer {
-      background-color: var(--dark-bg);
-      color: white;
-      text-align: center;
-      padding: 20px 0;
-      margin-top: 60px;
-    }
-
-    /* Responsiv design */
-    @media (max-width: 768px) {
-      .header-section {
-        height: 120px;
-      }
-
-      .logo-container .brand-name {
-        font-size: 2rem;
-      }
-
-      .main-navigation .nav-link {
-        padding: 12px 15px !important;
-      }
-
-      .welcome-section {
-        padding: 25px;
-      }
-
-      .welcome-section h1 {
-        font-size: 2rem;
-      }
-    }
-  </style>
-</head>
-<body>
-<!-- Header med logga -->
-<header class="header-section">
-  <div class="logo-container">
-    <h1 class="brand-name">CTRL+BUY</h1>
-    <p class="brand-subtitle">SOLUTIONS</p>
-  </div>
-</header>
-
-<!-- Status meddelande för inloggade användare -->
-<div th:if="${#authorization.expression('isAuthenticated()')}" class="status-message">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
-    <span th:text="'Du är inloggad som: ' + ${#authentication.name}">Du är inloggad som: user</span>
-    <a href="/logout" class="btn btn-outline-light btn-sm">Logga ut</a>
-  </div>
-</div>
-
-<!-- Huvudnavigation -->
-<nav class="navbar navbar-expand-lg main-navigation">
-  <div class="container-fluid">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}" href="/">
-            <i class="fas fa-home me-1"></i> Hem
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:classappend="${#request.requestURI == '/produkter' ? 'active' : ''}" href="/produkter">
-            <i class="fas fa-shopping-bag me-1"></i> Produkter
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:classappend="${#request.requestURI == '/om-oss' ? 'active' : ''}" href="/om-oss">
-            <i class="fas fa-info-circle me-1"></i> Om oss
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:classappend="${#request.requestURI == '/kontakt' ? 'active' : ''}" href="/kontakt">
-            <i class="fas fa-envelope me-1"></i> Kontakt
-          </a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
-          <a class="nav-link" href="/min-profil">
-            <i class="fas fa-user me-1"></i> Min profil
-          </a>
-        </li>
-        <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
-          <a class="nav-link" href="/varukorg">
-            <i class="fas fa-shopping-cart me-1"></i> Varukorg
-          </a>
-        </li>
-        <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
-          <a class="nav-link" href="/registrera">
-            <i class="fas fa-user-plus me-1"></i> Registrera dig
-          </a>
-        </li>
-        <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
-          <a class="nav-link" href="/login">
-            <i class="fas fa-sign-in-alt me-1"></i> Logga in
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- Huvudinnehåll -->
-<main class="main-content">
-  <div class="container">
-    <!-- Alert meddelanden -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-      <i class="fas fa-check-circle me-2"></i>
-      <span th:text="${success}"></span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <i class="fas fa-exclamation-circle me-2"></i>
-      <span th:text="${error}"></span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <!-- Sidspecifikt innehåll -->
-    <div th:block th:replace="${template} ?: ~{}">
-      <!-- Detta kommer att ersättas av specifikt sidinnehåll -->
-    </div>
-  </div>
-</main>
-
-<!-- Footer -->
-<footer class="footer">
-  <div class="container">
-    <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+      backgro

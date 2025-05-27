@@ -20,27 +20,21 @@
             background-color: var(--light-gray);
         }
 
-        /* Header med logga */
-        .header-section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
-            height: 250px; /* Ökat för större logo */
+        /* Header - FIXAD LOGO */
+        .header-container {
+            background: #000000;  /* Ren svart som loggan */
+            height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 3px solid var(--primary-green);
-        }
-
-        .logo-container {
-            text-align: center;
-            color: white;
         }
 
         .logo-icon {
-            width: 200px;
-            height: 200px;
-            background: transparent;
-            border-radius: 20px;
-            margin: 0 auto 25px;
+            width: 100%;    /* Fyller hela bredden */
+            height: 250px;  /* Lika hög som header-container */
+            background: #000000;  /* Samma svarta som headern */
+            border-radius: 0px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -48,24 +42,13 @@
         }
 
         .logo-icon img {
-            width: 100%;
-            height: 100%;
+            width: 20vw;  /* 20% av viewport-bredden */
+            height: 250px;
             object-fit: contain;
         }
 
-        .logo-container .brand-name {
-            font-size: 2.2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .logo-container .brand-subtitle {
-            font-size: 1.1rem;
-            color: #bdc3c7;
-            margin: 5px 0 0 0;
-            letter-spacing: 1px;
+        .logo-text {
+            display: none;  /* Dölj text */
         }
 
         /* Grön navigationsbar */
@@ -234,17 +217,18 @@
 
         /* Responsiv design */
         @media (max-width: 768px) {
-            .header-section {
-                height: 180px;
+            .header-container {
+                height: 250px;  /* Behåll samma höjd även på mobil */
             }
 
             .logo-icon {
-                width: 120px;
-                height: 120px;
+                width: 100%;
+                height: 250px;
             }
 
-            .logo-container .brand-name {
-                font-size: 1.8rem;
+            .logo-icon img {
+                width: 30vw;  /* Lite större på mobil */
+                height: 250px;
             }
 
             .main-navigation .nav-link {
@@ -263,18 +247,18 @@
 </head>
 <body>
 <!-- Header med logga -->
-<header class="header-section">
-    <div class="logo-container">
-        <div class="logo-icon">
-            <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+<header th:fragment="header" class="header-container">
+    <div class="logo-icon">
+        <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+        <div class="logo-text">
+            <h1 class="brand-name">CTRL+BUY</h1>
+            <p class="brand-subtitle">SOLUTIONS</p>
         </div>
-        <h1 class="brand-name">CTRL+BUY</h1>
-        <p class="brand-subtitle">SOLUTIONS</p>
     </div>
 </header>
 
 <!-- Status meddelande för inloggade användare -->
-<div th:if="${#authorization.expression('isAuthenticated()')}" class="status-message">
+<div th:fragment="user-status" th:if="${#authorization.expression('isAuthenticated()')}" class="status-message">
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <span th:text="'Du är inloggad som: ' + ${#authentication.name}">Du är inloggad som: user</span>
         <a href="/logout" class="btn btn-outline-light btn-sm">Logga ut</a>
@@ -393,7 +377,7 @@
 </main>
 
 <!-- Footer -->
-<footer class="footer">
+<footer th:fragment="footer" class="footer">
     <div class="container">
         <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
     </div>
