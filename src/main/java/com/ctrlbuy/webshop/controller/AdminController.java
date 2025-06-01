@@ -1,7 +1,7 @@
 package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.security.entity.User;
-import com.ctrlbuy.webshop.security.service.UserService;
+import com.ctrlbuy.webshop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

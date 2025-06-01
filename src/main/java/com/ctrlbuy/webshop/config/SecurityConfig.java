@@ -1,7 +1,7 @@
 package com.ctrlbuy.webshop.config;
 
-import com.ctrlbuy.webshop.security.service.CustomUserDetailsService;
-import com.ctrlbuy.webshop.security.handler.CustomAuthenticationSuccessHandler;
+import com.ctrlbuy.webshop.service.CustomUserDetailsService;
+// import com.ctrlbuy.webshop.security.handler.CustomAuthenticationSuccessHandler;  // ← KOMMENTERAD BORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +20,8 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    private CustomAuthenticationSuccessHandler successHandler;
+    // @Autowired
+    // private CustomAuthenticationSuccessHandler successHandler;  // ← KOMMENTERAD BORT
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,15 +30,22 @@ public class SecurityConfig {
                         // Statiska resurser
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
 
-                        // Publika sidor
-                        .requestMatchers("/", "/home", "/about", "/produkter", "/kontakt", "/support").permitAll()
+                        // Publika sidor - VIKTIGT: Lägg till /** för att matcha alla home-varianter
+                        .requestMatchers("/", "/home", "/home/**", "/about", "/om-oss", "/produkter", "/produkter/**", "/kontakt", "/support", "/debug-products").permitAll()
+
+                        // Produktsidor - LÄGG TILL /products också
+                        .requestMatchers("/products", "/products/**").permitAll()
 
                         // Autentisering och registrering
-                        .requestMatchers("/login", "/register", "/register/**").permitAll()
+                        .requestMatchers("/login", "/login/**", "/register", "/register/**").permitAll()
 
                         // E-postverifiering och relaterade endpoints
                         .requestMatchers("/verify-email", "/verify-email/**").permitAll()
                         .requestMatchers("/resend-verification", "/resend-verification/**").permitAll()
+
+                        // LÖSENORDSÅTERSTÄLLNING - NYA ENDPOINTS
+                        .requestMatchers("/forgot-password", "/forgot-password/**").permitAll()
+                        .requestMatchers("/reset-password", "/reset-password/**").permitAll()
 
                         // TEST ENDPOINTS - VIKTIGT FÖR DEBUGGING
                         .requestMatchers("/test-email", "/test-email/**").permitAll()
@@ -47,25 +54,31 @@ public class SecurityConfig {
                         // ADMIN ENDPOINTS - TILLÅT ADMIN-PANEL
                         .requestMatchers("/admin/**").permitAll()
 
-                        // Alla andra requests kräver autentisering
-                        .anyRequest().authenticated()
+                        // CART ENDPOINTS - LÄGG TILL CART
+                        .requestMatchers("/cart/**", "/varukorg/**").permitAll()
+
+                        // 🔥 ÄNDRING: Inloggade användare behöver tillgång till profil
+                        .requestMatchers("/min-profil", "/profile/**").authenticated()
+
+                        // 🔥 ÄNDRING: Andra skyddade sidor kan kräva inloggning - men de flesta sidor ska vara publika
+                        .anyRequest().permitAll()  // ÄNDRAT från .authenticated() till .permitAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .successHandler(successHandler)  // 🔥 Använd vår smarta routing
+                        .defaultSuccessUrl("/", true)  // 🔥 ÄNDRAT: Använd standard redirect till hemsidan
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessUrl("/?logout=true")  // 🔥 ÄNDRAT: Gå till hemsidan efter logout
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
                 .csrf(csrf -> csrf
                         // Inaktivera CSRF för test-endpoints (kan vara behövligt för debugging)
-                        .ignoringRequestMatchers("/test-email/**", "/api/test/**", "/admin/**")
+                        .ignoringRequestMatchers("/test-email/**", "/api/test/**", "/admin/**", "/cart/**", "/varukorg/**")
                 )
                 // VIKTIGT: Använd vår CustomUserDetailsService för verifieringskontroll
                 .userDetailsService(customUserDetailsService);

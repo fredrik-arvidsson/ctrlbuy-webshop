@@ -1,4 +1,4 @@
-package com.ctrlbuy.webshop.security.service;
+package com.ctrlbuy.webshop.service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

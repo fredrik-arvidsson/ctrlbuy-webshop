@@ -1,14 +1,16 @@
-package com.ctrlbuy.webshop.security.service;
+package com.ctrlbuy.webshop.service;
 
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;

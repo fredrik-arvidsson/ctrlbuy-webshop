@@ -3,42 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CtrlBuy - Din smarta webshop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title th:text="${title}">Hem - CTRL+BUY Solutions</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-green: #28a745;
-            --dark-green: #1e7e34;
-            --light-green: #d4edda;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
             background-color: #f8f9fa;
         }
 
-        /* Header - FIXAD LOGO samma som andra sidor */
+        /* Header - SAMMA SOM LOGIN */
         .header-container {
-            background: #000000;  /* Ren svart som loggan */
+            background: #000000;
             height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .logo-container {
-            text-align: center;
-            color: white;
-        }
-
-        /* 🔥 FIXAD LOGO: Fyller hela headern! */
         .logo-icon {
-            width: 100%;    /* Fyller hela bredden */
-            height: 250px;  /* Lika hög som header-container */
-            background: #000000;  /* Samma svarta som headern */
+            width: 100%;
+            height: 250px;
+            background: #000000;
             border-radius: 0px;
             margin: 0 auto;
             display: flex;
@@ -48,17 +36,16 @@
         }
 
         .logo-icon img {
-            width: 20vw;  /* 20% av viewport-bredden */
+            width: 20vw;
             height: 250px;
             object-fit: contain;
         }
 
-        /* 🔥 GÖMD TEXT - tar bort CTRL+BUY texten */
         .logo-text {
             display: none;
         }
 
-        /* Grön navigation - EXAKT som andra sidor */
+        /* Grön navigation - SAMMA SOM LOGIN */
         .top-nav {
             background-color: #28a745;
             padding: 15px 0;
@@ -72,6 +59,12 @@
 
         .top-nav a:hover {
             background-color: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .top-nav a.active {
+            background-color: rgba(255,255,255,0.2);
             padding: 5px 10px;
             border-radius: 4px;
         }
@@ -97,8 +90,242 @@
             background-color: #c82333;
         }
 
-        /* Välkomstsektion med horisontella knappar */
+        /* Welcome section */
         .welcome-section {
-            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
-            padding: 40px 0;
-            text-align: center;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+<!-- Header med logotyp - SAMMA SOM LOGIN -->
+<header class="header-container">
+    <div class="logo-icon">
+        <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+        <div class="logo-text">
+            <h1>CTRL+BUY</h1>
+            <p>SOLUTIONS</p>
+        </div>
+    </div>
+</header>
+
+<!-- Grön navigation - SAMMA SOM LOGIN -->
+<div class="top-nav text-center">
+    <a th:href="@{/}" class="active">Hem</a>
+    <a th:href="@{/products}">Produkter</a>
+    <a th:href="@{/about}">Om oss</a>
+    <a th:href="@{/contact}">Kontakt</a>
+    <a th:href="@{/support}">Support</a>
+    <a th:href="@{/varukorg}">
+        <i class="fas fa-shopping-cart"></i> Varukorg
+    </a>
+</div>
+
+<!-- Flash meddelanden -->
+<div class="container mt-3">
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> <span th:text="${param.success}">Framgång!</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div th:if="${param.logout}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-sign-out-alt"></i> Du har loggats ut framgångsrikt!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+
+<!-- Inloggningsstatusmeddelande -->
+<div class="container mt-3" sec:authorize="isAuthenticated()">
+    <div class="login-status">
+        <div class="row">
+            <div class="col-md-9">
+                <i class="fas fa-user-circle"></i> Du är inloggad som: <span sec:authentication="name">user</span>
+            </div>
+            <div class="col-md-3 text-right">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">Logga ut</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Välkomstsektion -->
+<div class="welcome-section" sec:authorize="!isAuthenticated()">
+    <div class="container text-center">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-shopping-cart me-3"></i>
+            Välkommen till CTRL+BUY Solutions
+        </h1>
+        <p class="lead mb-4">
+            Din smarta webshop för elektronik och teknik.
+            Upptäck fantastiska produkter till bästa priser!
+        </p>
+        <div class="mt-4">
+            <a href="/login" class="btn btn-light btn-lg mr-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Logga in
+            </a>
+            <a href="/register" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Registrera dig
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Välkomstmeddelande för inloggade -->
+<div class="container mt-4" sec:authorize="isAuthenticated()">
+    <div class="jumbotron bg-light">
+        <h2 class="text-success">
+            <i class="fas fa-home me-2"></i>
+            Välkommen tillbaka, <span sec:authentication="name">användare</span>!
+        </h2>
+        <p class="lead">Utforska våra senaste produkter och erbjudanden.</p>
+        <a href="/products" class="btn btn-success btn-lg">
+            <i class="fas fa-shopping-bag me-2"></i>Börja handla
+        </a>
+    </div>
+</div>
+
+<!-- Utvalda produkter -->
+<div class="container mt-4">
+    <div th:if="${featuredProducts != null and not #lists.isEmpty(featuredProducts)}">
+        <h3 class="mb-4 text-center">
+            <i class="fas fa-star text-warning me-2"></i>Utvalda produkter
+        </h3>
+        <div class="row">
+            <div th:each="product : ${featuredProducts}" class="col-md-4 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${product.name}">Produktnamn</h5>
+                        <p class="card-text text-muted" th:text="${#strings.abbreviate(product.description, 80)}">Beskrivning</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h4 class="text-success mb-0" th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' kr'">0 kr</h4>
+                            <small class="text-muted">
+                                <i class="fas fa-box me-1"></i><span th:text="${product.stockQuantity}">0</span> i lager
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <form th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-cart-plus me-2"></i>Lägg i varukorg
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/products" class="btn btn-outline-success btn-lg">
+                <i class="fas fa-arrow-right me-2"></i>Se alla produkter
+            </a>
+        </div>
+    </div>
+
+    <!-- Ingen produkter-meddelande -->
+    <div th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}" class="alert alert-info text-center">
+        <i class="fas fa-info-circle me-2"></i>
+        Inga produkter kunde laddas just nu.
+        <a href="/products" class="alert-link">Besök produktsidan</a> eller
+        <a href="/debug-products" class="alert-link">testa debug-läget</a>.
+    </div>
+</div>
+
+<!-- Features sektion -->
+<div class="container mt-5 mb-5">
+    <h3 class="text-center mb-5">Varför välja CTRL+BUY?</h3>
+    <div class="row">
+        <div class="col-md-4 text-center mb-4">
+            <div class="card feature-card border-0 h-100">
+                <div class="card-body">
+                    <i class="fas fa-shipping-fast fa-3x text-success mb-3"></i>
+                    <h5>Snabb leverans</h5>
+                    <p class="text-muted">Få dina produkter levererade på 1-2 arbetsdagar</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="card feature-card border-0 h-100">
+                <div class="card-body">
+                    <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                    <h5>Säker shopping</h5>
+                    <p class="text-muted">Dina betalningar är säkra med vår kryptering</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="card feature-card border-0 h-100">
+                <div class="card-body">
+                    <i class="fas fa-headset fa-3x text-success mb-3"></i>
+                    <h5>Kundservice</h5>
+                    <p class="text-muted">Vi hjälper dig med alla dina frågor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="fas fa-shopping-cart me-2"></i>CTRL+BUY Solutions</h5>
+                <p>Din pålitliga partner för elektronik och teknik.</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Snabblänkar</h6>
+                <ul class="list-unstyled">
+                    <li><a href="/about" class="text-white-50">Om oss</a></li>
+                    <li><a href="/contact" class="text-white-50">Kontakt</a></li>
+                    <li><a href="/support" class="text-white-50">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="text-center">
+            <p class="mb-0">&copy; 2024 CTRL+BUY Solutions. Alla rättigheter förbehållna.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap & JQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Auto-dölj flash meddelanden efter 5 sekunder
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+</script>
+</body>
+</html>

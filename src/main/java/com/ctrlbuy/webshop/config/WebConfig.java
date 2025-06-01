@@ -27,16 +27,16 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/home").setViewName("login");
         registry.addViewController("/welcome").setViewName("welcome");
 
-        // Engelska URL:er (befintliga)
+        // Statiska sidor (endast sidor utan logik)
         registry.addViewController("/login").setViewName("login");
         registry.addViewController("/register").setViewName("register");
         registry.addViewController("/about").setViewName("about");
         registry.addViewController("/contact").setViewName("contact");
-        registry.addViewController("/products").setViewName("products");
-
-        // Svenska URL:er (nya mappningar)
-        registry.addViewController("/produkter").setViewName("products");
         registry.addViewController("/kontakt").setViewName("contact");
         registry.addViewController("/support").setViewName("support");
+
+        // TA BORT DESSA RADER - de blockar din ProductController:
+        // registry.addViewController("/products").setViewName("products-backup");
+        // registry.addViewController("/produkter").setViewName("products-backup");
     }
 }

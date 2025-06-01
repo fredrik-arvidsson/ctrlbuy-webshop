@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Add to Cart Button Fragment -->
+<div th:fragment="add-to-cart-button(product)" class="add-to-cart-container">
+    <!-- Simple Add to Cart Button (för produktlistor) -->
+    <form th:if="${simple}" method="post" action="/cart/add" class="d-inline">
+        <input type="hidden" name="productId" th:value="${product.id}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn btn-primary btn-sm add-to-cart-btn"
+                th:attr="data-product-id=${product.id}">
+            <i class="fas fa-cart-plus me-1"></i>
+            Lägg i kundvagn
+        </button>
+    </form>
+
+    <!-- Detailed Add to Cart (för produktsidor) -->
+    <div th:unless="${simple}" class="add-to-cart-detailed">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Antal:</label>
+                <div class="input-group">
+                    <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" class="form-control text-center"
+                           id="quantity-input" value="1" min="1" max="99">
+                    <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button class="btn btn-primary btn-lg add-to-cart-detailed-btn"
+                            th:attr="data-product-id=${product.id}"
+                            onclick="addToCartDetailed()">
+                        <i class="fas fa-cart-plus me-2"></i>
+                        Lägg i kundvagn - <span th:text="${#numbers.formatCurrency(product.price)}">299.99</span> kr
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Cart Scripts -->
+<script th:fragment="add-to-cart-scripts">
+    // Quantity controls for detailed view
+    function increaseQuantity() {
+        const input = document.getElementById('quantity-input');
+        const currentValue = parseInt(input.value);
+        if (currentValue < 99) {
+            input.value = currentValue + 1;
+            updatePriceDisplay();
+        }
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity-input');
+        const currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
+            updatePriceDisplay();
+        }
+    }
+
+    // Update price display when quantity changes
+    function updatePriceDisplay() {
+        const quantity = parseInt(document.getElementById('quantity-input').value);
+        const unitPrice = parseFloat(document.querySelector('[data-unit-price]')?.getAttribute('data-unit-price') || '0');
+        const totalPrice = quantity * unitPrice;
+
+        const priceDisplay = document.querySelector('.total-price-display');
+        if (priceDisplay) {
+            priceDisplay.textContent = totalPrice.toLocaleString('sv-SE', {
+                style: 'currency',
+                currency: 'SEK'
+            });
+        }
+    }
+
+    // Add to cart with AJAX for better UX
+    function addToCartDetailed() {
+        const productId = document.querySelector('.add-to-cart-detailed-btn').getAttribute('data-product-id');
+        const quantity = document.getElementById('quantity-input').value;
+
+        addToCartAjax(productId, quantity);
+    }
+
+    // AJAX function to add to cart
+    function addToCartAjax(productId, quantity = 1) {
+        const button = document.querySelector(`[data-product-id="${productId}"]`);
+        const originalText = button.innerHTML;
+
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Lägger till...';
+
+        // Send AJAX request
+        fetch('/cart/add-ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `productId=${productId}&quantity=${quantity}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart badge
+                    updateCartBadge(data.itemCount);
+
+                    // Show success state
+                    button.innerHTML = '<i class="fas fa-check me-1"></i> Tillagd!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+
+                    // Show success message
+                    showSuccessToast('Produkten har lagts till i kundvagnen!');
+
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-primary');
+                    }, 2000);
+
+                } else {
+                    throw new Error(data.message || 'Kunde inte lägga till produkten');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding to cart:', error);
+
+                // Show error state
+                button.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Fel!';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-danger');
+
+                // Show error message
+                showErrorToast('Kunde inte lägga till produkten i kundvagnen');
+
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-primary');
+                }, 3000);
+            });
+    }
+
+    // Update cart badge in navigation
+    function updateCartBadge(itemCount) {
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.textContent = itemCount;
+
+            // Add animation effect
+            badge.classList.add('animate-bounce');
+            setTimeout(() => {
+                badge.classList.remove('animate-bounce');
+            }, 600);
+        }
+    }
+
+    // Show success toast notification
+    function showSuccessToast(message) {
+        showToast(message, 'success');
+    }
+
+    // Show error toast notification
+    function showErrorToast(message) {
+        showToast(message, 'danger');
+    }
+
+    // Generic toast notification function
+    function showToast(message, type = 'info') {
+        // Create toast element
+        const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+        // Add to toast container (create if doesn't exist)
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Add toast to container
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+        // Initialize and show toast
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 3000
+        });
+        toast.show();
+
+        // Remove toast element after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', () => {
+            toastElement.remove();
+        });
+    }
+
+    // Add event listeners for simple add to cart buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle simple add to cart buttons with AJAX
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                addToCartAjax(productId, 1);
+            });
+        });
+
+        // Handle quantity input changes
+        const quantityInput = document.getElementById('quantity-input');
+        if (quantityInput) {
+            quantityInput.addEventListener('change', updatePriceDisplay);
+        }
+    });
+</script>
+
+<!-- CSS Styles -->
+<style th:fragment="add-to-cart-styles">
+    .add-to-cart-container {
+        position: relative;
+    }
+
+    .add-to-cart-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .add-to-cart-detailed-btn {
+        transition: all 0.3s ease;
+    }
+
+    .add-to-cart-detailed-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .animate-bounce {
+        animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .toast-container {
+        z-index: 9999;
+    }
+
+    #quantity-input {
+        max-width: 80px;
+    }
+
+    .input-group .btn {
+        border-color: #dee2e6;
+    }
+
+    .input-group .btn:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+</style>
+</body>
+</html>

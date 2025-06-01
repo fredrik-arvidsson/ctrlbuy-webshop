@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import com.ctrlbuy.webshop.security.service.UserService;
+import com.ctrlbuy.webshop.service.UserService;
 import java.util.stream.Collectors;
 
 @Controller

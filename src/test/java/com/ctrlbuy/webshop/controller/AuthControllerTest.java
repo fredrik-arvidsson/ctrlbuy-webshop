@@ -2,10 +2,8 @@ package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.config.TestConfig;
 import com.ctrlbuy.webshop.config.SecurityTestConfig;
-import com.ctrlbuy.webshop.dto.LoginRequest;
-import com.ctrlbuy.webshop.dto.RegisterRequest;
 import com.ctrlbuy.webshop.security.JwtService;
-import com.ctrlbuy.webshop.security.service.CustomUserDetailsService;
+import com.ctrlbuy.webshop.service.CustomUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

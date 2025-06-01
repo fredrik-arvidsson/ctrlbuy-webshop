@@ -1,17 +1,28 @@
 package com.ctrlbuy.webshop.security.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * Användarklass som representerar en användare i systemet med
- * grundläggande information och säkerhetsattribut.
- */
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 @Entity
-@Table(name = "users") // Bra att specificera tabellnamn för att undvika konflikter
-public class User {
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,121 +36,87 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private boolean active;
-
-    // Nya fält för namn (behövs för RegisterRequest)
-    @Column(nullable = false)
     private String firstName;
-
-    @Column(nullable = false)
     private String lastName;
 
-    // Fält för e-postbekräftelse
-    @Column(name = "verification_token")
-    private String verificationToken;
+    @Builder.Default
+    private Boolean active = true;
 
-    @Column(name = "verification_token_expiry")
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    private String verificationToken;
     private LocalDateTime verificationTokenExpiry;
 
-    @Column(name = "email_verified")
-    private Boolean emailVerified = false;  // Boolean istället för boolean för att hantera null
-
-    // Fält för lösenordsåterställning
-    @Column(name = "reset_token")
     private String resetToken;
-
-    @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
-    private List<String> roles = new ArrayList<>();
+    @Builder.Default
+    private List<String> roles = new ArrayList<>(List.of("USER"));  // FIXAT: Mutable lista
 
-    // Konstruktörer
-    public User() {}
-
-    public User(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.active = false; // Inaktiv tills e-post bekräftas
-        this.emailVerified = false;
-        this.roles = new ArrayList<>();
-        this.roles.add("ROLE_USER"); // Standardroll
+    // UserDetails implementation
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toList());
     }
 
-    public User(String username, String email, String password, String firstName, String lastName) {
-        this(username, email, password);
-        this.firstName = firstName;
-        this.lastName = lastName;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    // Getters och setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
-
-    // För att stödja befintliga anrop i koden
-    public void setEnabled(boolean enabled) { this.active = enabled; }
-    public boolean isEnabled() { return active; }
-
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-
-    // Verifikationsfält
-    public String getVerificationToken() { return verificationToken; }
-    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
-
-    public LocalDateTime getVerificationTokenExpiry() { return verificationTokenExpiry; }
-    public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) {
-        this.verificationTokenExpiry = verificationTokenExpiry;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public Boolean isEmailVerified() { return emailVerified != null ? emailVerified : false; }
-    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
-
-    // Lösenordsåterställningsfält
-    public String getResetToken() { return resetToken; }
-    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
-
-    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
-    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
-        this.resetTokenExpiry = resetTokenExpiry;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public List<String> getRoles() { return roles; }
-    public void setRoles(List<String> roles) { this.roles = roles; }
-    public void addRole(String role) { this.roles.add(role); }
+    @Override
+    public boolean isEnabled() {
+        return active && emailVerified;
+    }
 
-    // Hjälpmetoder
+    // TILLAGDA: Manuella is-metoder för kompatibilitet med Boolean wrapper types
+    public boolean isActive() {
+        return active != null && active;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified != null && emailVerified;
+    }
+
+    // Utility methods
     public String getFullName() {
-        return firstName + " " + lastName;
+        if (firstName != null && lastName != null) {
+            return "%s %s".formatted(firstName, lastName);
+        }
+        return username;
+    }
+
+    public void addRole(String role) {
+        if (!roles.contains(role)) {
+            roles.add(role);
+        }
     }
 
     public boolean isVerificationTokenValid() {
         return verificationToken != null &&
                 verificationTokenExpiry != null &&
-                verificationTokenExpiry.isAfter(LocalDateTime.now());
+                LocalDateTime.now().isBefore(verificationTokenExpiry);
     }
 
     public boolean isResetTokenValid() {
         return resetToken != null &&
                 resetTokenExpiry != null &&
-                resetTokenExpiry.isAfter(LocalDateTime.now());
+                LocalDateTime.now().isBefore(resetTokenExpiry);
     }
 }

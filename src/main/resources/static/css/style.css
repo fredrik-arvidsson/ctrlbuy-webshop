@@ -6,71 +6,191 @@ body {
     background-color: #f5f5f5;
 }
 
-/* Header med svart bakgrund, 4cm hög */
-.header-container {
-    background-color: #1a1a1a;
-    height: 4cm;
+/* HERO SECTION - DEN RÄTTA KLASSEN FRÅN HEADER.HTML */
+.hero-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%) !important;
+    background-color: #000000 !important;
+    height: 280px !important;
+    min-height: 280px !important;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
     color: white;
+    position: relative;
 }
 
-/* Logotyp-container */
+/* HERO CONTENT */
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* CTRL KEY STYLING */
+.ctrl-key {
+    border: 3px solid #6c757d;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    color: #6c757d;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+/* HERO TITLE */
+.hero-title {
+    color: #17a2b8 !important;
+    font-size: 3rem !important;
+    font-weight: bold !important;
+    margin: 0.5rem 0 0 0 !important;
+    letter-spacing: 2px !important;
+}
+
+/* HERO SUBTITLE */
+.hero-subtitle {
+    color: #6c757d !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+    letter-spacing: 1px !important;
+}
+
+/* BAKÅTKOMPATIBILITET - Header container */
+.header-container {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%) !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    width: 100%;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    color: white;
+    position: relative;
+}
+
+/* Logo-container för kompatibilitet */
 .logo-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-/* Logotypbild */
-.logo {
-    height: 60px;
-    margin-right: 15px;
-}
-
-/* Logotyptext */
-.logo-text {
     text-align: center;
+    width: 100%;
+    height: 100%;
 }
 
-.logo-text h1 {
-    font-size: 2.2rem;
-    margin: 0;
-    font-weight: bold;
-    color: #4fc3f7;
+/* Logo-icon styling (matchar header.html) */
+.logo-icon {
+    width: 100% !important;
+    height: 280px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
 }
 
-.logo-text p {
-    font-size: 1rem;
-    margin: 0;
-    color: white;
+.logo-icon img {
+    width: 150px !important;
+    height: 150px !important;
+    object-fit: contain !important;
+    margin-bottom: 15px !important;
 }
 
-/* Anpassad navbar med grön bakgrund */
+/* Logotypbild (fallback) */
+.logo {
+    height: 150px !important;
+    width: 150px !important;
+    margin-bottom: 15px !important;
+    object-fit: contain;
+}
+
+/* Logotyptext - uppdaterad för att matcha */
+.logo-text {
+    display: block !important;
+    text-align: center;
+    color: white !important;
+}
+
+.logo-text h1,
+.brand-name {
+    font-size: 3rem !important;
+    font-weight: 700 !important;
+    color: #4dabf7 !important;
+    margin: 0 !important;
+    letter-spacing: 2px !important;
+}
+
+.logo-text p,
+.brand-subtitle {
+    font-size: 1.2rem !important;
+    font-weight: 400 !important;
+    color: #ffffff !important;
+    margin: 5px 0 0 0 !important;
+    letter-spacing: 1px !important;
+    opacity: 0.9 !important;
+}
+
+/* MAIN NAVIGATION - GRÖN NAVBAR */
+.main-navigation {
+    background-color: #28a745 !important;
+    padding: 0;
+    min-height: 60px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.main-navigation .nav-link {
+    color: white !important;
+    font-weight: 500;
+    font-size: 1.05rem;
+    padding: 18px 25px !important;
+    transition: all 0.3s ease;
+}
+
+.main-navigation .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-1px);
+}
+
+.main-navigation .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
+}
+
+/* Anpassad navbar med RÄTT grön bakgrund */
 .navbar-custom {
-    background-color: #4caf50;
-    padding: 0.5rem 1rem;
+    background-color: #28a745 !important;
+    padding: 0;
+    min-height: 60px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .navbar-custom .nav-link {
     color: white !important;
     font-weight: 500;
-    padding: 0.5rem 1rem;
+    font-size: 1.05rem;
+    padding: 18px 25px !important;
+    transition: all 0.3s ease;
 }
 
 .navbar-custom .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-1px);
 }
 
 .navbar-custom .nav-link.active {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
 }
 
 /* Inloggningsmeddelande (grön banner) */
 .login-status {
-    background-color: #4caf50;
+    background-color: #28a745;
     color: white;
     padding: 10px;
     margin-bottom: 20px;
@@ -126,4 +246,110 @@ body {
 /* Footer */
 .footer {
     margin-top: 30px;
+}
+
+/* Responsiv design för header */
+@media (max-width: 768px) {
+    .hero-section,
+    .header-container {
+        height: 240px !important;
+        min-height: 240px !important;
+    }
+
+    .logo-icon {
+        height: 240px !important;
+    }
+
+    .logo-icon img,
+    .logo {
+        width: 120px !important;
+        height: 120px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .hero-title,
+    .logo-text h1,
+    .brand-name {
+        font-size: 2.2rem !important;
+    }
+
+    .hero-subtitle,
+    .logo-text p,
+    .brand-subtitle {
+        font-size: 1rem !important;
+    }
+
+    .navbar-custom .nav-link,
+    .main-navigation .nav-link {
+        padding: 15px 20px !important;
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title,
+    .logo-text h1,
+    .brand-name {
+        font-size: 1.8rem !important;
+    }
+
+    .logo-icon img,
+    .logo {
+        width: 100px !important;
+        height: 100px !important;
+    }
+}
+
+/* BRUTAL OVERRIDE - FIXA ALLT NAVIGATION SKIT */
+
+/* TVINGA rätt färg på ALLA navigation element */
+.navbar,
+.navbar-custom,
+.main-navigation,
+nav[class*="navbar"],
+.navbar-expand-lg {
+    background-color: #28a745 !important;
+    background: #28a745 !important;
+}
+
+/* DÖLJ alla sökrutor i navigation */
+.navbar .form-control,
+.navbar input[type="search"],
+.navbar .search-box,
+.navbar-nav input,
+.main-navigation input,
+.navbar-custom input {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* DÖLJ sök-knappar också */
+.navbar .btn[type="submit"],
+.navbar button[type="submit"],
+.navbar .search-btn {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* TVINGA bort alla search-relaterade containers */
+.navbar .d-flex,
+.navbar .search-container,
+.navbar .input-group {
+    display: none !important;
+}
+
+/* SÅ HÄR VILL VI HA NAVIGATION - BARA LÄNKAR */
+.navbar-nav {
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+    padding: 15px 20px !important;
+    font-weight: 500 !important;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255,255,255,0.1) !important;
 }
