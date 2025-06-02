@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Användarvillkor - CTRL+BUY SOLUTIONS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Header - SAMMA som andra sidor */
+    .header-container {
+      background: #000000;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      width: 100%;
+      height: 250px;
+      background: #000000;
+      border-radius: 0;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 20vw;
+      height: 250px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: none;
+    }
+
+    .top-nav {
+      background-color: #28a745;
+      padding: 15px 0;
+    }
+
+    .top-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+    }
+
+    .top-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .login-status {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+
+    .terms-content {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      color: #28a745;
+      border-bottom: 2px solid #28a745;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .last-updated {
+      background: #f0f8f0;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #28a745;
+    }
+
+    .important-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .terms-table {
+      background: #f8f9fa;
+      border-radius: 5px;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header med logotyp -->
+<header class="header-container">
+  <div class="logo-icon">
+    <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+    <div class="logo-text">
+      <h1>CTRL+BUY</h1>
+      <p>SOLUTIONS</p>
+    </div>
+  </div>
+</header>
+
+<!-- Grön navigation -->
+<div class="top-nav text-center">
+  <a th:href="@{/}">Hem</a>
+  <a th:href="@{/produkter}">Produkter</a>
+  <a th:href="@{/about}">Om oss</a>
+  <a th:href="@{/kontakt}">Kontakt</a>
+  <a th:href="@{/support}">Support</a>
+  <a th:href="@{/varukorg}">
+    <i class="fas fa-shopping-cart"></i> Varukorg
+  </a>
+</div>
+
+<!-- Inloggningsstatusmeddelande -->
+<div class="container mt-3" sec:authorize="isAuthenticated()">
+  <div class="login-status">
+    <div class="row">
+      <div class="col-md-9">
+        Du är inloggad som: <span sec:authentication="name">user</span>
+      </div>
+      <div class="col-md-3 text-right">
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="logout-btn">Logga ut</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container my-5">
+  <div class="row">
+    <div class="col-12">
+      <div class="terms-content">
+        <h1 class="text-center mb-4">
+          <i class="fas fa-file-contract text-success me-2"></i>
+          Användarvillkor
+        </h1>
+
+        <div class="last-updated mb-4">
+          <strong>Senast uppdaterad:</strong> 2 juni 2025<br>
+          <strong>Gäller från:</strong> 1 januari 2025<br>
+          <strong>Version:</strong> 2.1
+        </div>
+
+        <div class="important-notice">
+          <strong><i class="fas fa-exclamation-triangle text-warning"></i> Viktigt!</strong>
+          Genom att använda CTRL+BUY Solutions webshop accepterar du dessa användarvillkor.
+        </div>
+
+        <h2 class="section-title">1. Allmänna bestämmelser</h2>
+        <p>Dessa användarvillkor ("Villkoren") reglerar din användning av CTRL+BUY SOLUTIONS webshop och e-handelstjänster. Genom att göra en beställning eller på annat sätt använda våra tjänster accepterar du dessa villkor fullt ut.</p>
+
+        <h2 class="section-title">2. Företagsinformation</h2>
+        <div class="terms-table">
+          <p><strong>CTRL+BUY SOLUTIONS</strong><br>
+            Organisationsnummer: 556XXX-XXXX<br>
+            Adress: [Din företagsadress]<br>
+            E-post: info@ctrlbuy.se<br>
+            Telefon: 08-123 45 67<br>
+            Webbplats: www.ctrlbuy.se</p>
+        </div>
+
+        <h2 class="section-title">3. Produkter och priser</h2>
+        <ul>
+          <li>Alla priser är angivna i svenska kronor (SEK) inklusive moms</li>
+          <li>Vi förbehåller oss rätten att ändra priser utan förvarning</li>
+          <li>Produktbilder är vägledande - verklig produkt kan skilja sig något</li>
+          <li>Vi garanterar produkternas kvalitet enligt gällande konsumentlagstiftning</li>
+        </ul>
+
+        <h2 class="section-title">4. Beställning och betalning</h2>
+
+        <h4>Beställningsprocess:</h4>
+        <ol>
+          <li>Lägg produkter i varukorgen</li>
+          <li>Gå till kassan och fyll i dina uppgifter</li>
+          <li>Välj leverans- och betalningsmetod</li>
+          <li>Granska din beställning</li>
+          <li>Bekräfta köpet</li>
+        </ol>
+
+        <h4>Accepterade betalningsmetoder:</h4>
+        <ul>
+          <li>Kort (Visa, Mastercard, American Express)</li>
+          <li>Swish</li>
+          <li>Klarna (faktura och delbetalning)</li>
+          <li>PayPal</li>
+        </ul>
+
+        <h4>Betalningsvillkor:</h4>
+        <ul>
+          <li>Betalning sker vid beställning (utom vid fakturaköp)</li>
+          <li>Vid fakturaköp: 30 dagars betalningsvillkor</li>
+          <li>Dröjsmålsränta: 2% per månad vid försenad betalning</li>
+        </ul>
+
+        <h2 class="section-title">5. Leverans</h2>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Leveransalternativ:</h5>
+            <ul>
+              <li>PostNord brev (2-5 arbetsdagar) - 49 kr</li>
+              <li>PostNord paket (1-3 arbetsdagar) - 89 kr</li>
+              <li>DHL Express (1-2 arbetsdagar) - 149 kr</li>
+              <li>Hämta i butik - Gratis</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h5>Leveransvillkor:</h5>
+            <ul>
+              <li>Fri frakt vid köp över 500 kr</li>
+              <li>Leverans till hela Sverige</li>
+              <li>Leveranstid räknas från bekräftad betalning</li>
+              <li>SMS/e-post vid leverans</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 class="section-title">6. Retur och ångerrätt</h2>
+
+        <div class="important-notice">
+          <strong>14 dagars ångerrätt</strong> enligt distans- och hemförsäljningslagen.
+        </div>
+
+        <h4>Returvillkor:</h4>
+        <ul>
+          <li>Produkten ska vara oanvänd och i originalförpackning</li>
+          <li>Returrätt gäller 14 dagar från mottagandet</li>
+          <li>Kunden står för returkostnad (utom vid fel/skada)</li>
+          <li>Återbetalning sker inom 14 dagar efter godkänd retur</li>
+        </ul>
+
+        <h4>Undantag från ångerrätt:</h4>
+        <ul>
+          <li>Specialbeställda/skräddarsydda produkter</li>
+          <li>Förbrukningsvaror som öppnats</li>
+          <li>Produkter som av hälsoskäl inte kan returneras</li>
+        </ul>
+
+        <h2 class="section-title">7. Garanti och reklamation</h2>
+        <p>Vi lämnar 2 års garanti på alla produkter enligt konsumentköplagen. Vid fel eller skada:</p>
+        <ol>
+          <li>Kontakta vår kundtjänst inom skälig tid</li>
+          <li>Beskriv felet och bifoga bilder om möjligt</li>
+          <li>Vi bedömer om reparation, utbyte eller återbetalning är lämpligt</li>
+        </ol>
+
+        <h2 class="section-title">8. Ansvarsbegränsning</h2>
+        <p>CTRL+BUY SOLUTIONS ansvar är begränsat till:</p>
+        <ul>
+          <li>Direkta skador upp till beställningens värde</li>
+          <li>Vi ansvarar ej för indirekta skador eller följdskador</li>
+          <li>Force majeure (naturkatastrofer, strejker, etc.) undantar från ansvar</li>
+        </ul>
+
+        <h2 class="section-title">9. Immaterialrätt</h2>
+        <p>Allt innehåll på vår webbplats (texter, bilder, logotyper, design) skyddas av upphovsrätt och varumärkesrätt. Användning utan tillstånd är förbjuden.</p>
+
+        <h2 class="section-title">10. Användarkonto</h2>
+        <ul>
+          <li>Du ansvarar för att hålla dina inloggningsuppgifter säkra</li>
+          <li>Meddela oss omgående vid misstänkt missbruk</li>
+          <li>Vi förbehåller oss rätten att stänga konton vid missbruk</li>
+        </ul>
+
+        <h2 class="section-title">11. Cookies och personuppgifter</h2>
+        <p>Vi använder cookies för att förbättra din upplevelse. Läs mer i vår <a th:href="@{/privacy-policy}" class="text-success">integritetspolicy</a> om hur vi behandlar dina personuppgifter enligt GDPR.</p>
+
+        <h2 class="section-title">12. Tvist och tillämplig lag</h2>
+        <ul>
+          <li>Svensk lag tillämpas på dessa villkor</li>
+          <li>Tvister avgörs av svensk domstol</li>
+          <li>Du som konsument har rätt att vända dig till Allmänna reklamationsnämnden (ARN)</li>
+          <li>Vi är anslutna till Svensk Handels branschprogram för e-handel</li>
+        </ul>
+
+        <h2 class="section-title">13. Ändringar av villkor</h2>
+        <p>Vi förbehåller oss rätten att ändra dessa villkor. Väsentliga ändringar meddelas på webbplatsen och via e-post till registrerade kunder.</p>
+
+        <h2 class="section-title">14. Kontakt</h2>
+        <div class="bg-light p-3 rounded">
+          <p><strong>Frågor om villkoren?</strong></p>
+          <p>Kontakta vår kundtjänst:<br>
+            E-post: support@ctrlbuy.se<br>
+            Telefon: 08-123 45 67<br>
+            Öppettider: Mån-Fre 09:00-17:00</p>
+        </div>
+
+        <div class="text-center mt-4">
+          <a th:href="@{/checkout}" class="btn btn-success">
+            <i class="fas fa-arrow-left me-2"></i>
+            Tillbaka till checkout
+          </a>
+          <a th:href="@{/privacy-policy}" class="btn btn-outline-success ml-2">
+            <i class="fas fa-shield-alt me-2"></i>
+            Läs integritetspolicy
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,22 +1,24 @@
 package com.ctrlbuy.webshop.controller;
 
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequiredArgsConstructor
 public class SwedishRoutesController {
 
-    private final CartController cartController;
+    // TA BORT /varukorg från här - det hanteras nu i CartController
 
-    @GetMapping("/varukorg")
-    public String viewCart(HttpSession session, Model model, Authentication auth) {
-        return cartController.viewCart(session, model, auth);
-    }
+    // Lägg till andra svenska routes här om du behöver, t.ex:
+
+    // @GetMapping("/om-oss")
+    // public String aboutUs() {
+    //     return "redirect:/about";
+    // }
+
+    // @GetMapping("/kontakt")
+    // public String contact() {
+    //     return "redirect:/contact";
+    // }
 }

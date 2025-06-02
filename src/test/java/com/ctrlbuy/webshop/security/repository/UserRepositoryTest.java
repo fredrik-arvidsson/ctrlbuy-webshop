@@ -1,12 +1,13 @@
 package com.ctrlbuy.webshop.security.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
-import com.ctrlbuy.webshop.config.TestConfig;
 import com.ctrlbuy.webshop.security.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.slf4j.Logger;
@@ -16,10 +17,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
 @DataJpaTest
-@Import(TestConfig.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application-test.yml")
+@EntityScan("com.ctrlbuy.webshop")
+@EnableJpaRepositories("com.ctrlbuy.webshop.security.repository")
 public class UserRepositoryTest {
 
     private static final Logger log = LoggerFactory.getLogger(UserRepositoryTest.class);
@@ -33,20 +35,25 @@ public class UserRepositoryTest {
 
         // Skapa ny användare
         User user = new User();
-        user.setUsername("testuser");
+        user.setUsername("testuser123");
         user.setPassword("testpassword");
-        user.setEmail("testuser@example.com");
+        user.setEmail("testuser123@example.com");
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setEmailVerified(false);
+        user.setActive(true);
 
         // Spara användaren
         User savedUser = userRepository.save(user);
+
         log.debug("Sparad användare med ID: {}", savedUser.getId());
 
         // Hämta användaren
-        Optional<User> foundUser = userRepository.findByUsername("testuser");
+        Optional<User> foundUser = userRepository.findByUsername("testuser123");
 
         // Verifiera att den finns och är korrekt
         assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getEmail()).isEqualTo("testuser@example.com");
+        assertThat(foundUser.get().getEmail()).isEqualTo("testuser123@example.com");
         log.debug("Test slutfört framgångsrikt");
     }
 
@@ -56,19 +63,23 @@ public class UserRepositoryTest {
 
         // Skapa ny användare
         User user = new User();
-        user.setUsername("emailuser");
+        user.setUsername("emailuser456");
         user.setPassword("password123");
-        user.setEmail("test@example.com");
+        user.setEmail("emailtest456@example.com");
+        user.setFirstName("Email");
+        user.setLastName("User");
+        user.setEmailVerified(true);
+        user.setActive(true);
 
         // Spara användaren
         userRepository.save(user);
 
-        // Hämta användaren med e-post (förutsätter att du har en sådan metod)
-        Optional<User> foundUser = userRepository.findByEmail("test@example.com");
+        // Hämta användaren med e-post
+        Optional<User> foundUser = userRepository.findByEmail("emailtest456@example.com");
 
         // Verifiera att den finns och är korrekt
         assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getUsername()).isEqualTo("emailuser");
+        assertThat(foundUser.get().getUsername()).isEqualTo("emailuser456");
         log.debug("Test slutfört framgångsrikt");
     }
 }

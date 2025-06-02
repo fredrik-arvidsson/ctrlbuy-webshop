@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/cart")
 @RequiredArgsConstructor
 @Slf4j
 public class CartController {
@@ -28,60 +27,67 @@ public class CartController {
     private final ProductService productService;
     private static final String CART_SESSION_KEY = "shopping_cart";
 
-    // Visa kundvagn - KOMPATIBEL MED DIN BEFINTLIGA VIEW
-    @GetMapping
+    // Visa kundvagn - ENGELSKA URL
+    @GetMapping("/cart")
     public String viewCart(HttpSession session, Model model, Authentication auth) {
-        log.debug("Visar kundvagn för användare: {}",
+        return viewCartSwedish(session, model, auth);
+    }
+
+    // SVENSK URL - DIREKT MAPPING (inte under /cart)
+    @GetMapping("/varukorg")
+    public String viewCartSwedish(HttpSession session, Model model, Authentication auth) {
+        log.debug("Visar kundvagn via svensk URL för användare: {}",
                 auth != null ? auth.getName() : "anonym");
 
         try {
             List<CartItem> cartItems = getCartItemsFromSession(session);
 
-            // Beräkna totaler
-            BigDecimal cartTotal = cartItems.stream()
+            // VIKTIGT: Beräkna totaler för templaten
+            BigDecimal subtotal = cartItems.stream()
                     .map(CartItem::getTotalPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // Frakt: 49 kr om under 499 kr, annars gratis
+            BigDecimal shipping = subtotal.compareTo(new BigDecimal("499")) >= 0 ?
+                    BigDecimal.ZERO : new BigDecimal("49");
+
+            BigDecimal total = subtotal.add(shipping);
 
             int cartItemCount = cartItems.stream()
                     .mapToInt(CartItem::getQuantity)
                     .sum();
 
-            // Lägg till data som din template förväntar sig
+            // Lägg till EXAKT det som templaten förväntar sig
             model.addAttribute("cartItems", cartItems);
-            model.addAttribute("cartTotal", cartTotal);
+            model.addAttribute("subtotal", subtotal);      // För templaten
+            model.addAttribute("shipping", shipping);      // För templaten
+            model.addAttribute("total", total);           // För templaten
+            model.addAttribute("cartTotal", total);       // Backup
             model.addAttribute("cartItemCount", cartItemCount);
-            model.addAttribute("cart", cartItems); // För empty check i template
 
-            log.debug("Cart contains {} items, total: {} kr", cartItemCount, cartTotal);
+            log.debug("Cart contains {} items, subtotal: {} kr, shipping: {} kr, total: {} kr",
+                    cartItemCount, subtotal, shipping, total);
 
         } catch (Exception e) {
             log.error("Error loading cart", e);
             model.addAttribute("errorMessage", "Ett fel uppstod vid hämtning av kundvagnen.");
             model.addAttribute("cartItems", new ArrayList<>());
-            model.addAttribute("cartTotal", BigDecimal.ZERO);
+            model.addAttribute("subtotal", BigDecimal.ZERO);
+            model.addAttribute("shipping", BigDecimal.ZERO);
+            model.addAttribute("total", BigDecimal.ZERO);
             model.addAttribute("cartItemCount", 0);
         }
 
         return "cart/view";
     }
 
-    // SVENSK MAPPING för /varukorg - NYTT!
-    @GetMapping("/varukorg")
-    public String viewCartSwedish(HttpSession session, Model model, Authentication auth) {
-        log.debug("Visar kundvagn via svensk URL för användare: {}",
-                auth != null ? auth.getName() : "anonym");
-        // Använd samma logik som viewCart metoden
-        return viewCart(session, model, auth);
-    }
-
     // Lägg till produkt i kundvagn - STÖDER BÅDE FORM OCH AJAX
-    @PostMapping("/add")
+    @PostMapping("/cart/add")
     public String addToCart(
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") Integer quantity,
             HttpSession session,
-            RedirectAttributes redirectAttributes,
-            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
+            RedirectAttributes redirectAttributes) {
 
         log.debug("Lägger till produkt {} i kundvagn, kvantitet: {}", productId, quantity);
 
@@ -99,7 +105,7 @@ public class CartController {
             if (product.getStockQuantity() == null || product.getStockQuantity() < quantity) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Otillräckligt lager. Endast " + (product.getStockQuantity() != null ? product.getStockQuantity() : 0) + " tillgängliga");
-                return "redirect:/products/" + productId;
+                return "redirect:/produkter"; // Tillbaka till produktsidan så man kan fortsätta handla
             }
 
             // Lägg till i kundvagn
@@ -116,10 +122,10 @@ public class CartController {
                 if (newQuantity > product.getStockQuantity()) {
                     redirectAttributes.addFlashAttribute("errorMessage",
                             "Kan inte lägga till fler. Max " + product.getStockQuantity() + " tillgängliga");
-                    return "redirect:/varukorg";
+                    return "redirect:/produkter"; // Tillbaka till produktsidan
                 }
                 existingItem.setQuantity(newQuantity);
-                existingItem.updatePrice(); // Uppdatera totalpris
+                existingItem.updatePrice();
             } else {
                 cartItems.add(new CartItem(product, quantity));
             }
@@ -128,7 +134,7 @@ public class CartController {
             session.setAttribute(CART_SESSION_KEY, cartItems);
 
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Produkten har lagts till i kundvagnen");
+                    product.getName() + " har lagts till i kundvagnen");
 
             log.info("Produkt {} tillagd i kundvagn", product.getName());
 
@@ -137,11 +143,12 @@ public class CartController {
             redirectAttributes.addFlashAttribute("errorMessage", "Ett fel uppstod vid tillägg i kundvagn");
         }
 
-        return "redirect:/varukorg";
+        // VIKTIGT: Redirect till produktsidan så man kan fortsätta handla
+        return "redirect:/produkter";
     }
 
     // Uppdatera kvantitet - FORM-BASERAD
-    @PostMapping("/update")
+    @PostMapping("/cart/update")
     public String updateQuantity(
             @RequestParam Long productId,
             @RequestParam Integer quantity,
@@ -171,7 +178,7 @@ public class CartController {
             Optional<Product> productOpt = productService.getProductByIdWithoutView(productId);
             if (productOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Produkten hittades inte");
-                return "redirect:/cart";
+                return "redirect:/varukorg";
             }
 
             Product product = productOpt.get();
@@ -187,7 +194,6 @@ public class CartController {
 
             session.setAttribute(CART_SESSION_KEY, cartItems);
 
-            // Lägg till success message vid lyckad uppdatering
             redirectAttributes.addFlashAttribute("successMessage", "Kvantiteten har uppdaterats");
 
         } catch (Exception e) {
@@ -199,7 +205,7 @@ public class CartController {
     }
 
     // Ta bort från kundvagn - FORM-BASERAD
-    @PostMapping("/remove")
+    @PostMapping("/cart/remove")
     public String removeFromCart(
             @RequestParam Long productId,
             HttpSession session,
@@ -227,8 +233,8 @@ public class CartController {
         return "redirect:/varukorg";
     }
 
-    // Rensa kundvagn - FORM-BASERAD
-    @PostMapping("/clear")
+    // Rensa kundvagn
+    @PostMapping("/cart/clear")
     public String clearCart(HttpSession session, RedirectAttributes redirectAttributes) {
         log.debug("Rensar kundvagn");
 
@@ -247,7 +253,7 @@ public class CartController {
     // AJAX-ENDPOINTS FÖR MODERN FUNKTIONALITET
 
     // Lägg till produkt i kundvagn (AJAX)
-    @PostMapping("/add/{productId}")
+    @PostMapping("/cart/add/{productId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> addToCartAjax(
             @PathVariable Long productId,
@@ -321,7 +327,7 @@ public class CartController {
     }
 
     // Hämta antal items i kundvagn (AJAX)
-    @GetMapping("/count")
+    @GetMapping("/cart/count")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getCartCount(HttpSession session) {
         List<CartItem> cartItems = getCartItemsFromSession(session);

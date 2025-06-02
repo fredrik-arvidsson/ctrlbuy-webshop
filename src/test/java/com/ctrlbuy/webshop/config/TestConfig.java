@@ -16,9 +16,12 @@ public class TestConfig {
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Mock CommandLineRunner för att förhindra exekvering under tester
-    @MockBean
+    // Mock BÅDA CommandLineRunner beans för att förhindra exekvering under tester
+    @MockBean(name = "commandLineRunner")
     private CommandLineRunner commandLineRunner;
+
+    @MockBean(name = "init")
+    private CommandLineRunner initCommandLineRunner;
 
     @Bean
     @Primary
@@ -33,5 +36,18 @@ public class TestConfig {
     @Bean(name = "mvcHandlerMappingIntrospector")
     public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
         return new HandlerMappingIntrospector();
+    }
+
+    /**
+     * Skapar en primär CommandLineRunner som inte gör något för tester.
+     * Detta förhindrar konflikter mellan flera CommandLineRunner beans.
+     */
+    @Bean
+    @Primary
+    public CommandLineRunner testCommandLineRunner() {
+        return args -> {
+            // Gör ingenting under tester - förhindrar data-initialisering
+            System.out.println("Test CommandLineRunner: Skippar data-initialisering");
+        };
     }
 }

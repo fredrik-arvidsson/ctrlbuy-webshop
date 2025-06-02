@@ -5,14 +5,18 @@ import com.ctrlbuy.webshop.security.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class DataInitializer {
 
     @Bean
+    @Profile("!test")  // Kör INTE under test-profil
     public CommandLineRunner init(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
+            System.out.println("DataInitializer: Kör data-initialisering...");
+
             // Se till att metoden existsByUsernameOrEmail finns i UserRepository
             if (userRepository.findByUsername("admin").isEmpty() &&
                     userRepository.findByEmail("admin@example.com").isEmpty()) {
@@ -49,6 +53,14 @@ public class DataInitializer {
                 userRepository.save(user);
                 System.out.println("Test user created.");
             }
+        };
+    }
+
+    @Bean
+    @Profile("test")  // Kör endast under test-profil
+    public CommandLineRunner testInit() {
+        return args -> {
+            System.out.println("Test CommandLineRunner: Skippar data-initialisering");
         };
     }
 }

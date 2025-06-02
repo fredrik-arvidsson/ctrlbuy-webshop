@@ -36,19 +36,29 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "first_name")
     private String firstName;
+
+    @Column(name = "last_name")
     private String lastName;
 
     @Builder.Default
     private Boolean active = true;
 
+    @Column(name = "email_verified")
     @Builder.Default
     private Boolean emailVerified = false;
 
+    @Column(name = "verification_token")
     private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 
+    @Column(name = "reset_token")
     private String resetToken;
+
+    @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
     @ElementCollection(fetch = FetchType.EAGER)
