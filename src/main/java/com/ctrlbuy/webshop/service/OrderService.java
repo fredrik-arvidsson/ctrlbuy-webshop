@@ -9,6 +9,10 @@ import com.ctrlbuy.webshop.repository.OrderRepository;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -287,6 +291,55 @@ public class OrderService {
      */
     public Long countOrdersByUser(User user) {
         return orderRepository.countByUser(user);
+    }
+
+    // ========================================
+    // NYA METODER FÖR ORDERHISTORIK
+    // ========================================
+
+    /**
+     * Hämta orders med paginering för orderhistorik
+     */
+    public Page<Order> getOrdersByUserWithPagination(User user, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+        return orderRepository.findByUser(user, pageable);
+    }
+
+    /**
+     * Hämta specifik order för användare (säkerhetscheck)
+     */
+    public Optional<Order> getOrderByIdAndUser(Long orderId, User user) {
+        return orderRepository.findByIdAndUser(orderId, user);
+    }
+
+    /**
+     * Hämta order via ordernummer och användare (säkerhetscheck) - wrapprar befintlig metod
+     */
+    public Optional<Order> getOrderByOrderNumberAndUser(String orderNumber, User user) {
+        Order order = findByOrderNumberAndUser(orderNumber, user);
+        return Optional.ofNullable(order);
+    }
+
+    /**
+     * Beräkna total summa för alla orders av användare
+     */
+    public Double getTotalSpentByUser(User user) {
+        return orderRepository.sumTotalAmountByUser(user);
+    }
+
+    /**
+     * Hämta senaste order för användare
+     */
+    public Optional<Order> getLatestOrderByUser(User user) {
+        List<Order> orders = findByUser(user); // Använder befintlig metod
+        return orders.isEmpty() ? Optional.empty() : Optional.of(orders.get(0));
+    }
+
+    /**
+     * Hämta orders för användare (orderhistorik - använder befintlig metod)
+     */
+    public List<Order> getOrdersByUser(User user) {
+        return findByUser(user); // Använder din befintliga metod
     }
 
     // DTO klasser för beställningsdata
