@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomErrorController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">CustomErrorController.java</span></div><h1>CustomErrorController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
+
+@Controller
+<span class="fc" id="L14">public class CustomErrorController implements ErrorController {</span>
+
+<span class="fc" id="L16">    private static final Logger log = LoggerFactory.getLogger(CustomErrorController.class);</span>
+
+    @RequestMapping(&quot;/error&quot;)
+    public String handleError(HttpServletRequest request, Model model) {
+        // Hämta feldetaljer
+<span class="fc" id="L21">        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);</span>
+<span class="fc" id="L22">        Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);</span>
+<span class="fc" id="L23">        Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);</span>
+<span class="fc" id="L24">        Object requestUri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);</span>
+
+        // Logga detaljerad felinformation
+<span class="fc" id="L27">        log.error(&quot;Error details - Status: {}, Exception: {}, Message: {}, URI: {}&quot;,</span>
+                status, exception, message, requestUri);
+
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (exception != null) {</span>
+<span class="fc" id="L31">            log.error(&quot;Exception details: &quot;, (Throwable) exception);</span>
+        }
+
+        // Lägg till felinformation i modellen
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        model.addAttribute(&quot;status&quot;, status != null ? status : &quot;Unknown&quot;);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        model.addAttribute(&quot;error&quot;, exception != null ? exception.toString() : &quot;Unknown error&quot;);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        model.addAttribute(&quot;message&quot;, message != null ? message : &quot;No error message available&quot;);</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        model.addAttribute(&quot;path&quot;, requestUri != null ? requestUri : &quot;Unknown path&quot;);</span>
+
+        // Om felet är relaterat till inloggning
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        String uri = requestUri != null ? requestUri.toString() : &quot;&quot;;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (uri.contains(&quot;/login-process&quot;)) {</span>
+<span class="fc" id="L43">            log.error(&quot;Login process error detected&quot;);</span>
+<span class="fc" id="L44">            return &quot;redirect:/login?methodNotAllowed=true&quot;;</span>
+        }
+
+        // Skapa en enkel HTML-svar
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!model.containsAttribute(&quot;isAuthenticated&quot;)) {</span>
+<span class="fc" id="L49">            model.addAttribute(&quot;isAuthenticated&quot;, false);</span>
+        }
+
+<span class="fc" id="L52">        return &quot;simple-error&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

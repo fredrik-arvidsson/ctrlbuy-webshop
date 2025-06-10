@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cart.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.model</a> &gt; <span class="el_source">Cart.java</span></div><h1>Cart.java</h1><pre class="source lang-java linenums">// FILE: src/main/java/com/ctrlbuy/webshop/model/Cart.java
+package com.ctrlbuy.webshop.model;
+
+import com.ctrlbuy.webshop.security.entity.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;carts&quot;)
+<span class="pc bnc" id="L18" title="All 54 branches missed.">@Data</span>
+<span class="pc bnc" id="L19" title="All 2 branches missed.">@Builder</span>
+<span class="fc" id="L20">@NoArgsConstructor</span>
+<span class="nc" id="L21">@AllArgsConstructor</span>
+public class Cart {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L26">    private Long id;</span>
+
+    // För inloggade användare
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;user_id&quot;)
+<span class="nc" id="L31">    private User user;</span>
+
+    // För session-baserade carts (innan inloggning)
+    @Column(name = &quot;session_id&quot;)
+<span class="nc" id="L35">    private String sessionId;</span>
+
+    @OneToMany(mappedBy = &quot;cart&quot;, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+<span class="fc" id="L39">    private List&lt;CartItem&gt; items = new ArrayList&lt;&gt;();</span>
+
+    @Column(name = &quot;created_at&quot;)
+<span class="nc" id="L42">    private LocalDateTime createdAt;</span>
+
+    @Column(name = &quot;updated_at&quot;)
+<span class="nc" id="L45">    private LocalDateTime updatedAt;</span>
+
+    @PrePersist
+    protected void onCreate() {
+<span class="nc" id="L49">        createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L50">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L51">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="nc" id="L55">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L56">    }</span>
+
+    // Beräkna total summa för hela kundvagnen
+    public BigDecimal getTotalAmount() {
+<span class="fc" id="L60">        return items.stream()</span>
+<span class="fc" id="L61">                .map(CartItem::getTotalPrice)</span>
+<span class="fc" id="L62">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+    }
+
+    // Få totalt antal varor i kundvagnen
+    public Integer getTotalItems() {
+<span class="nc" id="L67">        return items.stream()</span>
+<span class="nc" id="L68">                .mapToInt(CartItem::getQuantity)</span>
+<span class="nc" id="L69">                .sum();</span>
+    }
+
+    // Lägg till item i kundvagnen
+    public void addItem(CartItem item) {
+<span class="nc" id="L74">        item.setCart(this);</span>
+<span class="nc" id="L75">        this.items.add(item);</span>
+<span class="nc" id="L76">    }</span>
+
+    // Ta bort item från kundvagnen
+    public void removeItem(CartItem item) {
+<span class="nc" id="L80">        this.items.remove(item);</span>
+<span class="nc" id="L81">        item.setCart(null);</span>
+<span class="nc" id="L82">    }</span>
+
+    // Hitta item baserat på produkt
+    public CartItem findItemByProduct(Product product) {
+<span class="nc" id="L86">        return items.stream()</span>
+<span class="nc" id="L87">                .filter(item -&gt; item.getProduct().getId().equals(product.getId()))</span>
+<span class="nc" id="L88">                .findFirst()</span>
+<span class="nc" id="L89">                .orElse(null);</span>
+    }
+
+    // Kontrollera om kundvagnen är tom
+    public boolean isEmpty() {
+<span class="nc" id="L94">        return items.isEmpty();</span>
+    }
+
+    // Rensa hela kundvagnen
+    public void clear() {
+<span class="nc" id="L99">        items.clear();</span>
+<span class="nc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

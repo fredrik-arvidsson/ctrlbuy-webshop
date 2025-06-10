@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">LoginController.java</span></div><h1>LoginController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+<span class="fc" id="L12">public class LoginController {</span>
+
+    @GetMapping(&quot;/login&quot;)
+    public String login(@RequestParam(value = &quot;error&quot;, required = false) String error,
+                        @RequestParam(value = &quot;logout&quot;, required = false) String logout,
+                        @RequestParam(value = &quot;methodNotAllowed&quot;, required = false) String methodNotAllowed,
+                        @RequestParam(value = &quot;registration-pending&quot;, required = false) String registrationPending,
+                        Model model) {
+
+        // Hämta authentication från SecurityContext (som testerna förväntar sig)
+<span class="fc" id="L22">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+
+        // Kontrollera om användaren redan är inloggad
+<span class="fc bfc" id="L25" title="All 4 branches covered.">        if (authentication != null &amp;&amp; authentication.isAuthenticated() &amp;&amp;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">                !authentication.getName().equals(&quot;anonymousUser&quot;)) {</span>
+<span class="fc" id="L27">            return &quot;redirect:/&quot;;</span>
+        }
+
+        // Sätt title-attribut som testerna förväntar sig
+<span class="fc" id="L31">        model.addAttribute(&quot;title&quot;, &quot;Logga in - CtrlBuy&quot;);</span>
+
+        // Hantera parametrar i den ordning testerna förväntar sig
+        // methodNotAllowed har högst prioritet enligt testerna
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (methodNotAllowed != null) {</span>
+<span class="fc" id="L36">            model.addAttribute(&quot;error&quot;, &quot;Ett tekniskt fel uppstod. Försök igen.&quot;);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        } else if (error != null) {</span>
+<span class="fc" id="L38">            model.addAttribute(&quot;error&quot;, &quot;Ogiltigt användarnamn eller lösenord.&quot;);</span>
+        }
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (logout != null) {</span>
+<span class="fc" id="L42">            model.addAttribute(&quot;success&quot;, &quot;Du har loggats ut framgångsrikt.&quot;);</span>
+        }
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (registrationPending != null) {</span>
+<span class="fc" id="L46">            model.addAttribute(&quot;registrationPending&quot;, true);</span>
+        }
+
+<span class="fc" id="L49">        return &quot;login&quot;;</span>
+    }
+
+    @RequestMapping(&quot;/login-process-error&quot;)
+    public String loginProcessError() {
+<span class="fc" id="L54">        return &quot;redirect:/login?methodNotAllowed=true&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

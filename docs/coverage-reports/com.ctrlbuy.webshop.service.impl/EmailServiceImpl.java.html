@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service.impl</a> &gt; <span class="el_source">EmailServiceImpl.java</span></div><h1>EmailServiceImpl.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service.impl;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.EmailService;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Email service implementation for handling all email communications
+ */
+@Service
+<span class="nc" id="L26">public class EmailServiceImpl implements EmailService {</span>
+
+<span class="nc" id="L28">    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);</span>
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Value(&quot;${app.base-url:http://localhost:8080}&quot;)
+    private String baseUrl;
+
+    @Value(&quot;${app.email.from:noreply@ctrlbuy.com}&quot;)
+    private String fromEmail;
+
+    @Value(&quot;${app.email.company-name:CtrlBuy}&quot;)
+    private String companyName;
+
+    // ✅ 1. EMAIL VERIFICATION - New interface method
+    @Override
+    public void sendVerificationEmail(User user, String token) {
+        try {
+<span class="nc" id="L49">            logger.info(&quot;📧 Skickar verifieringsmail till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L51">            String verificationUrl = baseUrl + &quot;/verify-email?token=&quot; + token;</span>
+
+<span class="nc" id="L53">            Context context = new Context();</span>
+<span class="nc" id="L54">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L55">            context.setVariable(&quot;lastName&quot;, user.getLastName());</span>
+<span class="nc" id="L56">            context.setVariable(&quot;email&quot;, user.getEmail());</span>
+<span class="nc" id="L57">            context.setVariable(&quot;verificationUrl&quot;, verificationUrl);</span>
+<span class="nc" id="L58">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L59">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+
+<span class="nc" id="L61">            String htmlContent = templateEngine.process(&quot;emails/email-verification&quot;, context);</span>
+
+<span class="nc" id="L63">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L64">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L66">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L67">            helper.setTo(user.getEmail());</span>
+<span class="nc" id="L68">            helper.setSubject(&quot;Verifiera din email - &quot; + companyName);</span>
+<span class="nc" id="L69">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L71">            mailSender.send(message);</span>
+<span class="nc" id="L72">            logger.info(&quot;✅ Verifieringsmail skickat till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L74">        } catch (Exception e) {</span>
+<span class="nc" id="L75">            logger.error(&quot;❌ Fel vid skickande av verifieringsmail till {}: {}&quot;, user.getEmail(), e.getMessage());</span>
+<span class="nc" id="L76">            throw new RuntimeException(&quot;Kunde inte skicka verifieringsmail&quot;, e);</span>
+<span class="nc" id="L77">        }</span>
+<span class="nc" id="L78">    }</span>
+
+    // ✅ 2. EMAIL VERIFICATION - Legacy method
+    @Override
+    public void sendVerificationEmail(String email, String token, String firstName) {
+        try {
+<span class="nc" id="L84">            logger.info(&quot;📧 Skickar verifieringsmail (legacy) till: {}&quot;, email);</span>
+
+<span class="nc" id="L86">            String verificationUrl = baseUrl + &quot;/verify-email?token=&quot; + token;</span>
+
+<span class="nc" id="L88">            Context context = new Context();</span>
+<span class="nc" id="L89">            context.setVariable(&quot;firstName&quot;, firstName);</span>
+<span class="nc" id="L90">            context.setVariable(&quot;email&quot;, email);</span>
+<span class="nc" id="L91">            context.setVariable(&quot;verificationUrl&quot;, verificationUrl);</span>
+<span class="nc" id="L92">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L93">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+
+<span class="nc" id="L95">            String htmlContent = templateEngine.process(&quot;emails/email-verification&quot;, context);</span>
+
+<span class="nc" id="L97">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L98">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L100">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L101">            helper.setTo(email);</span>
+<span class="nc" id="L102">            helper.setSubject(&quot;Verifiera din email - &quot; + companyName);</span>
+<span class="nc" id="L103">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L105">            mailSender.send(message);</span>
+<span class="nc" id="L106">            logger.info(&quot;✅ Verifieringsmail (legacy) skickat till: {}&quot;, email);</span>
+
+<span class="nc" id="L108">        } catch (Exception e) {</span>
+<span class="nc" id="L109">            logger.error(&quot;❌ Fel vid skickande av verifieringsmail (legacy) till {}: {}&quot;, email, e.getMessage());</span>
+<span class="nc" id="L110">            throw new RuntimeException(&quot;Kunde inte skicka verifieringsmail&quot;, e);</span>
+<span class="nc" id="L111">        }</span>
+<span class="nc" id="L112">    }</span>
+
+    // ✅ 3. WELCOME EMAIL - After successful verification
+    @Override
+    public void sendWelcomeEmail(User user) {
+        try {
+<span class="nc" id="L118">            logger.info(&quot;🎉 Skickar välkomstmail till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L120">            Context context = new Context();</span>
+<span class="nc" id="L121">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L122">            context.setVariable(&quot;lastName&quot;, user.getLastName());</span>
+<span class="nc" id="L123">            context.setVariable(&quot;loginUrl&quot;, baseUrl + &quot;/login&quot;);</span>
+<span class="nc" id="L124">            context.setVariable(&quot;shopUrl&quot;, baseUrl + &quot;/products&quot;);</span>
+<span class="nc" id="L125">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L126">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+
+<span class="nc" id="L128">            String htmlContent = templateEngine.process(&quot;emails/welcome&quot;, context);</span>
+
+<span class="nc" id="L130">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L131">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L133">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L134">            helper.setTo(user.getEmail());</span>
+<span class="nc" id="L135">            helper.setSubject(&quot;Välkommen till &quot; + companyName + &quot;!&quot;);</span>
+<span class="nc" id="L136">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L138">            mailSender.send(message);</span>
+<span class="nc" id="L139">            logger.info(&quot;✅ Välkomstmail skickat till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L141">        } catch (Exception e) {</span>
+<span class="nc" id="L142">            logger.error(&quot;❌ Fel vid skickande av välkomstmail till {}: {}&quot;, user.getEmail(), e.getMessage());</span>
+<span class="nc" id="L143">            throw new RuntimeException(&quot;Kunde inte skicka välkomstmail&quot;, e);</span>
+<span class="nc" id="L144">        }</span>
+<span class="nc" id="L145">    }</span>
+
+    // ✅ 4. PASSWORD RESET - New interface method
+    @Override
+    public void sendPasswordResetEmail(User user, String resetToken) {
+        try {
+<span class="nc" id="L151">            logger.info(&quot;🔐 Skickar lösenordsåterställning till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L153">            String resetUrl = baseUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
+
+<span class="nc" id="L155">            Context context = new Context();</span>
+<span class="nc" id="L156">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L157">            context.setVariable(&quot;resetUrl&quot;, resetUrl);</span>
+<span class="nc" id="L158">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L159">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L160">            context.setVariable(&quot;expiryHours&quot;, 1); // 1 timme</span>
+
+<span class="nc" id="L162">            String htmlContent = templateEngine.process(&quot;emails/password-reset&quot;, context);</span>
+
+<span class="nc" id="L164">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L165">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L167">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L168">            helper.setTo(user.getEmail());</span>
+<span class="nc" id="L169">            helper.setSubject(&quot;Återställ ditt lösenord - &quot; + companyName);</span>
+<span class="nc" id="L170">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L172">            mailSender.send(message);</span>
+<span class="nc" id="L173">            logger.info(&quot;✅ Lösenordsåterställning skickad till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L175">        } catch (Exception e) {</span>
+<span class="nc" id="L176">            logger.error(&quot;❌ Fel vid skickande av lösenordsåterställning till {}: {}&quot;, user.getEmail(), e.getMessage());</span>
+<span class="nc" id="L177">            throw new RuntimeException(&quot;Kunde inte skicka lösenordsåterställning&quot;, e);</span>
+<span class="nc" id="L178">        }</span>
+<span class="nc" id="L179">    }</span>
+
+    // ✅ 5. PASSWORD RESET - Legacy method
+    @Override
+    public void sendPasswordResetEmail(String email, String resetToken, String firstName) {
+        try {
+<span class="nc" id="L185">            logger.info(&quot;🔐 Skickar lösenordsåterställning (legacy) till: {}&quot;, email);</span>
+
+<span class="nc" id="L187">            String resetUrl = baseUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
+
+<span class="nc" id="L189">            Context context = new Context();</span>
+<span class="nc" id="L190">            context.setVariable(&quot;firstName&quot;, firstName);</span>
+<span class="nc" id="L191">            context.setVariable(&quot;resetUrl&quot;, resetUrl);</span>
+<span class="nc" id="L192">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L193">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L194">            context.setVariable(&quot;expiryHours&quot;, 1); // 1 timme</span>
+
+<span class="nc" id="L196">            String htmlContent = templateEngine.process(&quot;emails/password-reset&quot;, context);</span>
+
+<span class="nc" id="L198">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L199">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L201">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L202">            helper.setTo(email);</span>
+<span class="nc" id="L203">            helper.setSubject(&quot;Återställ ditt lösenord - &quot; + companyName);</span>
+<span class="nc" id="L204">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L206">            mailSender.send(message);</span>
+<span class="nc" id="L207">            logger.info(&quot;✅ Lösenordsåterställning (legacy) skickad till: {}&quot;, email);</span>
+
+<span class="nc" id="L209">        } catch (Exception e) {</span>
+<span class="nc" id="L210">            logger.error(&quot;❌ Fel vid skickande av lösenordsåterställning (legacy) till {}: {}&quot;, email, e.getMessage());</span>
+<span class="nc" id="L211">            throw new RuntimeException(&quot;Kunde inte skicka lösenordsåterställning&quot;, e);</span>
+<span class="nc" id="L212">        }</span>
+<span class="nc" id="L213">    }</span>
+
+    // ✅ 6. ORDER CONFIRMATION - New interface method
+    @Override
+    public void sendOrderConfirmationEmail(User user, String orderNumber) {
+        try {
+<span class="nc" id="L219">            logger.info(&quot;🧾 Skickar orderbekräftelse till: {} för order: {}&quot;, user.getEmail(), orderNumber);</span>
+
+<span class="nc" id="L221">            Context context = new Context();</span>
+<span class="nc" id="L222">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L223">            context.setVariable(&quot;orderNumber&quot;, orderNumber);</span>
+<span class="nc" id="L224">            context.setVariable(&quot;orderDate&quot;, LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)));</span>
+<span class="nc" id="L225">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L226">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L227">            context.setVariable(&quot;supportEmail&quot;, fromEmail);</span>
+
+<span class="nc" id="L229">            String htmlContent = templateEngine.process(&quot;emails/order-confirmation-simple&quot;, context);</span>
+
+<span class="nc" id="L231">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L232">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L234">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L235">            helper.setTo(user.getEmail());</span>
+<span class="nc" id="L236">            helper.setSubject(&quot;Orderbekräftelse #&quot; + orderNumber + &quot; - &quot; + companyName);</span>
+<span class="nc" id="L237">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L239">            mailSender.send(message);</span>
+<span class="nc" id="L240">            logger.info(&quot;✅ Orderbekräftelse skickad till: {} för order: {}&quot;, user.getEmail(), orderNumber);</span>
+
+<span class="nc" id="L242">        } catch (Exception e) {</span>
+<span class="nc" id="L243">            logger.error(&quot;❌ Fel vid skickande av orderbekräftelse till {} för order {}: {}&quot;, user.getEmail(), orderNumber, e.getMessage());</span>
+<span class="nc" id="L244">            throw new RuntimeException(&quot;Kunde inte skicka orderbekräftelse&quot;, e);</span>
+<span class="nc" id="L245">        }</span>
+<span class="nc" id="L246">    }</span>
+
+    // ✅ 7. ORDER CONFIRMATION - Legacy method with full Order object
+    @Override
+    public void sendOrderConfirmation(Order order, String email) {
+        try {
+<span class="nc" id="L252">            logger.info(&quot;🧾 Skickar detaljerad orderbekräftelse för order: {} till: {}&quot;, order.getId(), email);</span>
+
+<span class="nc" id="L254">            User user = order.getUser();</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            String firstName = (user != null) ? user.getFirstName() : &quot;Kund&quot;;</span>
+
+<span class="nc" id="L257">            Context context = new Context();</span>
+<span class="nc" id="L258">            context.setVariable(&quot;firstName&quot;, firstName);</span>
+<span class="nc" id="L259">            context.setVariable(&quot;order&quot;, order);</span>
+<span class="nc" id="L260">            context.setVariable(&quot;orderNumber&quot;, String.format(&quot;ORD-%05d&quot;, order.getId()));</span>
+<span class="nc" id="L261">            context.setVariable(&quot;orderDate&quot;, LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)));</span>
+            // Note: Order creation date should be: order.getOrderDate() or similar
+            // context.setVariable(&quot;totalAmount&quot;, order.getTotalAmount());
+            // context.setVariable(&quot;items&quot;, order.getOrderItems());
+<span class="nc" id="L265">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L266">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L267">            context.setVariable(&quot;supportEmail&quot;, fromEmail);</span>
+
+<span class="nc" id="L269">            String htmlContent = templateEngine.process(&quot;emails/order-confirmation-detailed&quot;, context);</span>
+
+<span class="nc" id="L271">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L272">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L274">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L275">            helper.setTo(email);</span>
+<span class="nc" id="L276">            helper.setSubject(&quot;Orderbekräftelse #&quot; + String.format(&quot;ORD-%05d&quot;, order.getId()) + &quot; - &quot; + companyName);</span>
+<span class="nc" id="L277">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L279">            mailSender.send(message);</span>
+<span class="nc" id="L280">            logger.info(&quot;✅ Detaljerad orderbekräftelse skickad till: {} för order: {}&quot;, email, order.getId());</span>
+
+<span class="nc" id="L282">        } catch (Exception e) {</span>
+<span class="nc" id="L283">            logger.error(&quot;❌ Fel vid skickande av detaljerad orderbekräftelse för order {} till {}: {}&quot;, order.getId(), email, e.getMessage());</span>
+<span class="nc" id="L284">            throw new RuntimeException(&quot;Kunde inte skicka orderbekräftelse&quot;, e);</span>
+<span class="nc" id="L285">        }</span>
+<span class="nc" id="L286">    }</span>
+
+    // ✅ 8. TEST EMAIL CONNECTION
+    @Override
+    public boolean testEmailConnection() {
+        try {
+<span class="nc" id="L292">            logger.info(&quot;🧪 Testar email-anslutning...&quot;);</span>
+
+<span class="nc" id="L294">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L295">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L297">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L298">            helper.setTo(fromEmail); // Skicka till oss själva</span>
+<span class="nc" id="L299">            helper.setSubject(&quot;Email Test - &quot; + companyName);</span>
+<span class="nc" id="L300">            helper.setText(&quot;Detta är ett testmail för att kontrollera email-konfigurationen.\n\nTid: &quot; +</span>
+<span class="nc" id="L301">                    LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;)), false);</span>
+
+<span class="nc" id="L303">            mailSender.send(message);</span>
+<span class="nc" id="L304">            logger.info(&quot;✅ Email-test lyckades!&quot;);</span>
+<span class="nc" id="L305">            return true;</span>
+
+<span class="nc" id="L307">        } catch (Exception e) {</span>
+<span class="nc" id="L308">            logger.error(&quot;❌ Email-test misslyckades: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L309">            return false;</span>
+        }
+    }
+
+    // ✅ UTILITY METODER
+
+    /**
+     * Skicka enkelt textmail (för debug)
+     */
+    public boolean sendSimpleEmail(String to, String subject, String content) {
+        try {
+<span class="nc" id="L320">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L321">            MimeMessageHelper helper = new MimeMessageHelper(message, false, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L323">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L324">            helper.setTo(to);</span>
+<span class="nc" id="L325">            helper.setSubject(subject);</span>
+<span class="nc" id="L326">            helper.setText(content, false);</span>
+
+<span class="nc" id="L328">            mailSender.send(message);</span>
+<span class="nc" id="L329">            logger.info(&quot;✅ Enkelt email skickat till: {}&quot;, to);</span>
+<span class="nc" id="L330">            return true;</span>
+
+<span class="nc" id="L332">        } catch (Exception e) {</span>
+<span class="nc" id="L333">            logger.error(&quot;❌ Fel vid skickande av enkelt email till {}: {}&quot;, to, e.getMessage());</span>
+<span class="nc" id="L334">            return false;</span>
+        }
+    }
+
+    /**
+     * Skicka återskicka verifieringsmail (admin-funktion)
+     */
+    public boolean resendVerificationEmail(User user) {
+        try {
+<span class="nc bnc" id="L343" title="All 2 branches missed.">            if (user.getVerificationToken() == null) {</span>
+<span class="nc" id="L344">                logger.warn(&quot;⚠️ Ingen verifieringstoken för användare: {}&quot;, user.getEmail());</span>
+<span class="nc" id="L345">                return false;</span>
+            }
+
+<span class="nc" id="L348">            sendVerificationEmail(user, user.getVerificationToken());</span>
+<span class="nc" id="L349">            return true;</span>
+
+<span class="nc" id="L351">        } catch (Exception e) {</span>
+<span class="nc" id="L352">            logger.error(&quot;❌ Fel vid återskickande av verifieringsmail till {}: {}&quot;, user.getEmail(), e.getMessage());</span>
+<span class="nc" id="L353">            return false;</span>
+        }
+    }
+
+    /**
+     * Formatera pengar för email-templates
+     */
+    private String formatCurrency(BigDecimal amount) {
+<span class="nc" id="L361">        return String.format(&quot;%.2f kr&quot;, amount);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,6 +1,7 @@
 package com.ctrlbuy.webshop.model;
 
 import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.enums.PaymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -59,13 +60,24 @@ public class Order {
     @Column
     private String paymentTransactionId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column
+    private PaymentStatus paymentStatus;
+
+    @Column
+    private String transactionId;
+
+    @Column
+    private LocalDateTime refundedAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     // Constructors
     public Order() {
         this.orderDate = LocalDateTime.now();
         this.status = OrderStatus.PENDING;
+        this.paymentStatus = PaymentStatus.PENDING;
     }
 
     public Order(User user, String orderNumber, Double totalAmount) {
@@ -73,6 +85,31 @@ public class Order {
         this.user = user;
         this.orderNumber = orderNumber;
         this.totalAmount = totalAmount;
+    }
+
+    // Payment-related methods that PaymentService needs
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public LocalDateTime getRefundedAt() {
+        return refundedAt;
+    }
+
+    public void setRefundedAt(LocalDateTime refundedAt) {
+        this.refundedAt = refundedAt;
     }
 
     // Helper methods
@@ -84,6 +121,23 @@ public class Order {
     public void removeOrderItem(OrderItem item) {
         orderItems.remove(item);
         item.setOrder(null);
+    }
+
+    // Payment status convenience methods
+    public boolean isPaymentCompleted() {
+        return PaymentStatus.COMPLETED.equals(paymentStatus);
+    }
+
+    public boolean isPaymentPending() {
+        return PaymentStatus.PENDING.equals(paymentStatus);
+    }
+
+    public boolean isPaymentFailed() {
+        return PaymentStatus.FAILED.equals(paymentStatus);
+    }
+
+    public boolean canBeRefunded() {
+        return isPaymentCompleted() && refundedAt == null;
     }
 
     public enum OrderStatus {

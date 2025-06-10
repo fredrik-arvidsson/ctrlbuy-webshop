@@ -138,11 +138,16 @@
             text-align: center;
             height: 100%;
             transition: transform 0.2s ease;
+            display: block;
+            text-decoration: none;
+            color: inherit;
         }
 
         .contact-info-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            text-decoration: none;
+            color: inherit;
         }
 
         .contact-icon {
@@ -194,17 +199,71 @@
             margin-top: 50px;
         }
 
-        /* Karta placeholder */
-        .map-placeholder {
-            background: #e9ecef;
+        /* ✅ NY KARTA STYLING - Ersätter map-placeholder */
+        .map-container {
+            position: relative;
             height: 300px;
             border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+
+        .map-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .map-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px;
+            border-radius: 6px;
+            backdrop-filter: blur(5px);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: #6c757d;
-            font-size: 1.2rem;
-            border: 2px dashed #dee2e6;
+        }
+
+        .address-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .directions-btn {
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .directions-btn:hover {
+            background: #218838;
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Responsiv design för kartan */
+        @media (max-width: 768px) {
+            .map-container {
+                height: 250px;
+            }
+
+            .map-info {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -263,36 +322,36 @@
     <!-- Kontaktinformation -->
     <div class="row mb-5">
         <div class="col-md-4 mb-4">
-            <div class="contact-info-card">
+            <a href="tel:+46812345667" class="contact-info-card">
                 <div class="contact-icon">
                     <i class="fas fa-phone"></i>
                 </div>
                 <h5>Telefon</h5>
                 <p class="mb-2"><strong>08-123 45 67</strong></p>
                 <p class="text-muted small">Vardagar 9:00-17:00</p>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4 mb-4">
-            <div class="contact-info-card">
+            <a href="mailto:info@ctrlbuy.se?subject=Kontakt från CtrlBuy hemsida" class="contact-info-card">
                 <div class="contact-icon">
                     <i class="fas fa-envelope"></i>
                 </div>
                 <h5>E-post</h5>
                 <p class="mb-2"><strong>info@ctrlbuy.se</strong></p>
                 <p class="text-muted small">Svarar inom 24 timmar</p>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4 mb-4">
-            <div class="contact-info-card">
+            <a href="https://maps.google.com/maps?daddr=Teknikgatan 123, Stockholm" target="_blank" rel="noopener" class="contact-info-card">
                 <div class="contact-icon">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <h5>Besöksadress</h5>
                 <p class="mb-2"><strong>Teknikgatan 123</strong></p>
                 <p class="text-muted small">112 33 Stockholm</p>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -423,19 +482,19 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="/leveransinformation" class="list-group-item list-group-item-action">
                             <i class="fas fa-shipping-fast text-success"></i>
                             Leveransinformation
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="/returer-reklamationer" class="list-group-item list-group-item-action">
                             <i class="fas fa-undo text-success"></i>
                             Returer & Reklamationer
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="/betalningsmetoder" class="list-group-item list-group-item-action">
                             <i class="fas fa-credit-card text-success"></i>
                             Betalningsmetoder
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="/kundtjanst" class="list-group-item list-group-item-action">
                             <i class="fas fa-headset text-success"></i>
                             Kundtjänst
                         </a>
@@ -443,20 +502,33 @@
                 </div>
             </div>
 
-            <!-- Karta -->
+            <!-- ✅ UPPDATERAD KARTA - Nu med riktig Google Maps! -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-map"></i> Hitta hit</h5>
                 </div>
-                <div class="card-body">
-                    <div class="map-placeholder">
-                        <i class="fas fa-map-marker-alt fa-3x"></i>
-                        <div class="ml-3">
-                            <strong>Teknikgatan 123</strong><br>
-                            112 33 Stockholm
+                <div class="card-body p-0">
+                    <div class="map-container">
+                        <iframe
+                                class="map-frame"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2034.5555555!2d18.0649!3d59.3293!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f9d6521d2c3a7%3A0x123456789!2sTeknikgatan%20123%2C%20112%2033%20Stockholm!5e0!3m2!1ssv!2sse!4v1620000000000"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <div class="map-info">
+                            <div class="address-text">
+                                📍 Teknikgatan 123, Stockholm
+                            </div>
+                            <a href="https://maps.google.com/maps?daddr=Teknikgatan 123, Stockholm"
+                               class="directions-btn"
+                               target="_blank"
+                               rel="noopener">
+                                🚗 Vägbeskrivning
+                            </a>
                         </div>
                     </div>
-                    <p class="mt-3 small text-muted">
+                    <p class="mt-3 px-3 pb-3 small text-muted">
                         <i class="fas fa-info-circle"></i>
                         Parkering finns i närområdet. Närmaste tunnelbanestation är Tekniska Högskolan.
                     </p>

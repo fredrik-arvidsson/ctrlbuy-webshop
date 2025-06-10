@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">AdminController.java</span></div><h1>AdminController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Controller
+@RequestMapping(&quot;/admin&quot;)
+<span class="nc" id="L22">public class AdminController {</span>
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * Admin Dashboard - huvudsida efter inloggning
+     */
+    @GetMapping(&quot;/dashboard&quot;)
+    public String dashboard(Model model) {
+<span class="nc" id="L32">        List&lt;User&gt; users = userService.getAllUsers();</span>
+
+        // Beräkna statistik
+<span class="nc" id="L35">        long totalUsers = users.size();</span>
+<span class="nc" id="L36">        long activeUsers = users.stream()</span>
+<span class="nc" id="L37">                .filter(User::isActive)</span>
+<span class="nc" id="L38">                .count();</span>
+<span class="nc" id="L39">        long inactiveUsers = totalUsers - activeUsers;</span>
+<span class="nc" id="L40">        long verifiedUsers = users.stream()</span>
+<span class="nc" id="L41">                .filter(User::isEmailVerified)</span>
+<span class="nc" id="L42">                .count();</span>
+
+        // Lägg till data i model för Thymeleaf
+<span class="nc" id="L45">        model.addAttribute(&quot;users&quot;, users);</span>
+<span class="nc" id="L46">        model.addAttribute(&quot;totalUsers&quot;, totalUsers);</span>
+<span class="nc" id="L47">        model.addAttribute(&quot;activeUsers&quot;, activeUsers);</span>
+<span class="nc" id="L48">        model.addAttribute(&quot;inactiveUsers&quot;, inactiveUsers);</span>
+<span class="nc" id="L49">        model.addAttribute(&quot;verifiedUsers&quot;, verifiedUsers);</span>
+
+<span class="nc" id="L51">        return &quot;admin/dashboard&quot;;</span>
+    }
+
+    /**
+     * Redirect från /admin till dashboard
+     */
+    @GetMapping(&quot;&quot;)
+    public String adminHome() {
+<span class="nc" id="L59">        return &quot;redirect:/admin/dashboard&quot;;</span>
+    }
+
+    /**
+     * ✅ UPPDATERAD: Visa användare med filter för aktiva/inaktiva
+     */
+    @GetMapping(&quot;/users&quot;)
+    public String listUsers(@RequestParam(defaultValue = &quot;active&quot;) String filter, Model model) {
+        List&lt;User&gt; users;
+        String pageTitle;
+
+<span class="nc bnc" id="L70" title="All 3 branches missed.">        switch (filter.toLowerCase()) {</span>
+            case &quot;inactive&quot;:
+<span class="nc" id="L72">                users = userService.getInactiveUsers();</span>
+<span class="nc" id="L73">                pageTitle = &quot;Inaktiva användare&quot;;</span>
+<span class="nc" id="L74">                break;</span>
+            case &quot;all&quot;:
+<span class="nc" id="L76">                users = userService.getAllUsers();</span>
+<span class="nc" id="L77">                pageTitle = &quot;Alla användare&quot;;</span>
+<span class="nc" id="L78">                break;</span>
+            default: // &quot;active&quot;
+<span class="nc" id="L80">                users = userService.getActiveUsers();</span>
+<span class="nc" id="L81">                pageTitle = &quot;Aktiva användare&quot;;</span>
+                break;
+        }
+
+<span class="nc" id="L85">        model.addAttribute(&quot;users&quot;, users);</span>
+<span class="nc" id="L86">        model.addAttribute(&quot;currentFilter&quot;, filter);</span>
+<span class="nc" id="L87">        model.addAttribute(&quot;pageTitle&quot;, pageTitle);</span>
+<span class="nc" id="L88">        model.addAttribute(&quot;title&quot;, &quot;Kundhantering - CtrlBuy Admin&quot;);</span>
+
+        // Statistik för filter-knappar
+<span class="nc" id="L91">        long totalUsers = userService.countAllUsers();</span>
+<span class="nc" id="L92">        long activeUsers = userService.countActiveUsers();</span>
+<span class="nc" id="L93">        long inactiveUsers = totalUsers - activeUsers;</span>
+<span class="nc" id="L94">        long verifiedUsers = users.stream()</span>
+<span class="nc" id="L95">                .filter(User::isEmailVerified)</span>
+<span class="nc" id="L96">                .count();</span>
+
+<span class="nc" id="L98">        model.addAttribute(&quot;totalUsers&quot;, totalUsers);</span>
+<span class="nc" id="L99">        model.addAttribute(&quot;activeUsers&quot;, activeUsers);</span>
+<span class="nc" id="L100">        model.addAttribute(&quot;inactiveUsers&quot;, inactiveUsers);</span>
+<span class="nc" id="L101">        model.addAttribute(&quot;verifiedUsers&quot;, verifiedUsers);</span>
+
+<span class="nc" id="L103">        return &quot;admin/users&quot;;</span>
+    }
+
+    /**
+     * ✅ NY: Inaktivera användare (mjuk borttagning)
+     */
+    @PostMapping(&quot;/users/deactivate/{id}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; deactivateUser(@PathVariable Long id) {
+        try {
+<span class="nc" id="L113">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L115">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L116">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användaren finns inte&quot;));</span>
+            }
+
+<span class="nc" id="L119">            String username = user.getUsername();</span>
+
+            // Förhindra att admin inaktiverar sig själv
+<span class="nc" id="L122">            Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">            if (auth != null &amp;&amp; username.equals(auth.getName())) {</span>
+<span class="nc" id="L124">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L125">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Du kan inte inaktivera dig själv&quot;));</span>
+            }
+
+            // Förhindra inaktivering av huvudadmin &quot;fredrik&quot;
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            if (&quot;fredrik&quot;.equals(username)) {</span>
+<span class="nc" id="L130">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L131">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Huvudadmin kan inte inaktiveras&quot;));</span>
+            }
+
+            // Inaktivera användaren (mjuk borttagning)
+<span class="nc" id="L135">            user.setActive(false);</span>
+<span class="nc" id="L136">            userService.save(user);</span>
+
+<span class="nc" id="L138">            return ResponseEntity.ok()</span>
+<span class="nc" id="L139">                    .body(Map.of(</span>
+<span class="nc" id="L140">                            &quot;success&quot;, true,</span>
+<span class="nc" id="L141">                            &quot;message&quot;, &quot;Användare '&quot; + username + &quot;' har inaktiverats (e-post &quot; + user.getEmail() + &quot; är nu blockerad)&quot;</span>
+                    ));
+
+<span class="nc" id="L144">        } catch (Exception e) {</span>
+<span class="nc" id="L145">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L146">                    .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Fel vid inaktivering: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * ✅ NY: Reaktivera användare
+     */
+    @PostMapping(&quot;/users/reactivate/{id}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; reactivateUser(@PathVariable Long id) {
+        try {
+<span class="nc" id="L157">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L159">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L160">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användaren finns inte&quot;));</span>
+            }
+
+            // Reaktivera användaren
+<span class="nc" id="L164">            user.setActive(true);</span>
+<span class="nc" id="L165">            userService.save(user);</span>
+
+<span class="nc" id="L167">            return ResponseEntity.ok()</span>
+<span class="nc" id="L168">                    .body(Map.of(</span>
+<span class="nc" id="L169">                            &quot;success&quot;, true,</span>
+<span class="nc" id="L170">                            &quot;message&quot;, &quot;Användare '&quot; + user.getUsername() + &quot;' har reaktiverats&quot;</span>
+                    ));
+
+<span class="nc" id="L173">        } catch (Exception e) {</span>
+<span class="nc" id="L174">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L175">                    .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Fel vid reaktivering: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * ✅ NY: Snabb inaktivering via e-post
+     */
+    @PostMapping(&quot;/users/quick-deactivate&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; quickDeactivateByEmail(@RequestParam(&quot;email&quot;) String email) {
+        try {
+            // Hitta användare via e-post
+<span class="nc" id="L187">            Optional&lt;User&gt; userOpt = userService.findByEmail(email);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            if (!userOpt.isPresent()) {</span>
+<span class="nc" id="L189">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L190">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användare med e-post &quot; + email + &quot; hittades inte&quot;));</span>
+            }
+
+<span class="nc" id="L193">            User user = userOpt.get();</span>
+<span class="nc" id="L194">            String username = user.getUsername();</span>
+
+            // Kontrollera att det inte är admin själv
+<span class="nc" id="L197">            Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L198" title="All 4 branches missed.">            if (auth != null &amp;&amp; username.equals(auth.getName())) {</span>
+<span class="nc" id="L199">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L200">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Du kan inte inaktivera dig själv&quot;));</span>
+            }
+
+            // Förhindra inaktivering av huvudadmin &quot;fredrik&quot;
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            if (&quot;fredrik&quot;.equals(username)) {</span>
+<span class="nc" id="L205">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L206">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Huvudadmin kan inte inaktiveras&quot;));</span>
+            }
+
+            // Kontrollera om användaren redan är inaktiv
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            if (!user.isActive()) {</span>
+<span class="nc" id="L211">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L212">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användare '&quot; + username + &quot;' är redan inaktiv&quot;));</span>
+            }
+
+            // Inaktivera användaren
+<span class="nc" id="L216">            user.setActive(false);</span>
+<span class="nc" id="L217">            userService.save(user);</span>
+
+<span class="nc" id="L219">            return ResponseEntity.ok()</span>
+<span class="nc" id="L220">                    .body(Map.of(</span>
+<span class="nc" id="L221">                            &quot;success&quot;, true,</span>
+                            &quot;message&quot;, &quot;Användare '&quot; + username + &quot;' (&quot; + email + &quot;) har inaktiverats&quot;
+                    ));
+
+<span class="nc" id="L225">        } catch (Exception e) {</span>
+<span class="nc" id="L226">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L227">                    .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Fel vid inaktivering: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * ✅ BEHÅLLEN: Toggle active (för snabb växling)
+     */
+    @PostMapping(&quot;/users/toggle-active/{id}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; toggleUserActive(@PathVariable Long id) {
+        try {
+<span class="nc" id="L238">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L240">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L241">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användaren finns inte&quot;));</span>
+            }
+
+<span class="nc" id="L244">            String username = user.getUsername();</span>
+<span class="nc" id="L245">            boolean wasActive = user.isActive();</span>
+
+            // Förhindra att admin togglar sig själv
+<span class="nc" id="L248">            Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L249" title="All 4 branches missed.">            if (auth != null &amp;&amp; username.equals(auth.getName())) {</span>
+<span class="nc" id="L250">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L251">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Du kan inte ändra din egen status&quot;));</span>
+            }
+
+            // Förhindra inaktivering av huvudadmin &quot;fredrik&quot;
+<span class="nc bnc" id="L255" title="All 4 branches missed.">            if (&quot;fredrik&quot;.equals(username) &amp;&amp; wasActive) {</span>
+<span class="nc" id="L256">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L257">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Huvudadmin kan inte inaktiveras&quot;));</span>
+            }
+
+            // Växla status
+<span class="nc" id="L261">            userService.toggleUserActive(id);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            String action = wasActive ? &quot;inaktiverad&quot; : &quot;aktiverad&quot;;</span>
+
+<span class="nc" id="L264">            return ResponseEntity.ok()</span>
+<span class="nc" id="L265">                    .body(Map.of(</span>
+<span class="nc" id="L266">                            &quot;success&quot;, true,</span>
+                            &quot;message&quot;, &quot;Användare '&quot; + username + &quot;' har &quot; + action
+                    ));
+
+<span class="nc" id="L270">        } catch (Exception e) {</span>
+<span class="nc" id="L271">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L272">                    .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Fel vid statusändring: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * ✅ FIX: Återställ verifiering med korrekt JSON-respons
+     */
+    @PostMapping(&quot;/users/{id}/reset-verification&quot;)
+    @ResponseBody
+    public Map&lt;String, Object&gt; resetUserVerification(@PathVariable Long id) {
+        try {
+<span class="nc" id="L283">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L285">                Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L286">                result.put(&quot;success&quot;, false);</span>
+<span class="nc" id="L287">                result.put(&quot;message&quot;, &quot;Användaren finns inte&quot;);</span>
+<span class="nc" id="L288">                return result;</span>
+            }
+
+<span class="nc" id="L291">            userService.resetUserVerification(id);</span>
+
+<span class="nc" id="L293">            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L294">            result.put(&quot;success&quot;, true);</span>
+<span class="nc" id="L295">            result.put(&quot;message&quot;, &quot;E-postverifiering återställd för '&quot; + user.getUsername() + &quot;'&quot;);</span>
+<span class="nc" id="L296">            return result;</span>
+
+<span class="nc" id="L298">        } catch (Exception e) {</span>
+<span class="nc" id="L299">            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L300">            result.put(&quot;success&quot;, false);</span>
+<span class="nc" id="L301">            result.put(&quot;message&quot;, &quot;Fel vid återställning: &quot; + e.getMessage());</span>
+<span class="nc" id="L302">            return result;</span>
+        }
+    }
+
+    /**
+     * ✅ UPPDATERAD: Uppdatera email-adress (nu med kontroll av ALLA e-poster)
+     */
+    @PostMapping(&quot;/users/update-email/{id}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; updateUserEmail(@PathVariable Long id,
+                                             @RequestParam String email) {
+        try {
+            // Validera email format
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (!email.matches(&quot;^[A-Za-z0-9+_.-]+@(.+)$&quot;)) {</span>
+<span class="nc" id="L316">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L317">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Ogiltigt email-format&quot;));</span>
+            }
+
+            // Uppdatera användare
+<span class="nc" id="L321">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L323">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L324">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Användaren finns inte&quot;));</span>
+            }
+
+<span class="nc" id="L327">            String oldEmail = user.getEmail();</span>
+
+            // Kolla om det är samma e-post (tillåt)
+<span class="nc bnc" id="L330" title="All 2 branches missed.">            if (email.equals(oldEmail)) {</span>
+<span class="nc" id="L331">                return ResponseEntity.ok()</span>
+<span class="nc" id="L332">                        .body(Map.of(</span>
+<span class="nc" id="L333">                                &quot;success&quot;, true,</span>
+                                &quot;message&quot;, &quot;E-post är redan &quot; + email + &quot; (ingen ändring)&quot;
+                        ));
+            }
+
+            // ✅ UPPDATERAD: Kolla om email redan används (inkluderar inaktiva användare)
+<span class="nc bnc" id="L339" title="All 2 branches missed.">            if (userService.existsByEmailIncludingInactive(email)) {</span>
+<span class="nc" id="L340">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L341">                        .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Email-adressen används redan (även av inaktiva användare)&quot;));</span>
+            }
+
+<span class="nc" id="L344">            user.setEmail(email);</span>
+<span class="nc" id="L345">            userService.save(user);</span>
+
+<span class="nc" id="L347">            return ResponseEntity.ok()</span>
+<span class="nc" id="L348">                    .body(Map.of(</span>
+<span class="nc" id="L349">                            &quot;success&quot;, true,</span>
+                            &quot;message&quot;, &quot;Email uppdaterad från &quot; + oldEmail + &quot; till &quot; + email
+                    ));
+
+<span class="nc" id="L353">        } catch (Exception e) {</span>
+<span class="nc" id="L354">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L355">                    .body(Map.of(&quot;success&quot;, false, &quot;error&quot;, &quot;Fel vid uppdatering: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    /**
+     * ✅ UPPDATERAD: Permanent borttagning av användare (form-baserad)
+     */
+    @PostMapping(&quot;/users/{id}/delete-permanently&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public String deletePermanently(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+<span class="nc" id="L366">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L368">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Användare hittades inte&quot;);</span>
+<span class="nc" id="L369">                return &quot;redirect:/admin/users?filter=inactive&quot;;</span>
+            }
+
+<span class="nc" id="L372">            String userInfo = user.getUsername() + &quot; (&quot; + user.getEmail() + &quot;)&quot;;</span>
+
+            // Anropa uppdaterade metoden (kastar nu exceptions)
+<span class="nc" id="L375">            userService.deletePermanently(id);</span>
+
+<span class="nc" id="L377">            redirectAttributes.addFlashAttribute(&quot;success&quot;,</span>
+                    &quot;Användare &quot; + userInfo + &quot; har tagits bort permanent från databasen&quot;);
+
+<span class="nc" id="L380">        } catch (RuntimeException e) {</span>
+            // Business logic errors (t.ex. &quot;Admin kan inte tas bort&quot;)
+<span class="nc" id="L382">            redirectAttributes.addFlashAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="nc" id="L383">        } catch (Exception e) {</span>
+            // Tekniska fel
+<span class="nc" id="L385">            redirectAttributes.addFlashAttribute(&quot;error&quot;,</span>
+<span class="nc" id="L386">                    &quot;Tekniskt fel vid permanent borttagning: &quot; + e.getMessage());</span>
+<span class="nc" id="L387">        }</span>
+
+<span class="nc" id="L389">        return &quot;redirect:/admin/users?filter=inactive&quot;;</span>
+    }
+
+    /**
+     * ✅ UPPDATERAD: Permanent borttagning av användare (AJAX-baserad)
+     * Hanterar nu exceptions från UserService
+     */
+    @PostMapping(&quot;/users/{id}/delete-permanently-ajax&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;?&gt; deletePermanentlyAjax(@PathVariable Long id) {
+        try {
+<span class="nc" id="L401">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L403">                return ResponseEntity.badRequest()</span>
+<span class="nc" id="L404">                        .body(Map.of(&quot;success&quot;, false, &quot;message&quot;, &quot;Användare hittades inte&quot;));</span>
+            }
+
+<span class="nc" id="L407">            String userInfo = user.getUsername() + &quot; (&quot; + user.getEmail() + &quot;)&quot;;</span>
+
+            // Anropa uppdaterade metoden (kastar nu exceptions istället för att returnera boolean)
+<span class="nc" id="L410">            userService.deletePermanently(id);</span>
+
+<span class="nc" id="L412">            return ResponseEntity.ok(Map.of(</span>
+<span class="nc" id="L413">                    &quot;success&quot;, true,</span>
+                    &quot;message&quot;, &quot;Användare &quot; + userInfo + &quot; har tagits bort permanent från databasen&quot;
+            ));
+
+<span class="nc" id="L417">        } catch (RuntimeException e) {</span>
+            // Business logic errors (t.ex. &quot;Admin kan inte tas bort&quot;, &quot;Endast inaktiva användare&quot;)
+<span class="nc" id="L419">            return ResponseEntity.badRequest()</span>
+<span class="nc" id="L420">                    .body(Map.of(&quot;success&quot;, false, &quot;message&quot;, e.getMessage()));</span>
+
+<span class="nc" id="L422">        } catch (Exception e) {</span>
+            // Tekniska fel (databas, foreign keys, etc.)
+<span class="nc" id="L424">            return ResponseEntity.status(500)</span>
+<span class="nc" id="L425">                    .body(Map.of(&quot;success&quot;, false, &quot;message&quot;, &quot;Tekniskt fel vid borttagning: &quot; + e.getMessage()));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

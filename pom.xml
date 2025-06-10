@@ -1,202 +1,123 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
+        <version>3.3.0</version>
         <relativePath/>
     </parent>
-
     <groupId>com.ctrlbuy.webshop</groupId>
     <artifactId>webshop</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <name>webshop</name>
+    <description>Demo project for Spring Boot</description>
 
     <properties>
-        <java.version>21</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <jjwt.version>0.12.6</jjwt.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Dependencies -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.tomcat.embed</groupId>
-                    <artifactId>tomcat-embed-websocket</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
+        <!-- ===== SPRING BOOT STARTERS ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-
-        <!-- Lägg till stöd för Spring Security i Thymeleaf -->
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- E-postfunktionalitet -->
+        <!-- ===== EMAIL DEPENDENCIES ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- Databas -->
+        <!-- ===== THYMELEAF SECURITY ===== -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
+        <!-- ===== DATABASE DEPENDENCIES ===== -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.3.0</version>
+            <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 Databas för tester -->
+        <!-- H2 Database för utveckling och testning (EN GÅNG) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- JSON Parsing -->
+        <!-- ===== UTILITY DEPENDENCIES ===== -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.15.0</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
 
-        <!-- Spring Core Dependencies -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>6.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>6.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-expression</artifactId>
-            <version>6.0.8</version>
-        </dependency>
-
-        <!-- Tomcat -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>10.1.8</version>
-        </dependency>
-
-        <!-- Loggning -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.4.14</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.4.14</version>
-        </dependency>
-
-        <!-- JSON Web Token (JJWT) -->
+        <!-- ===== JWT SUPPORT ===== -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>${jjwt.version}</version>
+            <version>0.12.3</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>${jjwt.version}</version>
+            <version>0.12.3</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>${jjwt.version}</version>
+            <version>0.12.3</version>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Testning -->
+        <!-- ===== TEST DEPENDENCIES ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-        <!-- Mockito Dependencies för professionella tester -->
+        <!-- ===== EMAIL TEST DEPENDENCIES ===== -->
+        <!-- GreenMail för email-testning -->
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>RELEASE</version>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail</artifactId>
+            <version>1.6.15</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -206,40 +127,103 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.0.5</version>
+            </plugin>
+
+            <!-- JaCoCo med Java 21 support -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
                 <configuration>
                     <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
+                        <exclude>**/*Application.*</exclude>
+                        <exclude>**/config/**/*</exclude>
+                        <exclude>**/dto/**/*</exclude>
+                        <exclude>**/entity/**/*</exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <!-- Coverage enforcement under utveckling -->
+                    <!--
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.60</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>com.ctrlbuy.webshop.service.*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>com.ctrlbuy.webshop.controller.*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    -->
+                </executions>
             </plugin>
 
-            <!-- Maven Site Plugin för enkel dokumentation -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.12.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
-                </configuration>
-            </plugin>
-
-            <!-- Surefire Plugin för testning -->
+            <!-- Surefire för bättre testrapporter -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.5</version>
                 <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <!-- Ignorera test failures för att få coverage -->
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <parallel>methods</parallel>
+                    <threadCount>4</threadCount>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

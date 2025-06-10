@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminVerificationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">AdminVerificationController.java</span></div><h1>AdminVerificationController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.EmailService;
+import com.ctrlbuy.webshop.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/admin&quot;)
+<span class="nc" id="L18">public class AdminVerificationController {</span>
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserService userService;
+
+    @PostMapping(&quot;/resend-verification&quot;)
+    public ResponseEntity&lt;?&gt; resendVerification(@RequestBody Map&lt;String, String&gt; request) {
+        try {
+<span class="nc" id="L29">            String email = request.get(&quot;email&quot;);</span>
+
+            // Debug logging
+<span class="nc" id="L32">            System.out.println(&quot;AdminVerification - Attempting to send to: &quot; + email);</span>
+
+<span class="nc bnc" id="L34" title="All 4 branches missed.">            if (email == null || email.trim().isEmpty()) {</span>
+<span class="nc" id="L35">                return ResponseEntity.badRequest().body(&quot;Email is required&quot;);</span>
+            }
+
+            // Find user - handle Optional return type
+<span class="nc" id="L39">            Optional&lt;User&gt; userOptional = userService.findByEmail(email);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (!userOptional.isPresent()) {</span>
+<span class="nc" id="L41">                System.out.println(&quot;User not found for email: &quot; + email);</span>
+<span class="nc" id="L42">                return ResponseEntity.badRequest().body(&quot;User not found&quot;);</span>
+            }
+
+<span class="nc" id="L45">            User user = userOptional.get();</span>
+<span class="nc" id="L46">            System.out.println(&quot;User found: &quot; + user.getEmail());</span>
+
+            // Create verification token
+<span class="nc" id="L49">            String verificationToken = UUID.randomUUID().toString();</span>
+<span class="nc" id="L50">            user.setVerificationToken(verificationToken);</span>
+<span class="nc" id="L51">            user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));</span>
+
+            // Save user
+<span class="nc" id="L54">            userService.save(user);</span>
+<span class="nc" id="L55">            System.out.println(&quot;Verification token created: &quot; + verificationToken);</span>
+
+            // Send verification email - pass User object, not email string
+<span class="nc" id="L58">            emailService.sendVerificationEmail(user, verificationToken);</span>
+<span class="nc" id="L59">            System.out.println(&quot;Verification email sent successfully to: &quot; + email);</span>
+
+            // Create success response
+<span class="nc" id="L62">            Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L63">            response.put(&quot;message&quot;, &quot;Verification link sent successfully&quot;);</span>
+<span class="nc" id="L64">            response.put(&quot;email&quot;, email);</span>
+
+<span class="nc" id="L66">            return ResponseEntity.ok(response);</span>
+
+<span class="nc" id="L68">        } catch (Exception e) {</span>
+<span class="nc" id="L69">            System.err.println(&quot;AdminVerification error: &quot; + e.getMessage());</span>
+<span class="nc" id="L70">            e.printStackTrace();</span>
+
+<span class="nc" id="L72">            Map&lt;String, String&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L73">            errorResponse.put(&quot;error&quot;, &quot;Failed to send verification link&quot;);</span>
+<span class="nc" id="L74">            errorResponse.put(&quot;details&quot;, e.getMessage());</span>
+
+<span class="nc" id="L76">            return ResponseEntity.status(500).body(errorResponse);</span>
+        }
+    }
+
+    // Debug endpoint for testing
+    @GetMapping(&quot;/test-verification/{email}&quot;)
+    public ResponseEntity&lt;?&gt; testVerification(@PathVariable String email) {
+        try {
+<span class="nc" id="L84">            System.out.println(&quot;Testing verification for: &quot; + email);</span>
+
+<span class="nc" id="L86">            Optional&lt;User&gt; userOptional = userService.findByEmail(email);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (!userOptional.isPresent()) {</span>
+<span class="nc" id="L88">                return ResponseEntity.badRequest().body(&quot;User not found: &quot; + email);</span>
+            }
+
+<span class="nc" id="L91">            User user = userOptional.get();</span>
+<span class="nc" id="L92">            String testToken = &quot;test-&quot; + UUID.randomUUID().toString();</span>
+
+            // Pass User object to EmailService
+<span class="nc" id="L95">            emailService.sendVerificationEmail(user, testToken);</span>
+
+<span class="nc" id="L97">            return ResponseEntity.ok(&quot;Test verification email sent to: &quot; + email);</span>
+<span class="nc" id="L98">        } catch (Exception e) {</span>
+<span class="nc" id="L99">            return ResponseEntity.status(500).body(&quot;Test failed: &quot; + e.getMessage());</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

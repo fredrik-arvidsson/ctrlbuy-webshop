@@ -18,7 +18,7 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:development-only-secret-change-in-prod}")
     private String jwtSecret;
 
     // Ändrad från jwt.expiration till jwt.expirationMs

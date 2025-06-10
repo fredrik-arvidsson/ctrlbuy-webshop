@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HomeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">HomeController.java</span></div><h1>HomeController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import java.util.List;
+import java.util.Collections;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.security.core.Authentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.ctrlbuy.webshop.repository.ProductRepository;
+import com.ctrlbuy.webshop.service.ProductService;
+import com.ctrlbuy.webshop.model.Product;
+
+@Controller
+<span class="fc" id="L19">public class HomeController {</span>
+
+<span class="fc" id="L21">    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);</span>
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ProductService productService;
+
+    @GetMapping(&quot;/&quot;)
+    public String home(Model model, Authentication authentication, HttpServletRequest request) {
+<span class="fc" id="L31">        logger.trace(&quot;=== HOME CONTROLLER START ===&quot;);</span>
+<span class="fc" id="L32">        logger.trace(&quot;Request URL: {}&quot;, request.getRequestURL());</span>
+<span class="fc" id="L33">        logger.trace(&quot;Request Method: {}&quot;, request.getMethod());</span>
+<span class="fc" id="L34">        logger.trace(&quot;Request Headers: {}&quot;, Collections.list(request.getHeaderNames()));</span>
+
+        try {
+            // Sätt grundläggande titel
+<span class="fc" id="L38">            model.addAttribute(&quot;title&quot;, &quot;Hem - CTRL+BUY Solutions&quot;);</span>
+<span class="fc" id="L39">            logger.trace(&quot;Added title to model&quot;);</span>
+
+            // Hantera produkter för startsidan
+            try {
+<span class="fc" id="L43">                logger.trace(&quot;Loading featured products...&quot;);</span>
+<span class="nc" id="L44">                List&lt;Product&gt; featuredProducts = productRepository.findAll()</span>
+<span class="nc" id="L45">                        .stream()</span>
+<span class="nc" id="L46">                        .limit(6)  // Visa 6 produkter på startsidan</span>
+<span class="nc" id="L47">                        .toList();</span>
+<span class="nc" id="L48">                model.addAttribute(&quot;featuredProducts&quot;, featuredProducts);</span>
+<span class="nc" id="L49">                logger.trace(&quot;Successfully loaded {} featured products&quot;, featuredProducts.size());</span>
+<span class="fc" id="L50">            } catch (Exception e) {</span>
+<span class="fc" id="L51">                logger.warn(&quot;Could not load featured products: {}&quot;, e.getMessage());</span>
+                // Fortsätt utan produkter om det misslyckas
+<span class="nc" id="L53">            }</span>
+
+            // Hantera autentisering
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            if (authentication != null) {</span>
+<span class="fc" id="L57">                logger.trace(&quot;Authentication found: {}&quot;, authentication.getClass().getSimpleName());</span>
+<span class="fc" id="L58">                logger.trace(&quot;Is authenticated: {}&quot;, authentication.isAuthenticated());</span>
+<span class="fc" id="L59">                logger.trace(&quot;Principal: {}&quot;, authentication.getPrincipal());</span>
+<span class="fc" id="L60">                logger.trace(&quot;Name: {}&quot;, authentication.getName());</span>
+<span class="fc" id="L61">                logger.trace(&quot;Authorities: {}&quot;, authentication.getAuthorities());</span>
+
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                if (authentication.isAuthenticated() &amp;&amp;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                        !authentication.getName().equals(&quot;anonymousUser&quot;)) {</span>
+
+<span class="nc" id="L66">                    String username = authentication.getName();</span>
+<span class="nc" id="L67">                    logger.trace(&quot;Setting user as logged in: {}&quot;, username);</span>
+
+<span class="nc" id="L69">                    model.addAttribute(&quot;isLoggedIn&quot;, true);</span>
+<span class="nc" id="L70">                    model.addAttribute(&quot;username&quot;, username);</span>
+<span class="nc" id="L71">                    model.addAttribute(&quot;user&quot;, username); // För Thymeleaf kompatibilitet</span>
+
+                    // Kontrollera admin-status
+<span class="nc" id="L74">                    boolean isAdmin = authentication.getAuthorities().stream()</span>
+<span class="nc" id="L75">                            .anyMatch(authority -&gt; {</span>
+<span class="nc" id="L76">                                String auth = authority.getAuthority();</span>
+<span class="nc" id="L77">                                logger.trace(&quot;Checking authority: {}&quot;, auth);</span>
+<span class="nc" id="L78">                                return &quot;ROLE_ADMIN&quot;.equals(auth);</span>
+                            });
+
+<span class="nc" id="L81">                    logger.trace(&quot;User {} is admin: {}&quot;, username, isAdmin);</span>
+<span class="nc" id="L82">                    model.addAttribute(&quot;isAdmin&quot;, isAdmin);</span>
+
+<span class="nc" id="L84">                } else {</span>
+<span class="fc" id="L85">                    logger.trace(&quot;User not authenticated or is anonymous&quot;);</span>
+<span class="fc" id="L86">                    model.addAttribute(&quot;isLoggedIn&quot;, false);</span>
+<span class="fc" id="L87">                    model.addAttribute(&quot;isAdmin&quot;, false);</span>
+                }
+            } else {
+<span class="nc" id="L90">                logger.trace(&quot;No authentication found&quot;);</span>
+<span class="nc" id="L91">                model.addAttribute(&quot;isLoggedIn&quot;, false);</span>
+<span class="nc" id="L92">                model.addAttribute(&quot;isAdmin&quot;, false);</span>
+            }
+
+<span class="fc" id="L95">            logger.trace(&quot;Model attributes before return: {}&quot;, model.asMap().keySet());</span>
+<span class="fc" id="L96">            logger.trace(&quot;Returning template: home&quot;);</span>
+<span class="fc" id="L97">            return &quot;home&quot;;</span>
+
+<span class="nc" id="L99">        } catch (Exception e) {</span>
+<span class="nc" id="L100">            logger.error(&quot;=== EXCEPTION IN HOME CONTROLLER ===&quot;);</span>
+<span class="nc" id="L101">            logger.error(&quot;Exception class: {}&quot;, e.getClass().getName());</span>
+<span class="nc" id="L102">            logger.error(&quot;Exception message: {}&quot;, e.getMessage());</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            logger.error(&quot;Exception cause: {}&quot;, e.getCause() != null ? e.getCause().getMessage() : &quot;No cause&quot;);</span>
+<span class="nc" id="L104">            logger.error(&quot;Full stack trace: &quot;, e);</span>
+<span class="nc" id="L105">            logger.error(&quot;Model state when error occurred: {}&quot;, model.asMap());</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            logger.error(&quot;Authentication state: {}&quot;, authentication != null ? authentication.toString() : &quot;null&quot;);</span>
+<span class="nc" id="L107">            logger.error(&quot;====================================&quot;);</span>
+
+            // Rethrow för att Spring ska hantera det
+<span class="nc" id="L110">            throw e;</span>
+
+        } finally {
+<span class="fc" id="L113">            logger.trace(&quot;=== HOME CONTROLLER END ===&quot;);</span>
+        }
+    }
+
+    @GetMapping(&quot;/welcome&quot;)
+    public String welcome(Model model) {
+<span class="fc" id="L119">        logger.debug(&quot;Welcome endpoint called, redirecting to home&quot;);</span>
+<span class="fc" id="L120">        return &quot;redirect:/&quot;;</span>
+    }
+
+    @GetMapping(&quot;/about&quot;)
+    public String about(Model model) {
+<span class="fc" id="L125">        logger.debug(&quot;About page requested&quot;);</span>
+<span class="fc" id="L126">        model.addAttribute(&quot;title&quot;, &quot;Om oss - CtrlBuy&quot;);</span>
+<span class="fc" id="L127">        return &quot;about&quot;;</span>
+    }
+
+    // ❌ TAR BORT DENNA METOD FÖR ATT UNDVIKA KONFLIKT
+    // ProductController hanterar nu /products istället
+    /*
+    @GetMapping(&quot;/products&quot;)
+    public String products(Model model) {
+        logger.debug(&quot;Products page requested&quot;);
+        model.addAttribute(&quot;title&quot;, &quot;Produkter - CtrlBuy&quot;);
+
+        try {
+            List&lt;Product&gt; allProducts = productRepository.findAll();
+            model.addAttribute(&quot;products&quot;, allProducts);
+            logger.debug(&quot;Loaded {} products for products page&quot;, allProducts.size());
+        } catch (Exception e) {
+            logger.error(&quot;Error loading products: {}&quot;, e.getMessage());
+            model.addAttribute(&quot;products&quot;, Collections.emptyList());
+        }
+
+        return &quot;products&quot;;
+    }
+    */
+
+    @GetMapping(&quot;/min-profil&quot;)
+    public String minProfil(Authentication authentication, HttpSession session) {
+<span class="fc" id="L153">        logger.debug(&quot;=== MIN-PROFIL DEBUG ===&quot;);</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        logger.debug(&quot;Username: {}&quot;, authentication != null ? authentication.getName() : &quot;null&quot;);</span>
+<span class="fc" id="L155">        logger.debug(&quot;Session userRole: {}&quot;, session.getAttribute(&quot;userRole&quot;));</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (authentication != null) {</span>
+<span class="fc" id="L157">            logger.debug(&quot;Authorities: {}&quot;, authentication.getAuthorities());</span>
+        }
+<span class="fc" id="L159">        logger.debug(&quot;========================&quot;);</span>
+
+        // Tillfällig lösning: kolla både session och username
+<span class="fc" id="L162">        String role = (String) session.getAttribute(&quot;userRole&quot;);</span>
+<span class="pc bpc" id="L163" title="2 of 4 branches missed.">        boolean isAdmin = &quot;admin&quot;.equals(role) ||</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">                (authentication != null &amp;&amp; &quot;admin&quot;.equals(authentication.getName()));</span>
+
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        if (isAdmin) {</span>
+<span class="nc" id="L167">            logger.debug(&quot;Redirecting admin to dashboard&quot;);</span>
+<span class="nc" id="L168">            return &quot;redirect:/admin/dashboard&quot;;</span>
+        }
+
+<span class="fc" id="L171">        logger.debug(&quot;Redirecting regular user to user profile&quot;);</span>
+<span class="fc" id="L172">        return &quot;redirect:/user/profil&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+@RequestMapping(value = {&quot;/products&quot;, &quot;/produkter&quot;})
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+<span class="fc" id="L19">@Slf4j</span>
+public class ProductController {
+
+    private final ProductService productService;
+
+    @GetMapping
+    public String listProducts(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
+            Model model) {
+
+<span class="fc" id="L30">        log.info(&quot;=== PRODUKTCONTROLLER DEBUG START ===&quot;);</span>
+<span class="fc" id="L31">        log.info(&quot;Parameters - category: {}, search: {}&quot;, category, search);</span>
+
+        try {
+            List&lt;Product&gt; products;
+
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">            if (search != null &amp;&amp; !search.trim().isEmpty()) {</span>
+<span class="fc" id="L37">                products = productService.searchProducts(search.trim());</span>
+<span class="fc" id="L38">                model.addAttribute(&quot;pageTitle&quot;, &quot;Sökresultat för: &quot; + search);</span>
+<span class="fc" id="L39">                model.addAttribute(&quot;searchTerm&quot;, search);</span>
+<span class="fc" id="L40">                log.info(&quot;Searching for products with query: {}, found: {} products&quot;, search, products.size());</span>
+<span class="pc bpc" id="L41" title="2 of 6 branches missed.">            } else if (category != null &amp;&amp; !category.trim().isEmpty() &amp;&amp; !category.equals(&quot;Alla&quot;)) {</span>
+<span class="fc" id="L42">                products = productService.getProductsByCategory(category);</span>
+<span class="fc" id="L43">                model.addAttribute(&quot;pageTitle&quot;, &quot;Produkter i kategorin: &quot; + category);</span>
+<span class="fc" id="L44">                model.addAttribute(&quot;selectedCategory&quot;, category);</span>
+<span class="fc" id="L45">                log.info(&quot;Filtering products by category: {}, found: {} products&quot;, category, products.size());</span>
+            } else {
+<span class="fc" id="L47">                products = productService.getAllProducts();</span>
+<span class="fc" id="L48">                model.addAttribute(&quot;pageTitle&quot;, &quot;Alla produkter&quot;);</span>
+<span class="fc" id="L49">                log.info(&quot;Loading all products, found: {} products&quot;, products.size());</span>
+            }
+
+<span class="fc" id="L52">            model.addAttribute(&quot;products&quot;, products);</span>
+<span class="fc" id="L53">            log.info(&quot;Products loaded successfully: {} products&quot;, products.size());</span>
+
+<span class="nc" id="L55">        } catch (Exception e) {</span>
+<span class="nc" id="L56">            log.error(&quot;ERROR in listProducts: &quot;, e);</span>
+<span class="nc" id="L57">            model.addAttribute(&quot;error&quot;, &quot;Ett fel uppstod vid hämtning av produkter.&quot;);</span>
+<span class="nc" id="L58">            model.addAttribute(&quot;products&quot;, List.of());</span>
+<span class="fc" id="L59">        }</span>
+
+<span class="fc" id="L61">        log.info(&quot;=== PRODUKTCONTROLLER DEBUG END ===&quot;);</span>
+<span class="fc" id="L62">        return &quot;products&quot;; // 🔥 FIXAT: Använder products template för lista</span>
+    }
+
+    // 🔥 FIXAT: Produktdetaljer använder nu product-detail template
+    @GetMapping(&quot;/{id}&quot;)
+    public String viewProduct(@PathVariable Long id,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
+<span class="fc" id="L70">        log.info(&quot;=== PRODUKTDETALJER DEBUG START ===&quot;);</span>
+<span class="fc" id="L71">        log.info(&quot;Visar produktdetaljer för ID: {}&quot;, id);</span>
+
+        try {
+<span class="fc" id="L74">            Optional&lt;Product&gt; productOpt = productService.findById(id);</span>
+
+<span class="fc bfc" id="L76" title="All 2 branches covered.">            if (productOpt.isEmpty()) {</span>
+<span class="fc" id="L77">                log.warn(&quot;Produkt med ID {} hittades inte&quot;, id);</span>
+<span class="fc" id="L78">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Produkten hittades inte.&quot;);</span>
+<span class="fc" id="L79">                return &quot;redirect:/products&quot;;</span>
+            }
+
+<span class="fc" id="L82">            Product product = productOpt.get();</span>
+<span class="fc" id="L83">            log.info(&quot;Produkt hittad: {} (ID: {})&quot;, product.getName(), product.getId());</span>
+
+            // Lägg till produktdata
+<span class="fc" id="L86">            model.addAttribute(&quot;product&quot;, product);</span>
+<span class="fc" id="L87">            model.addAttribute(&quot;title&quot;, product.getName() + &quot; - CTRL+BUY Solutions&quot;);</span>
+
+            // 🔥 FIXAT: Bättre null-kontroll för recensioner
+            try {
+                // Placeholder för framtida recensioner
+<span class="fc" id="L92">                model.addAttribute(&quot;reviews&quot;, List.of());</span>
+<span class="fc" id="L93">                model.addAttribute(&quot;reviewCount&quot;, 0);</span>
+<span class="fc" id="L94">                model.addAttribute(&quot;averageRating&quot;, 0.0);</span>
+<span class="fc" id="L95">                log.debug(&quot;Recensionsdata initialiserad&quot;);</span>
+<span class="nc" id="L96">            } catch (Exception e) {</span>
+<span class="nc" id="L97">                log.warn(&quot;Could not load reviews for product {}: {}&quot;, product.getName(), e.getMessage());</span>
+<span class="nc" id="L98">                model.addAttribute(&quot;reviews&quot;, List.of());</span>
+<span class="nc" id="L99">                model.addAttribute(&quot;reviewCount&quot;, 0);</span>
+<span class="nc" id="L100">                model.addAttribute(&quot;averageRating&quot;, 0.0);</span>
+<span class="fc" id="L101">            }</span>
+
+            // 🔥 FÖRBÄTTRAT: Relaterade produkter med bättre felhantering
+<span class="pc bpc" id="L104" title="2 of 4 branches missed.">            if (product.getCategory() != null &amp;&amp; !product.getCategory().trim().isEmpty()) {</span>
+                try {
+<span class="fc" id="L106">                    List&lt;Product&gt; relatedProducts = productService.getProductsByCategory(product.getCategory())</span>
+<span class="fc" id="L107">                            .stream()</span>
+<span class="pc bnc" id="L108" title="All 2 branches missed.">                            .filter(p -&gt; !p.getId().equals(id))</span>
+<span class="fc" id="L109">                            .limit(4)</span>
+<span class="fc" id="L110">                            .toList();</span>
+<span class="fc" id="L111">                    model.addAttribute(&quot;relatedProducts&quot;, relatedProducts);</span>
+<span class="fc" id="L112">                    log.info(&quot;Found {} related products för kategori: {}&quot;, relatedProducts.size(), product.getCategory());</span>
+<span class="nc" id="L113">                } catch (Exception e) {</span>
+<span class="nc" id="L114">                    log.warn(&quot;Could not load related products: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L115">                    model.addAttribute(&quot;relatedProducts&quot;, List.of());</span>
+<span class="pc" id="L116">                }</span>
+            } else {
+<span class="nc" id="L118">                log.warn(&quot;Ingen kategori för produkt {}, inga relaterade produkter&quot;, product.getName());</span>
+<span class="nc" id="L119">                model.addAttribute(&quot;relatedProducts&quot;, List.of());</span>
+            }
+
+            // 🔥 FÖRBÄTTRAT: Rea-logik med bättre null-kontroller
+<span class="fc" id="L123">            boolean isOnSale = false;</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">            if (product.getName() != null) {</span>
+<span class="fc" id="L125">                String nameLower = product.getName().toLowerCase();</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">                String descLower = product.getDescription() != null ? product.getDescription().toLowerCase() : &quot;&quot;;</span>
+
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">                isOnSale = nameLower.contains(&quot;rea&quot;) ||</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">                        nameLower.contains(&quot;sale&quot;) ||</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                        nameLower.contains(&quot;kampanj&quot;) ||</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">                        descLower.contains(&quot;kampanj&quot;) ||</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">                        descLower.contains(&quot;rea&quot;);</span>
+            }
+
+<span class="pc bpc" id="L135" title="3 of 4 branches missed.">            if (isOnSale &amp;&amp; product.getPrice() != null) {</span>
+<span class="nc" id="L136">                BigDecimal salePrice = product.getPrice().multiply(new BigDecimal(&quot;0.8&quot;));</span>
+<span class="nc" id="L137">                BigDecimal savings = product.getPrice().subtract(salePrice);</span>
+<span class="nc" id="L138">                BigDecimal discountPercentage = new BigDecimal(&quot;20&quot;);</span>
+
+<span class="nc" id="L140">                model.addAttribute(&quot;discountPercentage&quot;, discountPercentage);</span>
+<span class="nc" id="L141">                model.addAttribute(&quot;savings&quot;, savings);</span>
+<span class="nc" id="L142">                model.addAttribute(&quot;salePrice&quot;, salePrice);</span>
+<span class="nc" id="L143">                log.info(&quot;Produkt på rea: {} - Ordinarie: {} kr, Rea: {} kr&quot;,</span>
+<span class="nc" id="L144">                        product.getName(), product.getPrice(), salePrice);</span>
+            }
+
+            // 🔥 FÖRBÄTTRAT: Lagerstatus med bättre logik
+<span class="fc" id="L148">            Integer stockQty = product.getStockQuantity();</span>
+<span class="pc bpc" id="L149" title="2 of 4 branches missed.">            boolean inStock = stockQty != null &amp;&amp; stockQty &gt; 0;</span>
+<span class="pc bpc" id="L150" title="4 of 6 branches missed.">            boolean lowStock = stockQty != null &amp;&amp; stockQty &lt; 5 &amp;&amp; stockQty &gt; 0;</span>
+
+<span class="fc" id="L152">            model.addAttribute(&quot;inStock&quot;, inStock);</span>
+<span class="fc" id="L153">            model.addAttribute(&quot;lowStock&quot;, lowStock);</span>
+<span class="fc" id="L154">            model.addAttribute(&quot;onSale&quot;, isOnSale);</span>
+
+<span class="fc" id="L156">            log.info(&quot;Lagerstatus - I lager: {}, Lågt lager: {}, Antal: {}&quot;,</span>
+<span class="fc" id="L157">                    inStock, lowStock, stockQty);</span>
+<span class="fc" id="L158">            log.info(&quot;Produktdetaljer redo för visning: {}&quot;, product.getName());</span>
+
+<span class="nc" id="L160">        } catch (Exception e) {</span>
+<span class="nc" id="L161">            log.error(&quot;Error loading product with id {}: {}&quot;, id, e.getMessage(), e);</span>
+<span class="nc" id="L162">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Ett fel uppstod vid hämtning av produkten.&quot;);</span>
+<span class="nc" id="L163">            return &quot;redirect:/products&quot;;</span>
+<span class="fc" id="L164">        }</span>
+
+<span class="fc" id="L166">        log.info(&quot;=== PRODUKTDETALJER DEBUG END ===&quot;);</span>
+<span class="fc" id="L167">        return &quot;product-detail&quot;; // 🔥 FIXAT: Använder product-detail template</span>
+    }
+
+    // API endpoint för produktsökning (AJAX)
+    @GetMapping(&quot;/api/search&quot;)
+    @ResponseBody
+    public List&lt;Product&gt; searchProducts(@RequestParam String q) {
+<span class="fc" id="L174">        log.debug(&quot;API-sökning efter: {}&quot;, q);</span>
+
+<span class="pc bpc" id="L176" title="2 of 4 branches missed.">        if (q == null || q.trim().length() &lt; 2) {</span>
+<span class="nc" id="L177">            return List.of();</span>
+        }
+
+        try {
+<span class="fc" id="L181">            return productService.searchActiveProducts(q.trim())</span>
+<span class="fc" id="L182">                    .stream()</span>
+<span class="fc" id="L183">                    .limit(10)</span>
+<span class="fc" id="L184">                    .toList();</span>
+<span class="nc" id="L185">        } catch (Exception e) {</span>
+<span class="nc" id="L186">            log.warn(&quot;Search method error: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L187">            return List.of();</span>
+        }
+    }
+
+    // Kategori-endpoint
+    @GetMapping(&quot;/category/{category}&quot;)
+    public String viewCategory(@PathVariable String category, Model model) {
+<span class="fc" id="L194">        return listProducts(category, null, model);</span>
+    }
+
+    // Rea-sida
+    @GetMapping(&quot;/sale&quot;)
+    public String viewSaleProducts(Model model) {
+<span class="fc" id="L200">        log.debug(&quot;Loading sale products&quot;);</span>
+        try {
+<span class="fc" id="L202">            List&lt;Product&gt; saleProducts = productService.getProductsOnSale();</span>
+<span class="fc" id="L203">            model.addAttribute(&quot;products&quot;, saleProducts);</span>
+<span class="fc" id="L204">            model.addAttribute(&quot;pageTitle&quot;, &quot;Produkter på rea&quot;);</span>
+<span class="fc" id="L205">            log.info(&quot;Found {} products on sale&quot;, saleProducts.size());</span>
+<span class="nc" id="L206">        } catch (Exception e) {</span>
+<span class="nc" id="L207">            log.error(&quot;Error loading sale products: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L208">            model.addAttribute(&quot;products&quot;, List.of());</span>
+<span class="nc" id="L209">            model.addAttribute(&quot;error&quot;, &quot;Kunde inte ladda rea-produkter&quot;);</span>
+<span class="fc" id="L210">        }</span>
+<span class="fc" id="L211">        return &quot;products&quot;;</span>
+    }
+
+    // Populära produkter
+    @GetMapping(&quot;/popular&quot;)
+    public String viewPopularProducts(Model model) {
+<span class="fc" id="L217">        log.debug(&quot;Loading popular products&quot;);</span>
+        try {
+<span class="fc" id="L219">            List&lt;Product&gt; popularProducts = productService.getPopularProducts(12);</span>
+<span class="fc" id="L220">            model.addAttribute(&quot;products&quot;, popularProducts);</span>
+<span class="fc" id="L221">            model.addAttribute(&quot;pageTitle&quot;, &quot;Populära produkter&quot;);</span>
+<span class="fc" id="L222">            log.info(&quot;Found {} popular products&quot;, popularProducts.size());</span>
+<span class="nc" id="L223">        } catch (Exception e) {</span>
+<span class="nc" id="L224">            log.error(&quot;Error loading popular products: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L225">            model.addAttribute(&quot;products&quot;, List.of());</span>
+<span class="nc" id="L226">            model.addAttribute(&quot;error&quot;, &quot;Kunde inte ladda populära produkter&quot;);</span>
+<span class="fc" id="L227">        }</span>
+<span class="fc" id="L228">        return &quot;products&quot;;</span>
+    }
+
+    // Nya produkter
+    @GetMapping(&quot;/new&quot;)
+    public String viewNewProducts(Model model) {
+<span class="fc" id="L234">        log.debug(&quot;Loading new products&quot;);</span>
+        try {
+<span class="fc" id="L236">            List&lt;Product&gt; newProducts = productService.getNewestProducts(12);</span>
+<span class="fc" id="L237">            model.addAttribute(&quot;products&quot;, newProducts);</span>
+<span class="fc" id="L238">            model.addAttribute(&quot;pageTitle&quot;, &quot;Nya produkter&quot;);</span>
+<span class="fc" id="L239">            log.info(&quot;Found {} new products&quot;, newProducts.size());</span>
+<span class="nc" id="L240">        } catch (Exception e) {</span>
+<span class="nc" id="L241">            log.error(&quot;Error loading new products: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L242">            model.addAttribute(&quot;products&quot;, List.of());</span>
+<span class="nc" id="L243">            model.addAttribute(&quot;error&quot;, &quot;Kunde inte ladda nya produkter&quot;);</span>
+<span class="fc" id="L244">        }</span>
+<span class="fc" id="L245">        return &quot;products&quot;;</span>
+    }
+
+    // Kontrollera lagerstatus (AJAX)
+    @GetMapping(&quot;/{id}/stock&quot;)
+    @ResponseBody
+    public boolean checkStock(@PathVariable Long id) {
+        try {
+<span class="fc" id="L253">            return productService.getProductByIdWithoutView(id)</span>
+<span class="pc bpc" id="L254" title="1 of 4 branches missed.">                    .map(product -&gt; product.getStockQuantity() != null &amp;&amp; product.getStockQuantity() &gt; 0)</span>
+<span class="fc" id="L255">                    .orElse(false);</span>
+<span class="nc" id="L256">        } catch (Exception e) {</span>
+<span class="nc" id="L257">            log.error(&quot;Error checking stock for product {}: {}&quot;, id, e.getMessage());</span>
+<span class="nc" id="L258">            return false;</span>
+        }
+    }
+
+    // 🔥 FÖRBÄTTRAT: Error handling med bättre logging
+    @ExceptionHandler(Exception.class)
+    public String handleError(Exception e, Model model) {
+<span class="fc" id="L265">        log.error(&quot;Fel i ProductController: {}&quot;, e.getMessage(), e);</span>
+<span class="fc" id="L266">        model.addAttribute(&quot;error&quot;, &quot;Ett oväntat fel inträffade vid hämtning av produkter.&quot;);</span>
+<span class="fc" id="L267">        model.addAttribute(&quot;products&quot;, List.of());</span>
+<span class="fc" id="L268">        return &quot;products&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -116,6 +116,30 @@
             transform: translateY(-5px);
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
+
+        /* Admin panel styling */
+        .admin-panel {
+            background: linear-gradient(135deg, #007bff, #6f42c1);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .admin-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -202,12 +226,41 @@
     <div class="jumbotron bg-light">
         <h2 class="text-success">
             <i class="fas fa-home me-2"></i>
-            Välkommen tillbaka, <span sec:authentication="name">användare</span>!
+            Välkommen, <span sec:authentication="name">användare</span>!
         </h2>
         <p class="lead">Utforska våra senaste produkter och erbjudanden.</p>
         <a href="/products" class="btn btn-success btn-lg">
             <i class="fas fa-shopping-bag me-2"></i>Börja handla
         </a>
+    </div>
+
+    <!-- 🔥 ADMIN PANEL - NYTT! -->
+    <div th:if="${isAdmin}" class="admin-panel">
+        <h3 class="mb-4">
+            <i class="fas fa-cogs me-2"></i>
+            Administratörspanel
+        </h3>
+        <p class="mb-4">Hantera systemet och användare här nedan:</p>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <a href="/admin/dashboard" class="btn admin-btn btn-lg w-100">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Dashboard
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin/users" class="btn admin-btn btn-lg w-100">
+                    <i class="fas fa-users me-2"></i>
+                    Användarhantering
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="/admin" class="btn admin-btn btn-lg w-100">
+                    <i class="fas fa-tools me-2"></i>
+                    Admin-hem
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 

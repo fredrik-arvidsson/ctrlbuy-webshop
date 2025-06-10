@@ -1,15 +1,16 @@
 package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.dto.RegisterRequest;
+import com.ctrlbuy.webshop.dto.RegistrationResult;
+import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.service.EmailService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ctrlbuy.webshop.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import com.ctrlbuy.webshop.service.UserService;
-import java.util.stream.Collectors;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class RegisterController {
@@ -17,7 +18,6 @@ public class RegisterController {
     private final UserService userService;
     private final EmailService emailService;
 
-    @Autowired
     public RegisterController(UserService userService, EmailService emailService) {
         this.userService = userService;
         this.emailService = emailService;
@@ -30,80 +30,116 @@ public class RegisterController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("registerRequest") @Valid RegisterRequest registerRequest,
-                               BindingResult bindingResult, Model model) {
+    public String registerUser(@ModelAttribute @Valid RegisterRequest registerRequest,
+                               BindingResult result,
+                               Model model) {
 
-        // Kontrollera om lösenorden matchar
-        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
-            bindingResult.rejectValue("confirmPassword", "error.registerRequest",
-                    "Lösenorden matchar inte");
-        }
-
-        // Om det finns valideringsfel, visa registreringsformuläret igen
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("errors", bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.toList()));
+        if (!validateRegistrationRequest(registerRequest, result)) {
+            if (result.hasErrors()) {
+                model.addAttribute("errors", result.getAllErrors());
+            }
             return "register";
         }
 
-        // Försök registrera användaren
+        if (result.hasErrors()) {
+            model.addAttribute("errors", result.getAllErrors());
+            return "register";
+        }
+
         try {
-            // Registrera användaren och få tillbaka verifikationstoken
-            String verificationToken = userService.registerNewUserWithToken(registerRequest);
+            // ✅ FIX: Registrera användare och få tillbaka User object + token
+            RegistrationResult registrationResult = userService.registerNewUserWithToken(registerRequest);
+            User newUser = registrationResult.getUser();
+            String verificationToken = registrationResult.getToken();
 
-            // Skicka bekräftelsemail
-            emailService.sendVerificationEmail(
-                    registerRequest.getEmail(),
-                    verificationToken,
-                    registerRequest.getFirstName()
-            );
+            // ✅ FIX: Anropa EmailService med korrekt User object och token
+            emailService.sendVerificationEmail(newUser, verificationToken);
 
-            // Omdirigera till bekräftelsesida
+            // ✅ FIX: Redirect efter lyckad registrering
             return "redirect:/login?registration-pending";
 
-        } catch (Exception e) {
-            // Om något går fel (t.ex. användarnamnet är redan taget)
-            model.addAttribute("errors", java.util.Collections.singletonList(e.getMessage()));
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("messageType", "error");
             return "register";
         }
     }
 
-    // FIXAD: Ändrat från /verify till /verify-email för att matcha SecurityConfig
-    @GetMapping("/verify-email")
-    public String verifyEmail(@RequestParam("token") String token, Model model) {
-        System.out.println("🔍 === EMAIL VERIFIERING STARTAD ===");
-        System.out.println("🔍 Token mottagen: " + token);
-        System.out.println("🔍 Token längd: " + token.length());
-        System.out.println("🔍 Token format: " + (token.matches("[a-f0-9-]{36}") ? "UUID format" : "Ogiltigt format"));
+    private boolean validateRegistrationRequest(RegisterRequest request, BindingResult result) {
+        boolean hasErrors = false;
 
-        try {
-            System.out.println("🔍 Söker efter token i databasen...");
-
-            boolean verified = userService.verifyEmailToken(token);
-            System.out.println("🔍 Verifiering resultat: " + verified);
-
-            if (verified) {
-                System.out.println("✅ Token verifierad framgångsrikt!");
-                model.addAttribute("message", "Ditt konto har bekräftats! Du kan nu logga in.");
-                model.addAttribute("messageType", "success");
-            } else {
-                System.out.println("❌ Token verifiering misslyckades");
-                model.addAttribute("message", "Bekräftelselänken är ogiltig eller har gått ut.");
-                model.addAttribute("messageType", "error");
-            }
-
-        } catch (Exception e) {
-            System.out.println("💥 Exception vid verifiering: " + e.getClass().getSimpleName());
-            System.out.println("💥 Exception meddelande: " + e.getMessage());
-            e.printStackTrace();
-
-            model.addAttribute("message", "Ett fel uppstod vid bekräftelsen: " + e.getMessage());
-            model.addAttribute("messageType", "error");
+        // Validera användarnamn
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            result.rejectValue("username", "error.username", "Användarnamn måste anges");
+            hasErrors = true;
+        } else if (request.getUsername().length() < 3) {
+            result.rejectValue("username", "error.username", "Användarnamn måste vara minst 3 tecken");
+            hasErrors = true;
+        } else if (userService.existsByUsernameIncludingInactive(request.getUsername())) {
+            result.rejectValue("username", "error.username", "Detta användarnamn är redan upptaget");
+            hasErrors = true;
         }
 
-        System.out.println("🔍 === EMAIL VERIFIERING AVSLUTAD ===");
-        return "verification-result";
+        // Validera e-post
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            result.rejectValue("email", "error.email", "E-post måste anges");
+            hasErrors = true;
+        } else if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            result.rejectValue("email", "error.email", "Ogiltig e-postadress");
+            hasErrors = true;
+        } else if (userService.existsByEmailIncludingInactive(request.getEmail())) {
+            result.rejectValue("email", "error.email",
+                    "Denna e-postadress är redan registrerad. Om du har glömt ditt lösenord, använd 'Glömt lösenord'-funktionen.");
+            hasErrors = true;
+        }
+
+        // Validera lösenord
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            result.rejectValue("password", "error.password", "Lösenord måste vara minst 6 tecken");
+            hasErrors = true;
+        }
+
+        if (request.getConfirmPassword() == null ||
+                !request.getPassword().equals(request.getConfirmPassword())) {
+            result.rejectValue("confirmPassword", "error.registerRequest", "Lösenorden matchar inte");
+            hasErrors = true;
+        }
+
+        // Validera förnamn
+        if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
+            result.rejectValue("firstName", "error.firstName", "Förnamn måste anges");
+            hasErrors = true;
+        }
+
+        // Validera efternamn
+        if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
+            result.rejectValue("lastName", "error.lastName", "Efternamn måste anges");
+            hasErrors = true;
+        }
+
+        return !hasErrors;
+    }
+
+    @GetMapping("/verify-email")
+    public String verifyEmail(@RequestParam("token") String token, Model model) {
+        try {
+            boolean verified = userService.verifyEmail(token);
+
+            if (verified) {
+                model.addAttribute("message", "Ditt konto har bekräftats! Du kan nu logga in.");
+                model.addAttribute("messageType", "success");
+                return "verification-result";
+            } else {
+                model.addAttribute("message", "Ogiltigt eller utgånget verifieringstoken.");
+                model.addAttribute("messageType", "error");
+                return "verification-result";
+            }
+
+        } catch (RuntimeException e) {
+            model.addAttribute("message", "Ogiltigt eller utgånget verifieringstoken.");
+            model.addAttribute("messageType", "error");
+            return "verification-result";
+        }
     }
 
     @GetMapping("/resend-verification")
@@ -114,20 +150,24 @@ public class RegisterController {
     @PostMapping("/resend-verification")
     public String resendVerification(@RequestParam("email") String email, Model model) {
         try {
+            if (!userService.existsByEmailIncludingInactive(email)) {
+                model.addAttribute("error", "E-postadressen hittades inte.");
+                model.addAttribute("messageType", "error");
+                return "resend-verification";
+            }
+
             String newToken = userService.createNewVerificationToken(email);
-
-            // Hämta förnamn från användaren via email
-            String firstName = userService.getFirstNameByEmail(email);
-            emailService.sendVerificationEmail(email, newToken, firstName);
-
-            model.addAttribute("message", "Ett nytt bekräftelsemail har skickats till " + email);
-            model.addAttribute("messageType", "success");
-
-        } catch (Exception e) {
-            model.addAttribute("message", "Kunde inte skicka nytt bekräftelsemail: " + e.getMessage());
+            if (newToken != null) {
+                model.addAttribute("message", "Nytt verifieringsmail skickat!");
+                model.addAttribute("messageType", "success");
+            } else {
+                model.addAttribute("error", "E-postadressen hittades inte eller kontot är inaktiverat.");
+                model.addAttribute("messageType", "error");
+            }
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
             model.addAttribute("messageType", "error");
         }
-
         return "resend-verification";
     }
 }

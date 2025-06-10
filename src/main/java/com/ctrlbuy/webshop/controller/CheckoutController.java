@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.List;
@@ -49,7 +49,7 @@ public class CheckoutController {
                 return "redirect:/varukorg";
             }
 
-            // Beräkna totaler från session-data
+            // Beräkna total från session-data
             BigDecimal subtotal = cartItems.stream()
                     .map(CartController.CartItem::getTotalPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -97,6 +97,10 @@ public class CheckoutController {
             }
 
             User currentUser = userService.findByUsername(auth.getName()).orElse(null);
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Användaren kunde inte hittas");
+                return "redirect:/login";
+            }
 
             // Hämta varukorg från SESSION
             @SuppressWarnings("unchecked")
@@ -108,41 +112,54 @@ public class CheckoutController {
                 return "redirect:/varukorg";
             }
 
-            // För nu - skapa enkel beställningsbekräftelse
-            // Du kan senare integrera med din OrderService om du vill
-            log.info("Processing order for user: {} with {} items",
-                    currentUser != null ? currentUser.getUsername() : "unknown",
-                    cartItems.size());
+            log.info("Processing order for user: {} with {} items", currentUser.getUsername(), cartItems.size());
 
-            // Beräkna total för loggning
-            BigDecimal orderTotal = cartItems.stream()
+            // Beräkna total
+            BigDecimal subtotal = cartItems.stream()
                     .map(CartController.CartItem::getTotalPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .add(BigDecimal.valueOf(49.00)); // shipping
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal shipping = BigDecimal.valueOf(49.00);
+            BigDecimal orderTotal = subtotal.add(shipping);
 
             log.info("Order total: {} kr", orderTotal);
+            log.info("About to call orderService.createOrderFromCart()");
 
-            // Rensa session-varukorg
+            // Skapa OrderDetails objekt (korrekt struktur med 6 fält)
+            OrderService.OrderDetails orderDetails = new OrderService.OrderDetails();
+            orderDetails.setDeliveryName(firstName + " " + lastName);
+            orderDetails.setDeliveryAddress(address);
+            orderDetails.setDeliveryCity(city);
+            orderDetails.setDeliveryPostalCode(postalCode);
+            orderDetails.setDeliveryPhone(phone);
+            orderDetails.setPaymentMethod(paymentMethod);
+
+            // **SKAPA BESTÄLLNINGEN I DATABASEN**
+            Order savedOrder = orderService.createOrderFromCart(currentUser, cartItems, orderDetails);
+
+            log.info("Order created successfully with ID: {}", savedOrder.getId());
+
+            // Rensa session-varukorg EFTER att beställningen sparats
             session.removeAttribute("shopping_cart");
 
-            // Success meddelande
-            redirectAttributes.addFlashAttribute("success",
-                    "Tack för din beställning! Total: " + orderTotal + " kr");
+            // Success meddelande med ordernummer
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Beställning genomförd! Ordernummer: " + savedOrder.getId());
 
-            return "redirect:/";
+            return "redirect:/checkout/confirmation/" + savedOrder.getId();
 
         } catch (Exception e) {
-            log.error("Error processing order: ", e);
-            redirectAttributes.addFlashAttribute("error",
-                    "Ett fel uppstod vid beställningen: " + e.getMessage());
+            log.error("ERROR in checkout process: ", e);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Något gick fel vid beställningen: " + e.getMessage());
             return "redirect:/checkout";
         }
     }
 
     @GetMapping("/confirmation/{orderId}")
+    @Transactional(readOnly = true)
     public String showConfirmation(@PathVariable Long orderId, Model model) {
         try {
-            // Om du vill använda OrderService senare
             Order order = orderService.findById(orderId);
 
             if (order == null) {

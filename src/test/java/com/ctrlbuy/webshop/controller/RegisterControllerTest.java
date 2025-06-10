@@ -1,6 +1,8 @@
 package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.dto.RegisterRequest;
+import com.ctrlbuy.webshop.dto.RegistrationResult;
+import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.service.EmailService;
 import com.ctrlbuy.webshop.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,8 +73,15 @@ class RegisterControllerTest {
     void registerUser_WithValidData_ShouldRegisterUserAndSendEmailThenRedirect() throws Exception {
         // Arrange
         String verificationToken = "test-token-123";
+        User mockUser = User.builder()
+                .email("test@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+        RegistrationResult mockResult = new RegistrationResult(mockUser, verificationToken);
+
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(userService.registerNewUserWithToken(registerRequest)).thenReturn(verificationToken);
+        when(userService.registerNewUserWithToken(registerRequest)).thenReturn(mockResult);
 
         // Act
         String result = registerController.registerUser(registerRequest, bindingResult, model);
@@ -80,11 +89,7 @@ class RegisterControllerTest {
         // Assert
         assertEquals("redirect:/login?registration-pending", result);
         verify(userService).registerNewUserWithToken(registerRequest);
-        verify(emailService).sendVerificationEmail(
-                registerRequest.getEmail(),
-                verificationToken,
-                registerRequest.getFirstName()
-        );
+        verify(emailService).sendVerificationEmail(mockUser, verificationToken);
         verify(model, never()).addAttribute(eq("errors"), any());
     }
 
@@ -105,22 +110,38 @@ class RegisterControllerTest {
         verify(bindingResult).rejectValue("confirmPassword", "error.registerRequest", "Lösenorden matchar inte");
         verify(model).addAttribute(eq("errors"), any(List.class));
         verify(userService, never()).registerNewUserWithToken(any());
-        verify(emailService, never()).sendVerificationEmail(any(), any(), any());
+        verify(emailService, never()).sendVerificationEmail(any(User.class), any());
     }
 
     @Test
     void verifyEmail_WithValidToken_ShouldReturnSuccessMessage() {
         // Arrange
         String token = "valid-token-123";
-        when(userService.verifyEmailToken(token)).thenReturn(true);
+        when(userService.verifyEmail(token)).thenReturn(true);
 
         // Act
         String result = registerController.verifyEmail(token, model);
 
         // Assert
         assertEquals("verification-result", result);
-        verify(userService).verifyEmailToken(token);
+        verify(userService).verifyEmail(token);
         verify(model).addAttribute("message", "Ditt konto har bekräftats! Du kan nu logga in.");
         verify(model).addAttribute("messageType", "success");
+    }
+
+    @Test
+    void verifyEmail_WithInvalidToken_ShouldReturnErrorMessage() {
+        // Arrange
+        String token = "invalid-token-123";
+        when(userService.verifyEmail(token)).thenReturn(false);
+
+        // Act
+        String result = registerController.verifyEmail(token, model);
+
+        // Assert
+        assertEquals("verification-result", result);
+        verify(userService).verifyEmail(token);
+        verify(model).addAttribute("message", "Ogiltigt eller utgånget verifieringstoken.");
+        verify(model).addAttribute("messageType", "error");
     }
 }

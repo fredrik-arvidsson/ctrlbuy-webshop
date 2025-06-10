@@ -1,0 +1,325 @@
+package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.repository.OrderRepository;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.EmailService;
+import com.ctrlbuy.webshop.service.OrderService;
+import com.ctrlbuy.webshop.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.servlet.http.HttpSession;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/checkout")
+@RequiredArgsConstructor
+@Slf4j
+public class CheckoutController {
+
+   private final OrderService orderService;
+   private final OrderRepository orderRepository;
+   private final UserService userService;
+   private final EmailService emailService;
+
+   @Value("${app.email.enabled:false}")
+   private boolean emailEnabled;
+
+   @GetMapping
+   public String showCheckout(Model model, HttpSession session, Authentication auth) {
+       try {
+           if (auth == null || !auth.isAuthenticated()) {
+               return "redirect:/login";
+           }
+
+           User currentUser = userService.findByUsername(auth.getName()).orElse(null);
+           model.addAttribute("user", currentUser);
+
+           @SuppressWarnings("unchecked")
+           List<CartController.CartItem> cartItems = (List<CartController.CartItem>)
+                   session.getAttribute("shopping_cart");
+
+           log.debug("DEBUG CHECKOUT: Cart items from session = {}", cartItems != null ? cartItems.size() : "null");
+
+           if (cartItems == null || cartItems.isEmpty()) {
+               log.debug("DEBUG CHECKOUT: Cart is null or empty, redirecting to cart");
+               model.addAttribute("error", "Din varukorg är tom");
+               return "redirect:/varukorg";
+           }
+
+           BigDecimal subtotal = cartItems.stream()
+                   .map(CartController.CartItem::getTotalPrice)
+                   .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+           BigDecimal shipping = BigDecimal.valueOf(49.00);
+           BigDecimal total = subtotal.add(shipping);
+
+           log.debug("DEBUG CHECKOUT: Proceeding to checkout with {} items, total: {}", cartItems.size(), total);
+
+           model.addAttribute("cartItems", cartItems);
+           model.addAttribute("subtotal", subtotal);
+           model.addAttribute("shipping", shipping);
+           model.addAttribute("total", total);
+
+           return "checkout";
+
+       } catch (Exception e) {
+           log.error("Error in checkout: ", e);
+           model.addAttribute("error", "Ett fel uppstod vid checkout");
+           return "redirect:/varukorg";
+       }
+   }
+
+   @PostMapping("/process")
+   public String processOrder(
+           @RequestParam String email,
+           @RequestParam String firstName,
+           @RequestParam String lastName,
+           @RequestParam String address,
+           @RequestParam String city,
+           @RequestParam String postalCode,
+           @RequestParam String phone,
+           @RequestParam(required = false) String notes,
+           @RequestParam String paymentMethod,
+           HttpSession session,
+           Authentication auth,
+           RedirectAttributes redirectAttributes) {
+
+       try {
+           if (auth == null || !auth.isAuthenticated()) {
+               return "redirect:/login";
+           }
+
+           User currentUser = userService.findByUsername(auth.getName()).orElse(null);
+           if (currentUser == null) {
+               redirectAttributes.addFlashAttribute("error", "Användaren kunde inte hittas");
+               return "redirect:/login";
+           }
+
+           @SuppressWarnings("unchecked")
+           List<CartController.CartItem> cartItems = (List<CartController.CartItem>)
+                   session.getAttribute("shopping_cart");
+
+           if (cartItems == null || cartItems.isEmpty()) {
+               redirectAttributes.addFlashAttribute("error", "Din varukorg är tom");
+               return "redirect:/varukorg";
+           }
+
+           log.info("Processing order for user: {} with {} items", currentUser.getUsername(), cartItems.size());
+
+           BigDecimal subtotal = cartItems.stream()
+                   .map(CartController.CartItem::getTotalPrice)
+                   .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+           BigDecimal shipping = BigDecimal.valueOf(49.00);
+           BigDecimal orderTotal = subtotal.add(shipping);
+
+           log.info("Order total: {} kr", orderTotal);
+           log.info("About to call orderService.createOrderFromCart()");
+
+           OrderService.OrderDetails orderDetails = new OrderService.OrderDetails();
+           orderDetails.setDeliveryName(firstName + " " + lastName);
+           orderDetails.setDeliveryAddress(address);
+           orderDetails.setDeliveryCity(city);
+           orderDetails.setDeliveryPostalCode(postalCode);
+           orderDetails.setDeliveryPhone(phone);
+           orderDetails.setPaymentMethod(paymentMethod);
+
+           Order savedOrder = orderService.createOrderFromCart(currentUser, cartItems, orderDetails);
+
+           log.info("Order created successfully with ID: {}", savedOrder.getId());
+
+           // 🆕 FÖRBÄTTRAD E-POSTDEBUG
+           try {
+               log.info("=== EMAIL DEBUG START ===");
+               log.info("Attempting to send email to: {}", email);
+               log.info("EmailService bean exists: {}", emailService != null);
+               log.info("EmailService class: {}", emailService != null ? emailService.getClass().getSimpleName() : "null");
+               log.info("Email enabled config: {}", emailEnabled);
+               log.info("Order number: {}", savedOrder.getOrderNumber());
+
+               if (emailService == null) {
+                   log.error("EmailService is NULL! Check bean configuration");
+               } else {
+                   emailService.sendOrderConfirmation(savedOrder, email);
+                   log.info("✅ Order confirmation email sent successfully for order: {}", savedOrder.getOrderNumber());
+               }
+               log.info("=== EMAIL DEBUG END ===");
+
+           } catch (Exception emailError) {
+               log.error("❌ Failed to send order confirmation email for order: {}", savedOrder.getOrderNumber());
+               log.error("Email error details: ", emailError);
+               log.error("Email error message: {}", emailError.getMessage());
+               log.error("Email error class: {}", emailError.getClass().getSimpleName());
+
+               // Lägg till felet i redirect-meddelandet så användaren ser det
+               redirectAttributes.addFlashAttribute("emailError",
+                   "Beställningen genomfördes men e-postbekräftelsen kunde inte skickas: " + emailError.getMessage());
+           }
+
+           session.removeAttribute("shopping_cart");
+
+           redirectAttributes.addFlashAttribute("successMessage",
+                   "Beställning genomförd! Ordernummer: " + savedOrder.getOrderNumber() +
+                   ". En bekräftelse har skickats till din e-post.");
+
+           return "redirect:/checkout/confirmation/" + savedOrder.getId();
+
+       } catch (Exception e) {
+           log.error("ERROR in checkout process: ", e);
+           redirectAttributes.addFlashAttribute("errorMessage",
+                   "Något gick fel vid beställningen: " + e.getMessage());
+           return "redirect:/checkout";
+       }
+   }
+
+   @GetMapping("/confirmation/{orderId}")
+   @Transactional(readOnly = true)
+   public String showConfirmation(@PathVariable Long orderId, Model model) {
+       Order order = orderRepository.findById(orderId)
+           .orElseThrow(() -> new IllegalArgumentException("Order hittades inte"));
+
+       // Tvinga lazy loading innan session stängs
+       order.getOrderItems().size();
+
+       model.addAttribute("order", order);
+       return "confirmation";
+   }
+
+   @GetMapping("/confirmation/order/{orderNumber}")
+   @Transactional(readOnly = true)
+   public String showConfirmationByOrderNumber(@PathVariable String orderNumber, Model model, Authentication auth) {
+       try {
+           if (auth == null || !auth.isAuthenticated()) {
+               return "redirect:/login";
+           }
+
+           User currentUser = userService.findByUsername(auth.getName()).orElse(null);
+           if (currentUser == null) {
+               return "redirect:/login";
+           }
+
+           Optional<Order> orderOpt = orderRepository.findByOrderNumberAndUserWithItems(orderNumber, currentUser);
+
+           if (orderOpt.isEmpty()) {
+               model.addAttribute("error", "Beställningen kunde inte hittas eller tillhör inte dig");
+               return "redirect:/orders";
+           }
+
+           Order order = orderOpt.get();
+
+           model.addAttribute("order", order);
+           model.addAttribute("pageTitle", "Orderbekräftelse - " + order.getOrderNumber());
+
+           return "confirmation";
+
+       } catch (Exception e) {
+           log.error("Error showing confirmation for order number {}: ", orderNumber, e);
+           model.addAttribute("error", "Ett fel uppstod vid visning av orderbekräftelsen");
+           return "redirect:/orders";
+       }
+   }
+
+   // 🆕 KORRIGERADE DEBUG-ENDPOINTS FÖR E-POSTTESTNING
+   @GetMapping("/test-email-debug")
+   @ResponseBody
+   public String testEmailDebug() {
+       try {
+           log.info("=== EMAIL DEBUG TEST START ===");
+           log.info("EmailService bean: {}", emailService);
+           log.info("EmailService null check: {}", emailService == null ? "NULL" : "NOT NULL");
+           log.info("Email enabled config: {}", emailEnabled);
+
+           if (emailService == null) {
+               return "❌ EmailService is NULL! Check bean configuration.";
+           }
+
+           log.info("EmailService class: {}", emailService.getClass().getName());
+           log.info("Calling testEmailConnection()...");
+
+           // KORRIGERAT: Använd rätt metodnamn
+           boolean result = emailService.testEmailConnection();
+
+           log.info("Test email connection result: {}", result);
+           log.info("=== EMAIL DEBUG TEST END ===");
+
+           return String.format("✅ EmailService EXISTS | Email Enabled: %s | Connection Test: %s",
+                   emailEnabled, result ? "SUCCESS" : "FAILED");
+
+       } catch (Exception e) {
+           log.error("Email debug test failed: ", e);
+           return "❌ Email test exception: " + e.getMessage() + " - Check logs for full details.";
+       }
+   }
+
+   @GetMapping("/test-email-simple")
+   @ResponseBody
+   public String testEmailSimple() {
+       try {
+           if (emailService == null) {
+               return "❌ EmailService is NULL";
+           }
+
+           // Test att skicka ett enkelt test-e-post
+           String testEmail = "fredrik.g.arvidsson@gmail.com"; // Ditt eget e-post
+
+           // Skapa en dummy order för test
+           Order testOrder = new Order();
+           testOrder.setOrderNumber("TEST001");
+           testOrder.setDeliveryName("Test User");
+           testOrder.setTotalAmount(BigDecimal.valueOf(999.00));
+           testOrder.setStatus("PENDING");
+
+           emailService.sendOrderConfirmation(testOrder, testEmail);
+
+           return "✅ Test email sent successfully to " + testEmail;
+
+       } catch (Exception e) {
+           log.error("Simple email test failed: ", e);
+           return "❌ Email test failed: " + e.getMessage();
+       }
+   }
+
+   @GetMapping("/debug-email-config")
+   @ResponseBody
+   public String debugEmailConfig() {
+       StringBuilder debug = new StringBuilder();
+       debug.append("=== EMAIL CONFIGURATION DEBUG ===\n");
+       debug.append("EmailService Status: ").append(emailService != null ? "EXISTS" : "NULL").append("\n");
+       debug.append("Email Enabled: ").append(emailEnabled).append("\n");
+
+       if (emailService != null) {
+           debug.append("EmailService Class: ").append(emailService.getClass().getName()).append("\n");
+           debug.append("EmailService Package: ").append(emailService.getClass().getPackage().getName()).append("\n");
+
+           try {
+               boolean connectionTest = emailService.testEmailConnection();
+               debug.append("Connection Test: ").append(connectionTest ? "SUCCESS" : "FAILED").append("\n");
+           } catch (Exception e) {
+               debug.append("Connection Test: EXCEPTION - ").append(e.getMessage()).append("\n");
+           }
+       }
+
+       // Kontrollera system properties
+       debug.append("app.email.enabled property: ").append(System.getProperty("app.email.enabled", "NOT SET")).append("\n");
+
+       return debug.toString();
+   }
+
+   @GetMapping("/test-email-minimal")
+   @ResponseBody
+   public String testEmailMinimal() {
+       return "EmailService: " + (emailService != null ? "OK" : "NULL") +
+              " | Email Enabled: " + emailEnabled;
+   }
+}

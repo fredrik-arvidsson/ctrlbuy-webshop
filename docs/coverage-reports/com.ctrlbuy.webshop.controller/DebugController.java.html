@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebugController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">DebugController.java</span></div><h1>DebugController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.List;
+import javax.sql.DataSource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.ctrlbuy.webshop.repository.ProductRepository;
+import com.ctrlbuy.webshop.model.Product;
+
+@Controller
+@RequestMapping(&quot;/debug&quot;)
+<span class="fc" id="L22">public class DebugController {</span>
+
+<span class="fc" id="L24">    private static final Logger logger = LoggerFactory.getLogger(DebugController.class);</span>
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @GetMapping(&quot;/products&quot;)
+    @ResponseBody
+    public String debugProducts() {
+<span class="fc" id="L38">        logger.debug(&quot;Debug products endpoint called&quot;);</span>
+<span class="nc" id="L39">        List&lt;Product&gt; products = productRepository.findAll();</span>
+<span class="nc" id="L40">        StringBuilder result = new StringBuilder();</span>
+
+<span class="nc" id="L42">        result.append(&quot;=== PRODUCT DEBUG ===\n&quot;);</span>
+<span class="nc" id="L43">        result.append(&quot;Number of products found: &quot;).append(products.size()).append(&quot;\n&quot;);</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (!products.isEmpty()) {</span>
+<span class="nc" id="L46">            result.append(&quot;\nFirst 3 products:\n&quot;);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            for (int i = 0; i &lt; Math.min(3, products.size()); i++) {</span>
+<span class="nc" id="L48">                Product product = products.get(i);</span>
+<span class="nc" id="L49">                result.append(&quot;Product &quot;).append(i+1).append(&quot;:\n&quot;);</span>
+<span class="nc" id="L50">                result.append(&quot;  ID: &quot;).append(product.getId()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L51">                result.append(&quot;  Name: &quot;).append(product.getName()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L52">                result.append(&quot;  Price: &quot;).append(product.getPrice()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L53">                result.append(&quot;  Category: &quot;).append(product.getCategory()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L54">                result.append(&quot;  Stock: &quot;).append(product.getStockQuantity()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L55">                result.append(&quot;  Description: &quot;).append(</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                        product.getDescription() != null ?</span>
+<span class="nc" id="L57">                                product.getDescription().substring(0, Math.min(50, product.getDescription().length())) + &quot;...&quot;</span>
+<span class="nc" id="L58">                                : &quot;No description&quot;).append(&quot;\n\n&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L62">        result.append(&quot;===================\n&quot;);</span>
+<span class="nc" id="L63">        logger.debug(&quot;Debug products result: {}&quot;, result.toString());</span>
+<span class="nc" id="L64">        return result.toString().replace(&quot;\n&quot;, &quot;&lt;br&gt;&quot;);</span>
+    }
+
+    @GetMapping(&quot;/repo&quot;)
+    @ResponseBody
+    public String debugRepo() {
+<span class="fc" id="L70">        logger.debug(&quot;Debug repo endpoint called&quot;);</span>
+        try {
+<span class="nc" id="L72">            long count = productRepository.count();</span>
+<span class="nc" id="L73">            List&lt;Product&gt; products = productRepository.findAll();</span>
+
+<span class="nc" id="L75">            StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L76">            result.append(&quot;&lt;h3&gt;REPOSITORY DEBUG&lt;/h3&gt;&quot;);</span>
+<span class="nc" id="L77">            result.append(&quot;Repository count(): &quot;).append(count).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L78">            result.append(&quot;FindAll() size: &quot;).append(products.size()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            result.append(&quot;Connection: &quot;).append(productRepository != null ? &quot;OK&quot; : &quot;NULL&quot;).append(&quot;&lt;br&gt;&lt;br&gt;&quot;);</span>
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (!products.isEmpty()) {</span>
+<span class="nc" id="L82">                result.append(&quot;&lt;h4&gt;First product:&lt;/h4&gt;&quot;);</span>
+<span class="nc" id="L83">                Product first = products.get(0);</span>
+<span class="nc" id="L84">                result.append(&quot;ID: &quot;).append(first.getId()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L85">                result.append(&quot;Name: &quot;).append(first.getName()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L86">                result.append(&quot;Price: &quot;).append(first.getPrice()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L87">                result.append(&quot;Category: &quot;).append(first.getCategory()).append(&quot;&lt;br&gt;&quot;);</span>
+            }
+
+<span class="nc" id="L90">            return result.toString();</span>
+<span class="fc" id="L91">        } catch (Exception e) {</span>
+<span class="fc" id="L92">            logger.error(&quot;Error in debug repo: &quot;, e);</span>
+<span class="fc" id="L93">            return &quot;&lt;h3&gt;ERROR&lt;/h3&gt;Message: &quot; + e.getMessage() +</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                    &quot;&lt;br&gt;Cause: &quot; + (e.getCause() != null ? e.getCause().getMessage() : &quot;No cause&quot;) +</span>
+<span class="fc" id="L95">                    &quot;&lt;br&gt;Stack: &quot; + e.getClass().getSimpleName();</span>
+        }
+    }
+
+    @GetMapping(&quot;/raw-sql&quot;)
+    @ResponseBody
+    public String debugRawSql() {
+<span class="fc" id="L102">        logger.debug(&quot;Debug raw SQL endpoint called&quot;);</span>
+        try {
+<span class="nc" id="L104">            Connection conn = dataSource.getConnection();</span>
+<span class="nc" id="L105">            Statement stmt = conn.createStatement();</span>
+
+<span class="nc" id="L107">            StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L108">            result.append(&quot;&lt;h3&gt;RAW SQL DEBUG&lt;/h3&gt;&quot;);</span>
+
+<span class="nc" id="L110">            ResultSet rs = stmt.executeQuery(&quot;SELECT COUNT(*) as count FROM products&quot;);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L112">                result.append(&quot;Raw SQL COUNT: &quot;).append(rs.getInt(&quot;count&quot;)).append(&quot;&lt;br&gt;&quot;);</span>
+            }
+<span class="nc" id="L114">            rs.close();</span>
+
+<span class="nc" id="L116">            rs = stmt.executeQuery(&quot;SELECT id, name, price, category FROM products LIMIT 3&quot;);</span>
+<span class="nc" id="L117">            result.append(&quot;&lt;h4&gt;First 3 products (Raw SQL):&lt;/h4&gt;&quot;);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L119">                result.append(&quot;ID: &quot;).append(rs.getLong(&quot;id&quot;))</span>
+<span class="nc" id="L120">                        .append(&quot;, Name: &quot;).append(rs.getString(&quot;name&quot;))</span>
+<span class="nc" id="L121">                        .append(&quot;, Price: &quot;).append(rs.getBigDecimal(&quot;price&quot;))</span>
+<span class="nc" id="L122">                        .append(&quot;, Category: &quot;).append(rs.getString(&quot;category&quot;))</span>
+<span class="nc" id="L123">                        .append(&quot;&lt;br&gt;&quot;);</span>
+            }
+<span class="nc" id="L125">            rs.close();</span>
+
+<span class="nc" id="L127">            rs = stmt.executeQuery(&quot;SELECT DATABASE() as db_name&quot;);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L129">                result.append(&quot;&lt;br&gt;Current database: &quot;).append(rs.getString(&quot;db_name&quot;)).append(&quot;&lt;br&gt;&quot;);</span>
+            }
+<span class="nc" id="L131">            rs.close();</span>
+
+<span class="nc" id="L133">            stmt.close();</span>
+<span class="nc" id="L134">            conn.close();</span>
+
+<span class="nc" id="L136">            return result.toString();</span>
+<span class="fc" id="L137">        } catch (Exception e) {</span>
+<span class="fc" id="L138">            logger.error(&quot;Error in debug raw SQL: &quot;, e);</span>
+<span class="fc" id="L139">            return &quot;&lt;h3&gt;RAW SQL ERROR&lt;/h3&gt;Message: &quot; + e.getMessage() +</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">                    &quot;&lt;br&gt;Cause: &quot; + (e.getCause() != null ? e.getCause().getMessage() : &quot;No cause&quot;);</span>
+        }
+    }
+
+    @GetMapping(&quot;/native&quot;)
+    @ResponseBody
+    public String debugNative() {
+<span class="fc" id="L147">        logger.debug(&quot;Debug native endpoint called&quot;);</span>
+        try {
+<span class="nc" id="L149">            Query countQuery = entityManager.createNativeQuery(&quot;SELECT COUNT(*) FROM products&quot;);</span>
+<span class="nc" id="L150">            Object countResult = countQuery.getSingleResult();</span>
+
+<span class="nc" id="L152">            StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L153">            result.append(&quot;&lt;h3&gt;NATIVE SQL DEBUG&lt;/h3&gt;&quot;);</span>
+<span class="nc" id="L154">            result.append(&quot;Native COUNT: &quot;).append(countResult.toString()).append(&quot;&lt;br&gt;&lt;br&gt;&quot;);</span>
+
+<span class="nc" id="L156">            Query dataQuery = entityManager.createNativeQuery(&quot;SELECT id, name, price FROM products LIMIT 3&quot;);</span>
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L158">            List&lt;Object[]&gt; results = dataQuery.getResultList();</span>
+
+<span class="nc" id="L160">            result.append(&quot;&lt;h4&gt;First 3 products (Native SQL):&lt;/h4&gt;&quot;);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            for (Object[] row : results) {</span>
+<span class="nc" id="L162">                result.append(&quot;ID: &quot;).append(row[0])</span>
+<span class="nc" id="L163">                        .append(&quot;, Name: &quot;).append(row[1])</span>
+<span class="nc" id="L164">                        .append(&quot;, Price: &quot;).append(row[2])</span>
+<span class="nc" id="L165">                        .append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L166">            }</span>
+
+<span class="nc" id="L168">            return result.toString();</span>
+<span class="fc" id="L169">        } catch (Exception e) {</span>
+<span class="fc" id="L170">            logger.error(&quot;Error in debug native: &quot;, e);</span>
+<span class="fc" id="L171">            return &quot;&lt;h3&gt;NATIVE SQL ERROR&lt;/h3&gt;Message: &quot; + e.getMessage() +</span>
+<span class="fc" id="L172">                    &quot;&lt;br&gt;Stack: &quot; + e.getClass().getSimpleName();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

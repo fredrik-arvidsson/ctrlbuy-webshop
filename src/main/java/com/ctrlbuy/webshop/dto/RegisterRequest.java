@@ -33,8 +33,41 @@ public class RegisterRequest {
     @NotBlank(message = "Bekräfta lösenord får inte vara tomt")
     private String confirmPassword;
 
-    // Hjälpmetod för att få hela namnet
+    // ✅ Hjälpmetoder
+
+    /**
+     * Få hela namnet
+     */
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    /**
+     * Kontrollera om lösenorden matchar
+     */
+    public boolean passwordsMatch() {
+        return password != null && password.equals(confirmPassword);
+    }
+
+    /**
+     * Trimma alla fält för säkrare hantering
+     */
+    public void trimAllFields() {
+        if (firstName != null) firstName = firstName.trim();
+        if (lastName != null) lastName = lastName.trim();
+        if (username != null) username = username.trim();
+        if (email != null) email = email.trim().toLowerCase();
+        if (password != null) password = password.trim();
+        if (confirmPassword != null) confirmPassword = confirmPassword.trim();
+    }
+
+    @Override
+    public String toString() {
+        return "RegisterRequest{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }

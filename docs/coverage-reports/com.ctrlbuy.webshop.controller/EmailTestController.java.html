@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailTestController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">EmailTestController.java</span></div><h1>EmailTestController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="nc" id="L13">@RequiredArgsConstructor</span>
+<span class="nc" id="L14">@Slf4j</span>
+public class EmailTestController {
+
+    private final EmailService emailService;
+
+    @Value(&quot;${app.email.enabled:false}&quot;)
+    private boolean emailEnabled;
+
+    @GetMapping(&quot;/test-email&quot;)
+    public String testEmail(@RequestParam(&quot;email&quot;) String email) {
+        try {
+<span class="nc" id="L25">            emailService.sendVerificationEmail(email, &quot;test-token-123&quot;, &quot;Testanvändare&quot;);</span>
+<span class="nc" id="L26">            return &quot;E-post skickad till: &quot; + email;</span>
+<span class="nc" id="L27">        } catch (Exception e) {</span>
+<span class="nc" id="L28">            return &quot;FEL vid e-postsändning: &quot; + e.getMessage();</span>
+        }
+    }
+
+    // 🆕 ENKLA DEBUG ENDPOINTS
+    @GetMapping(&quot;/test-email-status&quot;)
+    public String testEmailStatus() {
+<span class="nc" id="L35">        log.info(&quot;=== EMAIL STATUS TEST ===&quot;);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        log.info(&quot;EmailService: {}&quot;, emailService != null ? &quot;EXISTS&quot; : &quot;NULL&quot;);</span>
+<span class="nc" id="L37">        log.info(&quot;Email Enabled: {}&quot;, emailEnabled);</span>
+
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (emailService != null) {</span>
+<span class="nc" id="L40">            log.info(&quot;EmailService Class: {}&quot;, emailService.getClass().getName());</span>
+        }
+
+<span class="nc" id="L43">        return String.format(&quot;EmailService: %s | Email Enabled: %s&quot;,</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">                emailService != null ? &quot;EXISTS&quot; : &quot;NULL&quot;,</span>
+<span class="nc" id="L45">                emailEnabled);</span>
+    }
+
+    @GetMapping(&quot;/test-email-connection&quot;)
+    public String testEmailConnection() {
+        try {
+<span class="nc" id="L51">            log.info(&quot;=== EMAIL CONNECTION TEST ===&quot;);</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (emailService == null) {</span>
+<span class="nc" id="L54">                return &quot;❌ EmailService is NULL - Check bean configuration&quot;;</span>
+            }
+
+<span class="nc" id="L57">            log.info(&quot;EmailService found, testing connection...&quot;);</span>
+<span class="nc" id="L58">            boolean connectionResult = emailService.testEmailConnection();</span>
+
+<span class="nc" id="L60">            log.info(&quot;Connection test result: {}&quot;, connectionResult);</span>
+
+<span class="nc" id="L62">            return String.format(&quot;✅ EmailService: EXISTS | Email Enabled: %s | Connection: %s&quot;,</span>
+<span class="nc" id="L63">                    emailEnabled,</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                    connectionResult ? &quot;SUCCESS&quot; : &quot;FAILED&quot;);</span>
+
+<span class="nc" id="L66">        } catch (Exception e) {</span>
+<span class="nc" id="L67">            log.error(&quot;Email connection test failed: &quot;, e);</span>
+<span class="nc" id="L68">            return &quot;❌ Connection test failed: &quot; + e.getMessage();</span>
+        }
+    }
+
+    @GetMapping(&quot;/test-order-email&quot;)
+    public String testOrderEmail() {
+        try {
+<span class="nc" id="L75">            log.info(&quot;=== ORDER EMAIL TEST ===&quot;);</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (emailService == null) {</span>
+<span class="nc" id="L78">                return &quot;❌ EmailService is NULL&quot;;</span>
+            }
+
+            // Skapa en test-order med korrekta datatyper
+<span class="nc" id="L82">            Order testOrder = new Order();</span>
+<span class="nc" id="L83">            testOrder.setOrderNumber(&quot;TEST-&quot; + System.currentTimeMillis());</span>
+<span class="nc" id="L84">            testOrder.setDeliveryName(&quot;Test Användare&quot;);</span>
+<span class="nc" id="L85">            testOrder.setTotalAmount(999.00); // Double istället för BigDecimal</span>
+<span class="nc" id="L86">            testOrder.setStatus(Order.OrderStatus.PENDING); // Enum istället för String</span>
+
+<span class="nc" id="L88">            String testEmail = &quot;fredrik.g.arvidsson@gmail.com&quot;;</span>
+
+<span class="nc" id="L90">            log.info(&quot;Sending test order confirmation to: {}&quot;, testEmail);</span>
+<span class="nc" id="L91">            emailService.sendOrderConfirmation(testOrder, testEmail);</span>
+
+<span class="nc" id="L93">            return &quot;✅ Test order email sent successfully to &quot; + testEmail +</span>
+<span class="nc" id="L94">                    &quot; for order: &quot; + testOrder.getOrderNumber();</span>
+
+<span class="nc" id="L96">        } catch (Exception e) {</span>
+<span class="nc" id="L97">            log.error(&quot;Order email test failed: &quot;, e);</span>
+<span class="nc" id="L98">            return &quot;❌ Order email test failed: &quot; + e.getMessage();</span>
+        }
+    }
+
+    @GetMapping(&quot;/debug-email-full&quot;)
+    public String debugEmailFull() {
+<span class="nc" id="L104">        StringBuilder debug = new StringBuilder();</span>
+<span class="nc" id="L105">        debug.append(&quot;=== FULL EMAIL DEBUG ===\n&quot;);</span>
+
+        // Basic status
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        debug.append(&quot;EmailService Status: &quot;).append(emailService != null ? &quot;EXISTS&quot; : &quot;NULL&quot;).append(&quot;\n&quot;);</span>
+<span class="nc" id="L109">        debug.append(&quot;Email Enabled Config: &quot;).append(emailEnabled).append(&quot;\n&quot;);</span>
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (emailService != null) {</span>
+<span class="nc" id="L112">            debug.append(&quot;EmailService Class: &quot;).append(emailService.getClass().getName()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L113">            debug.append(&quot;EmailService Package: &quot;).append(emailService.getClass().getPackage().getName()).append(&quot;\n&quot;);</span>
+
+            // Test connection
+            try {
+<span class="nc" id="L117">                boolean connectionTest = emailService.testEmailConnection();</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                debug.append(&quot;Connection Test: &quot;).append(connectionTest ? &quot;SUCCESS&quot; : &quot;FAILED&quot;).append(&quot;\n&quot;);</span>
+<span class="nc" id="L119">            } catch (Exception e) {</span>
+<span class="nc" id="L120">                debug.append(&quot;Connection Test: EXCEPTION - &quot;).append(e.getMessage()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L121">            }</span>
+        }
+
+        // System properties check
+<span class="nc" id="L125">        debug.append(&quot;System property app.email.enabled: &quot;).append(System.getProperty(&quot;app.email.enabled&quot;, &quot;NOT SET&quot;)).append(&quot;\n&quot;);</span>
+
+        // Environment variables check
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        debug.append(&quot;Env var APP_EMAIL_ENABLED: &quot;).append(System.getenv(&quot;APP_EMAIL_ENABLED&quot;) != null ? System.getenv(&quot;APP_EMAIL_ENABLED&quot;) : &quot;NOT SET&quot;).append(&quot;\n&quot;);</span>
+
+<span class="nc" id="L130">        return debug.toString();</span>
+    }
+
+    @GetMapping(&quot;/test-email-minimal&quot;)
+    public String testEmailMinimal() {
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        return &quot;EmailService: &quot; + (emailService != null ? &quot;OK&quot; : &quot;NULL&quot;) +</span>
+                &quot; | Enabled: &quot; + emailEnabled;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

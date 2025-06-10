@@ -1,8 +1,8 @@
 package com.ctrlbuy.webshop.config;
 
 import com.ctrlbuy.webshop.service.CustomUserDetailsService;
-// import com.ctrlbuy.webshop.security.handler.CustomAuthenticationSuccessHandler;  // ← KOMMENTERAD BORT
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -20,8 +20,14 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    // @Autowired
-    // private CustomAuthenticationSuccessHandler successHandler;  // ← KOMMENTERAD BORT
+    @Value("${app.security.remember-me.token-validity-seconds:2592000}")
+    private int rememberMeTokenValiditySeconds;
+
+    @Value("${app.security.remember-me.key:uniqueAndSecretKey2025CtrlBuy}")
+    private String rememberMeKey;
+
+    @Value("${app.security.remember-me.parameter:remember-me}")
+    private String rememberMeParameter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,10 +36,10 @@ public class SecurityConfig {
                         // Statiska resurser
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
 
-                        // Publika sidor - VIKTIGT: Lägg till /** för att matcha alla home-varianter
+                        // Publika sidor
                         .requestMatchers("/", "/home", "/home/**", "/about", "/om-oss", "/produkter", "/produkter/**", "/kontakt", "/support", "/debug-products").permitAll()
 
-                        // Produktsidor - LÄGG TILL /products också
+                        // Produktsidor
                         .requestMatchers("/products", "/products/**").permitAll()
 
                         // Autentisering och registrering
@@ -43,44 +49,54 @@ public class SecurityConfig {
                         .requestMatchers("/verify-email", "/verify-email/**").permitAll()
                         .requestMatchers("/resend-verification", "/resend-verification/**").permitAll()
 
-                        // LÖSENORDSÅTERSTÄLLNING - NYA ENDPOINTS
+                        // Lösenordsåterställning
                         .requestMatchers("/forgot-password", "/forgot-password/**").permitAll()
                         .requestMatchers("/reset-password", "/reset-password/**").permitAll()
 
-                        // TEST ENDPOINTS - VIKTIGT FÖR DEBUGGING
+                        // Test endpoints
                         .requestMatchers("/test-email", "/test-email/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
 
-                        // ADMIN ENDPOINTS - TILLÅT ADMIN-PANEL
-                        .requestMatchers("/admin/**").permitAll()
+                        // Admin endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // 🔥 FIXAT: Bara admins får tillgång
 
-                        // CART ENDPOINTS - LÄGG TILL CART
+                        // Cart endpoints
                         .requestMatchers("/cart/**", "/varukorg/**").permitAll()
 
-                        // 🔥 ÄNDRING: Inloggade användare behöver tillgång till profil
-                        .requestMatchers("/min-profil", "/profile/**").authenticated()
+                        // Coming Soon sidor (publika)
+                        .requestMatchers("/returer", "/spara-bestallning", "/garantivillkor", "/coming-soon").permitAll()
 
-                        // 🔥 ÄNDRING: Andra skyddade sidor kan kräva inloggning - men de flesta sidor ska vara publika
-                        .anyRequest().permitAll()  // ÄNDRAT från .authenticated() till .permitAll()
+                        // Profil-sidor kräver inloggning
+                        .requestMatchers("/min-profil", "/min-profil/**", "/profile/**").authenticated()
+
+                        // Resten är publikt
+                        .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)  // 🔥 ÄNDRAT: Använd standard redirect till hemsidan
+                        .defaultSuccessUrl("/", true)  // 🔥 FIXAT: Alltid till hemsidan efter login
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
+                .rememberMe(remember -> remember
+                        .key(rememberMeKey)
+                        .tokenValiditySeconds(rememberMeTokenValiditySeconds)
+                        .userDetailsService(customUserDetailsService)
+                        .rememberMeParameter(rememberMeParameter)
+                        .rememberMeCookieName("ctrlbuy-remember-me")
+                        .alwaysRemember(false)  // 🔥 NYTT: Bara kom ihåg om användaren kryssar i
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/?logout=true")  // 🔥 ÄNDRAT: Gå till hemsidan efter logout
+                        .logoutSuccessUrl("/?logout=true")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "ctrlbuy-remember-me")
+                        .clearAuthentication(true)  // 🔥 NYTT: Rensa autentisering
                         .permitAll()
                 )
                 .csrf(csrf -> csrf
-                        // Inaktivera CSRF för test-endpoints (kan vara behövligt för debugging)
                         .ignoringRequestMatchers("/test-email/**", "/api/test/**", "/admin/**", "/cart/**", "/varukorg/**")
                 )
-                // VIKTIGT: Använd vår CustomUserDetailsService för verifieringskontroll
                 .userDetailsService(customUserDetailsService);
 
         return http.build();

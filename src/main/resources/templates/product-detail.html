@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Produktdetaljer - CTRL+BUY Solutions</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Header - SAMMA SOM HOME */
+        .header-container {
+            background: #000000;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon {
+            width: 100%;
+            height: 250px;
+            background: #000000;
+            border-radius: 0px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 20vw;
+            height: 250px;
+            object-fit: contain;
+        }
+
+        /* Grön navigation */
+        .top-nav {
+            background-color: #28a745;
+            padding: 15px 0;
+        }
+
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+        }
+
+        .top-nav a:hover {
+            background-color: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .top-nav a.active {
+            background-color: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        /* Produktspecifik styling */
+        .product-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.02);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+
+        .price-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .original-price {
+            font-size: 1.2rem;
+            color: #6c757d;
+            text-decoration: line-through;
+        }
+
+        .savings-badge {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+
+        .stock-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .in-stock {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .low-stock {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .out-of-stock {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .add-to-cart-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            margin: 20px 0;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .quantity-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .quantity-btn:hover {
+            background: #218838;
+        }
+
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            margin: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px;
+        }
+
+        .related-products {
+            margin-top: 50px;
+        }
+
+        .related-product-card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .related-product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-specs {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .breadcrumb {
+            background: rgba(40, 167, 69, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<!-- Header med logotyp -->
+<header class="header-container">
+    <div class="logo-icon">
+        <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+    </div>
+</header>
+
+<!-- Grön navigation -->
+<div class="top-nav text-center">
+    <a th:href="@{/}">Hem</a>
+    <a th:href="@{/products}" class="active">Produkter</a>
+    <a th:href="@{/about}">Om oss</a>
+    <a th:href="@{/contact}">Kontakt</a>
+    <a th:href="@{/support}">Support</a>
+    <a th:href="@{/varukorg}">
+        <i class="fas fa-shopping-cart"></i> Varukorg
+    </a>
+</div>
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/}"><i class="fas fa-home"></i> Hem</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/products}">Produkter</a>
+            </li>
+            <li class="breadcrumb-item" th:if="${product.category}">
+                <a th:href="@{/products/category/{cat}(cat=${product.category})}" th:text="${product.category}">Kategori</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Produktnamn</li>
+        </ol>
+    </nav>
+
+    <!-- Flash meddelanden -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> <span th:text="${param.success}">Framgång!</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <!-- Produktinformation -->
+    <div class="row">
+        <!-- Produktbild -->
+        <div class="col-md-6 mb-4">
+            <div class="position-relative">
+                <!-- Rea-badge -->
+                <div th:if="${onSale}" class="product-badge">
+                    <span class="badge badge-danger badge-lg">
+                        <i class="fas fa-fire"></i> REA -<span th:text="${discountPercentage}">20</span>%
+                    </span>
+                </div>
+
+                <!-- Produktbild -->
+                <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/placeholder.jpg'}"
+                     th:alt="${product.name}"
+                     class="product-image"
+                     onerror="this.src='/images/placeholder.jpg'">
+            </div>
+        </div>
+
+        <!-- Produktinformation -->
+        <div class="col-md-6">
+            <div class="product-info">
+                <!-- Produktnamn -->
+                <h1 class="product-title mb-3" th:text="${product.name}">Produktnamn</h1>
+
+                <!-- Pris -->
+                <div class="price-section mb-4">
+                    <div th:if="${onSale}">
+                        <span class="original-price" th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' kr'">0 kr</span>
+                        <span class="price-display" th:text="${#numbers.formatDecimal(salePrice, 0, 2)} + ' kr'">0 kr</span>
+                        <span class="savings-badge">
+                            Spara <span th:text="${#numbers.formatDecimal(savings, 0, 2)}">0</span> kr
+                        </span>
+                    </div>
+                    <div th:unless="${onSale}">
+                        <span class="price-display" th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' kr'">0 kr</span>
+                    </div>
+                </div>
+
+                <!-- Lagerstatus -->
+                <div th:if="${inStock and !lowStock}" class="stock-indicator in-stock">
+                    <i class="fas fa-check-circle"></i> I lager (<span th:text="${product.stockQuantity}">0</span> st)
+                </div>
+                <div th:if="${lowStock}" class="stock-indicator low-stock">
+                    <i class="fas fa-exclamation-triangle"></i> Få kvar i lager (<span th:text="${product.stockQuantity}">0</span> st)
+                </div>
+                <div th:unless="${inStock}" class="stock-indicator out-of-stock">
+                    <i class="fas fa-times-circle"></i> Slutsåld
+                </div>
+
+                <!-- Produktbeskrivning -->
+                <div class="product-description mb-4">
+                    <h5>Beskrivning</h5>
+                    <p th:text="${product.description ?: 'Ingen beskrivning tillgänglig för denna produkt.'}" class="text-muted">
+                        Produktbeskrivning kommer här...
+                    </p>
+                </div>
+
+                <!-- Lägg i varukorg -->
+                <div class="add-to-cart-section" th:if="${inStock}">
+                    <h5><i class="fas fa-shopping-cart me-2"></i>Lägg i varukorg</h5>
+                    <form th:action="@{/cart/add}" method="post">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+
+                        <!-- Antal -->
+                        <div class="quantity-selector">
+                            <label for="quantity" class="mr-3">Antal:</label>
+                            <button type="button" class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                            <input type="number"
+                                   id="quantity"
+                                   name="quantity"
+                                   value="1"
+                                   min="1"
+                                   th:max="${product.stockQuantity}"
+                                   class="quantity-input">
+                            <button type="button" class="quantity-btn" onclick="increaseQuantity()">+</button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-9">
+                                <button type="submit" class="btn btn-success btn-lg btn-block">
+                                    <i class="fas fa-cart-plus me-2"></i>Lägg i varukorg
+                                </button>
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-danger btn-lg btn-block" onclick="addToWishlist()">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Leveransinformation -->
+                    <div class="delivery-info mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-truck me-1"></i> Fri frakt över 500 kr<br>
+                            <i class="fas fa-undo me-1"></i> 30 dagars öppet köp<br>
+                            <i class="fas fa-shield-alt me-1"></i> 2 års garanti
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Slutsåld meddelande -->
+                <div th:unless="${inStock}" class="add-to-cart-section">
+                    <h5><i class="fas fa-bell me-2"></i>Bevaka produkt</h5>
+                    <p class="text-muted">Produkten är för tillfället slutsåld.</p>
+                    <button class="btn btn-outline-secondary btn-lg btn-block" disabled>
+                        <i class="fas fa-bell"></i> Bevaka (Kommer snart)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produktspecifikationer -->
+    <div class="product-specs">
+        <h3><i class="fas fa-info-circle me-2"></i>Produktinformation</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Kategori:</strong><br>
+                <span th:text="${product.category ?: 'Okategoriserad'}">Kategori</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Artikelnummer:</strong><br>
+                <span th:text="${product.id}">12345</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Lagerstatus:</strong><br>
+                <span th:if="${inStock}" class="text-success">✓ I lager</span>
+                <span th:unless="${inStock}" class="text-danger">✗ Slutsåld</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produktinformation tabs -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab">
+                        <i class="fas fa-info-circle me-1"></i> Beskrivning
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="specifications-tab" data-toggle="tab" href="#specifications" role="tab">
+                        <i class="fas fa-list me-1"></i> Specifikationer
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="productTabsContent">
+                <!-- Beskrivning -->
+                <div class="tab-pane fade show active" id="description" role="tabpanel">
+                    <div class="p-4">
+                        <p th:text="${product.description ?: 'Ingen detaljerad beskrivning tillgänglig för denna produkt.'}">
+                            Detaljerad produktbeskrivning...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Specifikationer -->
+                <div class="tab-pane fade" id="specifications" role="tabpanel">
+                    <div class="p-4">
+                        <table class="table table-striped">
+                            <tr>
+                                <td><strong>Kategori</strong></td>
+                                <td th:text="${product.category ?: 'Okategoriserad'}">Smartklockor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Artikelnummer</strong></td>
+                                <td th:text="${product.id}">29</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tillgänglighet</strong></td>
+                                <td>
+                                    <span th:if="${inStock}" class="text-success">✓ I lager</span>
+                                    <span th:unless="${inStock}" class="text-danger">✗ Ej tillgänglig</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lagersaldo</strong></td>
+                                <td th:text="${product.stockQuantity} + ' st'">0 st</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relaterade produkter -->
+    <div class="related-products" th:if="${relatedProducts != null and !#lists.isEmpty(relatedProducts)}">
+        <h3 class="mb-4"><i class="fas fa-heart me-2"></i>Du kanske också gillar</h3>
+        <div class="row">
+            <div th:each="relatedProduct : ${relatedProducts}" class="col-md-3 mb-4">
+                <div class="card related-product-card h-100">
+                    <img th:src="${relatedProduct.imageUrl ?: '/images/placeholder.jpg'}"
+                         class="card-img-top"
+                         style="height: 200px; object-fit: cover;"
+                         onerror="this.src='/images/placeholder.jpg'">
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title" th:text="${relatedProduct.name}">Produktnamn</h6>
+                        <p class="card-text text-muted small flex-grow-1"
+                           th:text="${#strings.abbreviate(relatedProduct.description, 60)}">Beskrivning...</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-success"
+                                      th:text="${#numbers.formatDecimal(relatedProduct.price, 0, 2)} + ' kr'">1234 kr</span>
+                                <a th:href="@{/products/{id}(id=${relatedProduct.id})}"
+                                   class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-eye"></i> Visa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="fas fa-shopping-cart me-2"></i>CTRL+BUY Solutions</h5>
+                <p>Din pålitliga partner för elektronik och teknik.</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Snabblänkar</h6>
+                <ul class="list-unstyled">
+                    <li><a href="/about" class="text-white-50">Om oss</a></li>
+                    <li><a href="/contact" class="text-white-50">Kontakt</a></li>
+                    <li><a href="/support" class="text-white-50">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="text-center">
+            <p class="mb-0">&copy; 2024 CTRL+BUY Solutions. Alla rättigheter förbehållna.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap & JQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Quantity selector functions
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.getAttribute('max')) || 999;
+        const current = parseInt(input.value) || 1;
+        if (current < max) {
+            input.value = current + 1;
+        }
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        const current = parseInt(input.value) || 1;
+        if (current > 1) {
+            input.value = current - 1;
+        }
+    }
+
+    function addToWishlist() {
+        // Implementera önskelista-funktionalitet
+        alert('Produkt tillagd i önskelistan! (Funktion kommer snart)');
+    }
+
+    // Prevent form submission if out of stock or invalid quantity
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartForm = document.querySelector('form[action*="/cart/add"]');
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function(e) {
+                const quantityInput = document.getElementById('quantity');
+                const quantity = parseInt(quantityInput.value) || 0;
+                const maxStock = parseInt(quantityInput.getAttribute('max')) || 0;
+
+                if (quantity <= 0) {
+                    e.preventDefault();
+                    alert('Ange ett giltigt antal.');
+                    quantityInput.focus();
+                    return;
+                }
+
+                if (quantity > maxStock) {
+                    e.preventDefault();
+                    alert('Inte tillräckligt många i lager. Max antal: ' + maxStock);
+                    quantityInput.value = maxStock;
+                    return;
+                }
+            });
+        }
+
+        // Auto-dölj flash meddelanden efter 5 sekunder
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    });
+</script>
+</body>
+</html>

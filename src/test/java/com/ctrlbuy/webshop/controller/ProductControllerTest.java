@@ -3,7 +3,6 @@ package com.ctrlbuy.webshop.controller;
 import com.ctrlbuy.webshop.model.Product;
 import com.ctrlbuy.webshop.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,26 +10,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@DisplayName("Product Controller Unit Tests")
-class ProductControllerTest {
+public class ProductControllerTest {
 
     @Mock
     private ProductService productService;
@@ -46,273 +44,201 @@ class ProductControllerTest {
 
     private Product testProduct;
     private List<Product> testProducts;
-    private Page<Product> testPage;
+    private Page<Product> testProductPage;
 
     @BeforeEach
     void setUp() {
+        // Setup test product
         testProduct = new Product();
         testProduct.setId(1L);
-        testProduct.setName("Test Product");
-        testProduct.setDescription("Test product description");
-        testProduct.setPrice(new BigDecimal("199.99"));
-        testProduct.setCategory("Electronics");
-        testProduct.setStockQuantity(5);
-        testProduct.setActive(true);
+        testProduct.setName("Test Game");
+        testProduct.setCategory("Action");
+        testProduct.setPrice(new BigDecimal("59.99"));
+        testProduct.setStockQuantity(10);
+        testProduct.setDescription("Test description");
+
+        // Setup test products list
+        testProducts = new ArrayList<>();
+        testProducts.add(testProduct);
 
         Product product2 = new Product();
         product2.setId(2L);
-        product2.setName("Second Product");
-        product2.setDescription("Second test product");
-        product2.setPrice(new BigDecimal("299.99"));
-        product2.setCategory("Books");
-        product2.setStockQuantity(10);
-        product2.setActive(true);
+        product2.setName("Test Game 2");
+        product2.setCategory("RPG");
+        product2.setPrice(new BigDecimal("49.99"));
+        testProducts.add(product2);
 
-        testProducts = Arrays.asList(testProduct, product2);
-        testPage = new PageImpl<>(testProducts, PageRequest.of(0, 12), testProducts.size());
-    }
+        // Setup paginated products
+        testProductPage = new PageImpl<>(testProducts, PageRequest.of(0, 10), testProducts.size());
 
-    @Test
-    @DisplayName("Product listing - Default parameters")
-    void testListProductsDefault() {
-        // Arrange
-        when(productService.findAllActive(any(Pageable.class))).thenReturn(testPage);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
-
-        // Act
-        String viewName = productController.listProducts(0, 12, "name", "asc", null, null, null, null, null, false, model);
-
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("products", testProducts);
-        verify(model).addAttribute("pageTitle", "Alla produkter");
-        verify(model).addAttribute("currentPage", 0);
-        verify(model).addAttribute("totalPages", 1);
-        
-        System.out.println("✅ Product listing default - PASS");
-    }
-
-    @Test
-    @DisplayName("Product listing - Search functionality")
-    void testListProductsWithSearch() {
-        // Arrange
-        String searchTerm = "test";
-        when(productService.searchProducts(eq(searchTerm), any(Pageable.class))).thenReturn(testPage);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
-
-        // Act
-        String viewName = productController.listProducts(0, 12, "name", "asc", null, searchTerm, null, null, null, false, model);
-
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("pageTitle", "Sökresultat för: " + searchTerm);
-        verify(model).addAttribute("searchTerm", searchTerm);
-        
-        System.out.println("✅ Product listing search - PASS");
-    }
-
-    @Test
-    @DisplayName("Product listing - Category filter")
-    void testListProductsWithCategory() {
-        // Arrange
-        String category = "Electronics";
-        when(productService.findByCategory(eq(category), any(Pageable.class))).thenReturn(testPage);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
-
-        // Act
-        String viewName = productController.listProducts(0, 12, "name", "asc", category, null, null, null, null, false, model);
-
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("pageTitle", "Produkter i kategorin: " + category);
-        verify(model).addAttribute("selectedCategory", category);
-        
-        System.out.println("✅ Product listing category - PASS");
-    }
-
-    @Test
-    @DisplayName("Product listing - Sale products")
-    void testListProductsOnSale() {
-        // Arrange
-        when(productService.getProductsOnSale()).thenReturn(testProducts);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
-
-        // Act
-        String viewName = productController.listProducts(0, 12, "name", "asc", null, null, null, null, null, true, model);
-
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("pageTitle", "Produkter på rea");
-        
-        System.out.println("✅ Product listing on sale - PASS");
-    }
-
-    @Test
-    @DisplayName("Product detail - Existing product")
-    void testViewProductExisting() {
-        // Arrange
+        // Common mocks - använd rätta metodnamn
+        when(productService.findAllActive(any(Pageable.class))).thenReturn(testProductPage);
         when(productService.findById(1L)).thenReturn(Optional.of(testProduct));
-        when(productService.getProductsByCategory("Electronics")).thenReturn(testProducts);
-
-        // Act
-        String viewName = productController.viewProduct(1L, model, redirectAttributes);
-
-        // Assert
-        assertEquals("products/detail", viewName);
-        verify(model).addAttribute("product", testProduct);
-        verify(model).addAttribute("inStock", true);
-        
-        System.out.println("✅ Product detail existing - PASS");
     }
 
     @Test
-    @DisplayName("Product detail - Non-existing product")
-    void testViewProductNonExisting() {
-        // Arrange
+    void testListProducts_NoFilters() {
+        // Test GET /products (no filters) - använd rätt service method
+        when(productService.getAllProducts()).thenReturn(testProducts);
+
+        String result = productController.listProducts(null, null, model);
+
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), any());
+        verify(model).addAttribute(eq("pageTitle"), eq("Alla produkter"));
+        verify(productService).getAllProducts();
+    }
+
+    @Test
+    void testListProducts_WithCategory() {
+        // Test GET /products?category=Action - rätt attribut och service call
+        when(productService.getProductsByCategory("Action")).thenReturn(testProducts);
+
+        String result = productController.listProducts("Action", null, model);
+
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), any());
+        verify(model).addAttribute(eq("selectedCategory"), eq("Action"));
+        verify(model).addAttribute(eq("pageTitle"), eq("Produkter i kategorin: Action"));
+        verify(productService).getProductsByCategory("Action");
+    }
+
+    @Test
+    void testListProducts_WithSearch() {
+        // Test GET /products?search=game - använd rätt metod utan Pageable
+        when(productService.searchProducts("game")).thenReturn(testProducts);
+
+        String result = productController.listProducts(null, "game", model);
+
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), any());
+        verify(model).addAttribute(eq("searchTerm"), eq("game"));
+        verify(productService).searchProducts("game");
+    }
+
+    @Test
+    void testViewProduct_Success() {
+        // Test GET /products/{id} - ✅ FIXAT: Korrekt template för produktdetaljer
+        String result = productController.viewProduct(1L, model, redirectAttributes);
+
+        assertEquals("product-detail", result); // ✅ RÄTT: viewProduct ska returnera product-detail
+        verify(model).addAttribute(eq("product"), eq(testProduct));
+        verify(productService).findById(1L);
+    }
+
+    @Test
+    void testViewProduct_NotFound() {
+        // Test GET /products/{id} med produkt som inte finns - rätt redirect
         when(productService.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
-        String viewName = productController.viewProduct(999L, model, redirectAttributes);
+        String result = productController.viewProduct(999L, model, redirectAttributes);
 
-        // Assert
-        assertEquals("redirect:/products", viewName);
-        verify(redirectAttributes).addFlashAttribute("error", "Produkten hittades inte.");
-        
-        System.out.println("✅ Product detail non-existing - PASS");
+        assertEquals("redirect:/products", result);
+        verify(redirectAttributes).addFlashAttribute(anyString(), anyString());
     }
 
     @Test
-    @DisplayName("API search endpoint")
-    void testSearchProductsAPI() {
-        // Arrange
-        when(productService.searchActiveProducts("test")).thenReturn(testProducts);
+    void testSearchProducts_API() {
+        // Test GET /products/api/search?q=game - använd rätt service method
+        when(productService.searchActiveProducts("game")).thenReturn(new ArrayList<>());
 
-        // Act
-        List<Product> result = productController.searchProducts("test");
+        List<Product> result = productController.searchProducts("game");
 
-        // Assert
-        assertEquals(2, result.size());
-        
-        System.out.println("✅ API search - PASS");
+        assertEquals(0, result.size()); // Förvänta tom lista
+        verify(productService).searchActiveProducts("game");
     }
 
     @Test
-    @DisplayName("API search - Short query")
-    void testSearchProductsAPIShortQuery() {
-        // Act
-        List<Product> result = productController.searchProducts("a");
-
-        // Assert
-        assertEquals(0, result.size());
-        
-        System.out.println("✅ API search short query - PASS");
-    }
-
-    @Test
-    @DisplayName("Category view")
     void testViewCategory() {
-        // Arrange
-        when(productService.findByCategory(eq("Electronics"), any(Pageable.class))).thenReturn(testPage);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
+        // Test GET /products/category/{category} - använd rätt service method
+        when(productService.getProductsByCategory("Action")).thenReturn(testProducts);
 
-        // Act
-        String viewName = productController.viewCategory("Electronics", model);
+        String result = productController.viewCategory("Action", model);
 
-        // Assert
-        assertEquals("products/list", viewName);
-        
-        System.out.println("✅ Category view - PASS");
+        assertEquals("products", result);
+        verify(productService).getProductsByCategory("Action");
     }
 
     @Test
-    @DisplayName("Sale products page")
     void testViewSaleProducts() {
-        // Arrange
+        // Test GET /products/sale - rätt template
         when(productService.getProductsOnSale()).thenReturn(testProducts);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
-        when(productService.getPopularProducts(5)).thenReturn(testProducts);
-        when(productService.getNewestProducts(5)).thenReturn(testProducts);
 
-        // Act
-        String viewName = productController.viewSaleProducts(model);
+        String result = productController.viewSaleProducts(model);
 
-        // Assert
-        assertEquals("products/list", viewName);
-        
-        System.out.println("✅ Sale products page - PASS");
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), eq(testProducts));
+        verify(productService).getProductsOnSale();
     }
 
     @Test
-    @DisplayName("Popular products page")
     void testViewPopularProducts() {
-        // Arrange
-        when(productService.getPopularProducts(20)).thenReturn(testProducts);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
+        // Test GET /products/popular - använd rätt service method med parameter
+        when(productService.getPopularProducts(12)).thenReturn(new ArrayList<>());
 
-        // Act
-        String viewName = productController.viewPopularProducts(model);
+        String result = productController.viewPopularProducts(model);
 
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("pageTitle", "Populära produkter");
-        
-        System.out.println("✅ Popular products page - PASS");
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), any());
+        verify(model).addAttribute(eq("pageTitle"), eq("Populära produkter"));
+        verify(productService).getPopularProducts(12);
     }
 
     @Test
-    @DisplayName("New products page")
     void testViewNewProducts() {
-        // Arrange
-        when(productService.getNewestProducts(20)).thenReturn(testProducts);
-        when(productService.getAllCategories()).thenReturn(Arrays.asList("Electronics", "Books"));
+        // Test GET /products/new - använd rätt service method
+        when(productService.getNewestProducts(12)).thenReturn(new ArrayList<>());
 
-        // Act
-        String viewName = productController.viewNewProducts(model);
+        String result = productController.viewNewProducts(model);
 
-        // Assert
-        assertEquals("products/list", viewName);
-        verify(model).addAttribute("pageTitle", "Nya produkter");
-        
-        System.out.println("✅ New products page - PASS");
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("products"), any());
+        verify(model).addAttribute(eq("pageTitle"), eq("Nya produkter"));
+        verify(productService).getNewestProducts(12);
     }
 
     @Test
-    @DisplayName("Quick view API")
-    void testQuickViewProduct() {
-        // Arrange
+    void testCheckStock_InStock() {
+        // Test GET /products/{id}/stock - använd rätt service method
         when(productService.getProductByIdWithoutView(1L)).thenReturn(Optional.of(testProduct));
 
-        // Act
-        Product result = productController.quickViewProduct(1L);
+        boolean result = productController.checkStock(1L);
 
-        // Assert
-        assertEquals(testProduct, result);
-        
-        System.out.println("✅ Quick view API - PASS");
+        assertTrue(result);
+        verify(productService).getProductByIdWithoutView(1L);
     }
 
     @Test
-    @DisplayName("Stock check API")
-    void testCheckStock() {
-        // Arrange
+    void testCheckStock_OutOfStock() {
+        // Test GET /products/{id}/stock - product out of stock
+        testProduct.setStockQuantity(0);
         when(productService.getProductByIdWithoutView(1L)).thenReturn(Optional.of(testProduct));
 
-        // Act
-        boolean inStock = productController.checkStock(1L);
+        boolean result = productController.checkStock(1L);
 
-        // Assert
-        assertTrue(inStock);
-        
-        System.out.println("✅ Stock check API - PASS");
+        assertFalse(result);
+        verify(productService).getProductByIdWithoutView(1L);
+    }
+
+    @Test
+    void testCheckStock_ProductNotFound() {
+        // Test GET /products/{id}/stock - product not found
+        when(productService.getProductByIdWithoutView(999L)).thenReturn(Optional.empty());
+
+        boolean result = productController.checkStock(999L);
+
+        assertFalse(result);
+        verify(productService).getProductByIdWithoutView(999L);
+    }
+
+    @Test
+    void testHandleError() {
+        // Test exception handling - rätt template
+        Exception testException = new RuntimeException("Test error");
+
+        String result = productController.handleError(testException, model);
+
+        assertEquals("products", result);
+        verify(model).addAttribute(eq("error"), anyString());
     }
 }

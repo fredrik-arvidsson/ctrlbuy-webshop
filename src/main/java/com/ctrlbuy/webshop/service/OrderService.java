@@ -7,6 +7,8 @@ import com.ctrlbuy.webshop.model.OrderItem;
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.repository.OrderRepository;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductService productService;
+    private final EmailService emailService; // ✅ NYTT: Lägg till EmailService
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * Skapa beställning från checkout-formulär
@@ -67,7 +73,7 @@ public class OrderService {
         order.setUser(user);
         order.setOrderNumber(orderNumber);
         order.setTotalAmount(total.doubleValue());
-        order.setStatus(Order.OrderStatus.CONFIRMED);
+        order.setStatus(Order.OrderStatus.PENDING);
         order.setOrderDate(LocalDateTime.now());
 
         // Leveransadress
@@ -95,6 +101,15 @@ public class OrderService {
 
         // Spara igen med orderitems
         order = orderRepository.save(order);
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+            emailService.sendOrderConfirmation(order, user != null ? user.getEmail() : email);
+            log.info("Orderbekräftelse skickad till: {}", user != null ? user.getEmail() : email);
+        } catch (Exception e) {
+            log.error("Kunde inte skicka orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
         log.info("Beställning skapad med ordernummer: {}", orderNumber);
         return order;
@@ -129,7 +144,7 @@ public class OrderService {
         order.setUser(user);
         order.setOrderNumber(orderNumber);
         order.setTotalAmount(total.doubleValue());
-        order.setStatus(Order.OrderStatus.CONFIRMED);
+        order.setStatus(Order.OrderStatus.PENDING);
         order.setOrderDate(LocalDateTime.now());
 
         // Leveransadress
@@ -159,6 +174,15 @@ public class OrderService {
 
         // Spara igen med orderitems
         order = orderRepository.save(order);
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+            emailService.sendOrderConfirmation(order, user.getEmail());
+            log.info("Orderbekräftelse skickad till: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Kunde inte skicka orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
         log.info("Beställning skapad med ordernummer: {}", orderNumber);
         return order;
@@ -192,7 +216,7 @@ public class OrderService {
         Order order = new Order();
         order.setOrderNumber(orderNumber);
         order.setTotalAmount(total.doubleValue());
-        order.setStatus(Order.OrderStatus.CONFIRMED);
+        order.setStatus(Order.OrderStatus.PENDING);
         order.setOrderDate(LocalDateTime.now());
 
         // Leveransadress från gäst
@@ -222,6 +246,15 @@ public class OrderService {
 
         // Spara igen med orderitems
         order = orderRepository.save(order);
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post för gäster
+        try {
+            emailService.sendOrderConfirmation(order, guestDetails.getEmail());
+            log.info("Gäst-orderbekräftelse skickad till: {}", guestDetails.getEmail());
+        } catch (Exception e) {
+            log.error("Kunde inte skicka gäst-orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
         log.info("Gästbeställning skapad med ordernummer: {}", orderNumber);
         return order;
@@ -263,12 +296,12 @@ public class OrderService {
     }
 
     /**
-     * Generera unikt ordernummer
+     * ✅ UPPDATERAD: Generera enkelt ordernummer med löpnummer
      */
     private String generateOrderNumber() {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-        int random = new Random().nextInt(9999);
-        return "CB" + timestamp + String.format("%04d", random);
+        // Hämta totalt antal ordrar och lägg till 1 för nästa nummer
+        long nextOrderNumber = orderRepository.count() + 1;
+        return String.format("CB%03d", nextOrderNumber);
     }
 
     /**
@@ -277,6 +310,23 @@ public class OrderService {
     public Order findById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Beställning hittades inte"));
+    }
+
+    /**
+     * Hitta beställning med orderItems (för att undvika LazyInitializationException)
+     */
+    @Transactional(readOnly = true)
+    public Order findOrderWithItemsById(Long orderId) {
+        try {
+            return entityManager.createQuery(
+                            "SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId",
+                            Order.class)
+                    .setParameter("orderId", orderId)
+                    .getSingleResult();
+        } catch (Exception e) {
+            log.error("Kunde inte hämta beställning med ID: {}", orderId, e);
+            return null;
+        }
     }
 
     /**

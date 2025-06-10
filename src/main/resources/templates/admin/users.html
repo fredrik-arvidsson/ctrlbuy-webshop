@@ -2,97 +2,350 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Användare | CtrlBuy</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kundhantering - CtrlBuy</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .table {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .table thead th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1rem;
+      font-weight: 600;
+    }
+
+    .table tbody td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-color: #f8f9fa;
+    }
+
+    .btn-custom {
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filter {
+      border-radius: 25px;
+      padding: 0.5rem 1.5rem;
+      margin: 0.25rem;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      color: white;
+    }
+
+    .status-inactive {
+      background: linear-gradient(135deg, #f56565, #e53e3e);
+      color: white;
+    }
+
+    .verified-badge {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      color: white;
+    }
+
+    .unverified-badge {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+      color: white;
+    }
+
+    .role-badge {
+      background: linear-gradient(135deg, #9f7aea, #805ad5);
+      color: white;
+    }
+
+    .search-box {
+      border-radius: 15px;
+      border: 2px solid #e2e8f0;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .action-btn {
+      margin: 0.1rem;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .quick-deactivate {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .alert-custom {
+      border-radius: 15px;
+      border: none;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-<div class="container mt-4">
-  <h1>🔧 Admin - Användarhantering</h1>
 
-  <!-- Snabb borttagning via e-post -->
-  <div class="card mb-4">
-    <div class="card-header bg-danger text-white">
-      <h5>🗑️ Snabb borttagning via e-post</h5>
-    </div>
-    <div class="card-body">
-      <form method="post" action="/admin/users/delete-by-email" class="row g-3">
-        <div class="col-md-8">
-          <input type="email" class="form-control" name="email" placeholder="användarens@email.com" required>
-        </div>
-        <div class="col-md-4">
-          <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Är du säker?')">
-            Ta bort användare
-          </button>
-        </div>
-      </form>
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="header-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="mb-2"><i class="fas fa-users text-primary"></i> <span th:text="${pageTitle}">Kundhantering</span></h1>
+        <p class="text-muted mb-0">Hantera kunder och behörigheter</p>
+      </div>
+      <a href="/admin/dashboard" class="btn btn-outline-primary btn-custom">
+        <i class="fas fa-arrow-left"></i> Tillbaka till Dashboard
+      </a>
     </div>
   </div>
 
-  <!-- Alla användare -->
-  <div class="card">
-    <div class="card-header">
-      <h5>👥 Alla användare (<span th:text="${#lists.size(users)}">0</span>)</h5>
+  <!-- Flash Messages -->
+  <div th:if="${success}" class="alert alert-success alert-custom">
+    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-custom">
+    <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+  </div>
+
+  <!-- Statistik Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="stat-card">
+        <div class="stat-number" th:text="${totalUsers}">0</div>
+        <div><i class="fas fa-users"></i> Totalt Kunder</div>
+      </div>
     </div>
-    <div class="card-body">
+    <div class="col-md-3 mb-3">
+      <div class="stat-card">
+        <div class="stat-number" th:text="${activeUsers}">0</div>
+        <div><i class="fas fa-user-check"></i> Aktiva</div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="stat-card">
+        <div class="stat-number" th:text="${inactiveUsers}">0</div>
+        <div><i class="fas fa-user-slash"></i> Inaktiva</div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="stat-card">
+        <div class="stat-number" th:text="${verifiedUsers}">0</div>
+        <div><i class="fas fa-user-shield"></i> Verifierade</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter och Snabb-inaktivering -->
+  <div class="filter-section">
+    <div class="row">
+      <!-- Filter Knappar -->
+      <div class="col-md-8">
+        <h5><i class="fas fa-filter"></i> Filter</h5>
+        <div class="btn-group" role="group">
+          <a th:href="@{/admin/users(filter='all')}"
+             class="btn btn-filter"
+             th:classappend="${currentFilter == 'all'} ? 'btn-primary' : 'btn-outline-primary'">
+            <i class="fas fa-users"></i> Alla (<span th:text="${totalUsers}">0</span>)
+          </a>
+          <a th:href="@{/admin/users(filter='active')}"
+             class="btn btn-filter"
+             th:classappend="${currentFilter == 'active'} ? 'btn-success' : 'btn-outline-success'">
+            <i class="fas fa-user-check"></i> Aktiva (<span th:text="${activeUsers}">0</span>)
+          </a>
+          <a th:href="@{/admin/users(filter='inactive')}"
+             class="btn btn-filter"
+             th:classappend="${currentFilter == 'inactive'} ? 'btn-warning' : 'btn-outline-warning'">
+            <i class="fas fa-user-slash"></i> Inaktiva (<span th:text="${inactiveUsers}">0</span>)
+          </a>
+          <a th:href="@{/admin/users(filter='verified')}"
+             class="btn btn-filter"
+             th:classappend="${currentFilter == 'verified'} ? 'btn-info' : 'btn-outline-info'">
+            <i class="fas fa-user-shield"></i> Ej verifierade
+          </a>
+        </div>
+      </div>
+
+      <!-- Snabb-inaktivering -->
+      <div class="col-md-4">
+        <h5><i class="fas fa-bolt"></i> Snabb-inaktivering</h5>
+        <form id="quickDeactivateForm" class="d-flex">
+          <input type="email"
+                 class="form-control search-box me-2"
+                 id="quickEmail"
+                 placeholder="Ange e-post för snabb-inaktivering"
+                 required>
+          <button type="submit" class="btn btn-danger btn-custom">
+            <i class="fas fa-user-times"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Användartabell -->
+  <div class="card">
+    <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-hover mb-0">
           <thead>
           <tr>
             <th>ID</th>
             <th>Användarnamn</th>
             <th>E-post</th>
-            <th>Namn</th>
             <th>Aktiv</th>
             <th>Verifierad</th>
             <th>Roller</th>
+            <th>Skapad</th>
             <th>Åtgärder</th>
           </tr>
           </thead>
           <tbody>
           <tr th:each="user : ${users}">
             <td th:text="${user.id}">1</td>
-            <td th:text="${user.username}">username</td>
-            <td th:text="${user.email}">email@example.com</td>
             <td>
-              <span th:text="${user.firstName + ' ' + user.lastName}">Namn</span>
+              <i class="fas fa-user text-muted me-2"></i>
+              <span th:text="${user.username}">admin</span>
+            </td>
+            <td th:text="${user.email}">admin@example.com</td>
+            <td>
+                <span class="status-badge"
+                      th:classappend="${user.active} ? 'status-active' : 'status-inactive'"
+                      th:text="${user.active} ? 'Aktiv' : 'Inaktiv'">
+                </span>
             </td>
             <td>
-              <span th:if="${user.active}" class="badge bg-success">Aktiv</span>
-              <span th:unless="${user.active}" class="badge bg-danger">Inaktiv</span>
+                <span class="status-badge"
+                      th:classappend="${user.emailVerified} ? 'verified-badge' : 'unverified-badge'"
+                      th:text="${user.emailVerified} ? 'Verifierad' : 'Ej verifierad'">
+                </span>
             </td>
             <td>
-              <span th:if="${user.emailVerified}" class="badge bg-success">✅ Verifierad</span>
-              <span th:unless="${user.emailVerified}" class="badge bg-warning">⏳ Ej verifierad</span>
+                <span class="status-badge role-badge"
+                      th:text="${#strings.contains(user.roles.toString(), 'ADMIN')} ? 'ADMIN' : 'USER'">
+                </span>
             </td>
+            <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">2025-06-08 18:42</td>
             <td>
-              <small th:text="${#strings.listJoin(user.roles, ', ')}">ROLE_USER</small>
-            </td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <!-- Ta bort -->
-                <form method="post" th:action="@{'/admin/users/delete/' + ${user.id}}" style="display: inline;">
-                  <button type="submit" class="btn btn-outline-danger btn-sm"
-                          onclick="return confirm('Ta bort användare?')">
-                    🗑️
-                  </button>
-                </form>
+              <!-- Toggle Active/Inactive -->
+              <button th:if="${user.active}"
+                      class="btn btn-warning action-btn"
+                      title="Inaktivera användare"
+                      th:onclick="'deactivateUser(' + ${user.id} + ')'">
+                <i class="fas fa-user-times"></i>
+              </button>
+              <button th:if="${!user.active}"
+                      class="btn btn-success action-btn"
+                      title="Aktivera användare"
+                      th:onclick="'reactivateUser(' + ${user.id} + ')'">
+                <i class="fas fa-user-check"></i>
+              </button>
 
-                <!-- Toggle aktiv -->
-                <form method="post" th:action="@{'/admin/users/toggle-active/' + ${user.id}}" style="display: inline;">
-                  <button type="submit" class="btn btn-outline-warning btn-sm">
-                    <span th:if="${user.active}">⏸️</span>
-                    <span th:unless="${user.active}">▶️</span>
-                  </button>
-                </form>
+              <!-- Reset Email Verification -->
+              <button class="btn btn-info action-btn"
+                      title="Återställ e-postverifiering"
+                      th:onclick="'resetVerification(' + ${user.id} + ')'">
+                <i class="fas fa-envelope"></i>
+              </button>
 
-                <!-- Återställ verifiering -->
-                <form method="post" th:action="@{'/admin/users/reset-verification/' + ${user.id}}" style="display: inline;">
-                  <button type="submit" class="btn btn-outline-secondary btn-sm"
-                          th:if="${user.emailVerified}">
-                    🔄
-                  </button>
-                </form>
-              </div>
+              <!-- Edit Email -->
+              <button class="btn btn-primary action-btn"
+                      title="Ändra e-postadress"
+                      th:data-user-id="${user.id}"
+                      th:data-user-email="${user.email}"
+                      onclick="editEmailSafe(this)">
+                <i class="fas fa-edit"></i>
+              </button>
+
+              <!-- Delete Permanently (endast för inaktiva) -->
+              <button th:if="${!user.active}"
+                      class="btn btn-danger action-btn"
+                      title="Ta bort permanent"
+                      th:data-user-id="${user.id}"
+                      th:data-username="${user.username}"
+                      onclick="deletePermanentlySafe(this)">
+                <i class="fas fa-trash"></i>
+              </button>
             </td>
           </tr>
           </tbody>
@@ -100,10 +353,210 @@
       </div>
     </div>
   </div>
-
-  <div class="mt-4">
-    <a href="/admin/dashboard" class="btn btn-secondary">← Tillbaka till Dashboard</a>
-  </div>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // ✅ FIX: Ändrat från method: 'DELETE' till method: 'POST'
+  function deletePermanently(userId, username) {
+    if (confirm(`Är du säker på att du vill ta bort användare "${username}" PERMANENT?\n\nDetta kan INTE ångras!`)) {
+      fetch(`/admin/users/${userId}/delete-permanently-ajax`, {
+        method: 'POST',  // ✅ FIXAT: Var 'DELETE' tidigare
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  showAlert('success', data.message);
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
+                } else {
+                  showAlert('danger', data.message || 'Ett fel uppstod vid borttagning');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', 'Tekniskt fel vid borttagning');
+              });
+    }
+  }
+
+  function deactivateUser(userId) {
+    fetch(`/admin/users/deactivate/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert('success', data.message);
+                setTimeout(() => {
+                  location.reload();
+                }, 1500);
+              } else {
+                showAlert('danger', data.error || 'Ett fel uppstod');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showAlert('danger', 'Tekniskt fel vid inaktivering');
+            });
+  }
+
+  function reactivateUser(userId) {
+    fetch(`/admin/users/reactivate/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert('success', data.message);
+                setTimeout(() => {
+                  location.reload();
+                }, 1500);
+              } else {
+                showAlert('danger', data.error || 'Ett fel uppstod');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showAlert('danger', 'Tekniskt fel vid reaktivering');
+            });
+  }
+
+  function resetVerification(userId) {
+    if (confirm('Återställ e-postverifiering för denna användare?')) {
+      fetch(`/admin/users/${userId}/reset-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  showAlert('success', data.message);
+                } else {
+                  showAlert('danger', data.message || 'Ett fel uppstod');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', 'Tekniskt fel vid återställning');
+              });
+    }
+  }
+
+  function editEmailSafe(button) {
+    const userId = button.getAttribute('data-user-id');
+    const currentEmail = button.getAttribute('data-user-email');
+    editEmail(userId, currentEmail);
+  }
+
+  function deletePermanentlySafe(button) {
+    const userId = button.getAttribute('data-user-id');
+    const username = button.getAttribute('data-username');
+    deletePermanently(userId, username);
+  }
+
+  function editEmail(userId, currentEmail) {
+    const newEmail = prompt(`Ange ny e-postadress för användaren:\n\nNuvarande: ${currentEmail}`, currentEmail);
+    if (newEmail && newEmail !== currentEmail) {
+      const formData = new FormData();
+      formData.append('email', newEmail);
+
+      fetch(`/admin/users/update-email/${userId}`, {
+        method: 'POST',
+        body: formData
+      })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  showAlert('success', data.message);
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
+                } else {
+                  showAlert('danger', data.error || 'Ett fel uppstod');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', 'Tekniskt fel vid uppdatering');
+              });
+    }
+  }
+
+  // Snabb-inaktivering
+  document.getElementById('quickDeactivateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('quickEmail').value;
+
+    if (confirm(`Inaktivera användare med e-post: ${email}?`)) {
+      const formData = new FormData();
+      formData.append('email', email);
+
+      fetch('/admin/users/quick-deactivate', {
+        method: 'POST',
+        body: formData
+      })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  showAlert('success', data.message);
+                  document.getElementById('quickEmail').value = '';
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
+                } else {
+                  showAlert('danger', data.error || 'Ett fel uppstod');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', 'Tekniskt fel vid snabb-inaktivering');
+              });
+    }
+  });
+
+  function showAlert(type, message) {
+    // Ta bort befintliga alerts
+    const existingAlerts = document.querySelectorAll('.alert-custom');
+    existingAlerts.forEach(alert => alert.remove());
+
+    // Skapa ny alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-custom`;
+    alertDiv.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+    ${message}
+  `;
+
+    // Lägg till överst på sidan
+    const container = document.querySelector('.container-fluid');
+    const header = container.querySelector('.header-card');
+    container.insertBefore(alertDiv, header.nextSibling);
+
+    // Ta bort efter 5 sekunder
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 5000);
+  }
+</script>
+
 </body>
 </html>

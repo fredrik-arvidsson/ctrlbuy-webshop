@@ -1,0 +1,189 @@
+// Fixa CartServiceTest.java - Lägg till dessa fixes
+
+@ExtendWith(MockitoExtension.class)
+class CartServiceTest {
+
+    @Mock
+    private CartRepository cartRepository;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private CartItemRepository cartItemRepository;
+
+    @InjectMocks
+    private CartService cartService;
+
+    private User testUser;
+    private Product testProduct;
+    private Cart testCart;
+    private CartItem testCartItem;
+
+    @BeforeEach
+    void setUp() {
+        // Setup test user
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testuser");
+        testUser.setEmail("test@example.com");
+
+        // Setup test product
+        testProduct = new Product();
+        testProduct.setId(1L);
+        testProduct.setName("Test Product");
+        testProduct.setPrice(new BigDecimal("99.99"));
+
+        // Setup test cart
+        testCart = new Cart();
+        testCart.setId(1L);
+        testCart.setUser(testUser);
+        testCart.setItems(new ArrayList<>());
+
+        // Setup test cart item
+        testCartItem = new CartItem();
+        testCartItem.setId(1L);
+        testCartItem.setCart(testCart);
+        testCartItem.setProduct(testProduct);
+        testCartItem.setQuantity(2);
+        testCart.getItems().add(testCartItem);
+    }
+
+    // FIX 1: testMergeSessionCartWithUserCart_ShouldMergeCarts
+    @Test
+    void testMergeSessionCartWithUserCart_ShouldMergeCarts() {
+        // Given
+        String sessionId = "session-123";
+
+        Cart sessionCart = new Cart();
+        sessionCart.setSessionId(sessionId);
+        sessionCart.setItems(new ArrayList<>());
+
+        CartItem sessionItem = new CartItem();
+        sessionItem.setProduct(testProduct);
+        sessionItem.setQuantity(1);
+        sessionCart.getItems().add(sessionItem);
+
+        Cart userCart = new Cart();
+        userCart.setUser(testUser);
+        userCart.setItems(new ArrayList<>());
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(sessionCart);
+        when(cartRepository.findByUserWithItems(testUser)).thenReturn(userCart);
+        when(cartRepository.save(any(Cart.class))).thenReturn(userCart);
+
+        // When
+        Cart result = cartService.mergeSessionCartWithUserCart(sessionId, testUser);
+
+        // Then
+        assertNotNull(result);
+        verify(cartRepository).save(any(Cart.class));
+        verify(cartRepository).delete(sessionCart);
+    }
+
+    // FIX 2: testGetCartItemCount_WithEmptyCart_ShouldReturnZero
+    @Test
+    void testGetCartItemCount_WithEmptyCart_ShouldReturnZero() {
+        // Given
+        String sessionId = "empty-session";
+        Cart emptyCart = new Cart();
+        emptyCart.setItems(new ArrayList<>());
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(emptyCart);
+
+        // When
+        int count = cartService.getCartItemCount(sessionId);
+
+        // Then
+        assertEquals(0, count);
+    }
+
+    // FIX 3: testGetCartTotal_WithEmptyCart_ShouldReturnZero
+    @Test
+    void testGetCartTotal_WithEmptyCart_ShouldReturnZero() {
+        // Given
+        String sessionId = "empty-session";
+        Cart emptyCart = new Cart();
+        emptyCart.setItems(new ArrayList<>());
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(emptyCart);
+
+        // When
+        BigDecimal total = cartService.getCartTotal(sessionId);
+
+        // Then
+        assertEquals(BigDecimal.ZERO, total);
+    }
+
+    // FIX 4: testRemoveProductFromCart_WhenItemExists_ShouldRemoveItem
+    @Test
+    void testRemoveProductFromCart_WhenItemExists_ShouldRemoveItem() {
+        // Given
+        String sessionId = "session-123";
+        Long productId = 1L;
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(testCart);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(cartRepository.save(any(Cart.class))).thenReturn(testCart);
+
+        // When
+        Cart result = cartService.removeProductFromCart(sessionId, productId);
+
+        // Then
+        assertNotNull(result);
+        verify(cartRepository).save(any(Cart.class));
+    }
+
+    // FIX 5: testRemoveProductFromCart_WhenItemNotExists_ShouldReturnCartUnchanged
+    @Test
+    void testRemoveProductFromCart_WhenItemNotExists_ShouldReturnCartUnchanged() {
+        // Given
+        String sessionId = "session-123";
+        Long productId = 999L; // Non-existent product
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(testCart);
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            cartService.removeProductFromCart(sessionId, productId);
+        });
+    }
+
+    // FIX 6: testUpdateCartItemQuantity_WhenItemExists_ShouldUpdateQuantity
+    @Test
+    void testUpdateCartItemQuantity_WhenItemExists_ShouldUpdateQuantity() {
+        // Given
+        String sessionId = "session-123";
+        Long productId = 1L;
+        int newQuantity = 5;
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(testCart);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(cartRepository.save(any(Cart.class))).thenReturn(testCart);
+
+        // When
+        Cart result = cartService.updateCartItemQuantity(sessionId, productId, newQuantity);
+
+        // Then
+        assertNotNull(result);
+        verify(cartRepository).save(any(Cart.class));
+    }
+
+    // FIX 7: testUpdateCartItemQuantity_WhenItemNotExists_ShouldReturnCartUnchanged
+    @Test
+    void testUpdateCartItemQuantity_WhenItemNotExists_ShouldReturnCartUnchanged() {
+        // Given
+        String sessionId = "session-123";
+        Long productId = 999L; // Non-existent product
+        int newQuantity = 5;
+
+        when(cartRepository.findBySessionIdWithItems(sessionId)).thenReturn(testCart);
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            cartService.updateCartItemQuantity(sessionId, productId, newQuantity);
+        });
+    }
+}

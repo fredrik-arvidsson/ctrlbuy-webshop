@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentGatewayImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service.impl</a> &gt; <span class="el_source">PaymentGatewayImpl.java</span></div><h1>PaymentGatewayImpl.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service.impl;
+
+import com.ctrlbuy.webshop.model.*;
+import com.ctrlbuy.webshop.enums.PaymentStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Service
+<span class="nc" id="L13">@Slf4j</span>
+<span class="nc" id="L14">public class PaymentGatewayImpl implements PaymentGateway {</span>
+
+    @Override
+    public PaymentResult processPayment(PaymentInfo paymentInfo) {
+<span class="nc" id="L18">        log.info(&quot;Processing payment for amount: {}&quot;, paymentInfo.getAmount());</span>
+
+        try {
+            // Simulate payment processing
+<span class="nc" id="L22">            Thread.sleep(1000); // Simulate network call</span>
+
+            // Simple validation
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            if (paymentInfo.getAmount().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="nc" id="L26">                return PaymentResult.failure(&quot;INVALID_AMOUNT&quot;, &quot;Invalid payment amount&quot;);</span>
+            }
+
+            // Generate mock transaction ID
+<span class="nc" id="L30">            String transactionId = &quot;TXN_&quot; + UUID.randomUUID().toString().substring(0, 8).toUpperCase();</span>
+
+            // Simulate 90% success rate
+<span class="nc bnc" id="L33" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.1;</span>
+
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L36">                log.info(&quot;Payment successful with transaction ID: {}&quot;, transactionId);</span>
+<span class="nc" id="L37">                return PaymentResult.success(transactionId, &quot;Payment processed successfully&quot;);</span>
+            } else {
+<span class="nc" id="L39">                log.warn(&quot;Payment failed for amount: {}&quot;, paymentInfo.getAmount());</span>
+<span class="nc" id="L40">                return PaymentResult.failure(&quot;PAYMENT_DECLINED&quot;, &quot;Payment was declined by the bank&quot;);</span>
+            }
+
+<span class="nc" id="L43">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L44">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L45">            log.error(&quot;Payment processing interrupted&quot;, e);</span>
+<span class="nc" id="L46">            return PaymentResult.failure(&quot;PROCESSING_ERROR&quot;, &quot;Payment processing was interrupted&quot;);</span>
+<span class="nc" id="L47">        } catch (Exception e) {</span>
+<span class="nc" id="L48">            log.error(&quot;Error processing payment&quot;, e);</span>
+<span class="nc" id="L49">            return PaymentResult.failure(&quot;SYSTEM_ERROR&quot;, &quot;An error occurred while processing the payment&quot;);</span>
+        }
+    }
+
+    @Override
+    public boolean refund(String transactionId, BigDecimal amount) {
+<span class="nc" id="L55">        log.info(&quot;Processing refund for transaction: {} amount: {}&quot;, transactionId, amount);</span>
+
+        try {
+            // Simulate refund processing
+<span class="nc" id="L59">            Thread.sleep(500);</span>
+
+            // Simulate 95% success rate for refunds
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.05;</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L65">                log.info(&quot;Refund successful for transaction: {}&quot;, transactionId);</span>
+            } else {
+<span class="nc" id="L67">                log.warn(&quot;Refund failed for transaction: {}&quot;, transactionId);</span>
+            }
+
+<span class="nc" id="L70">            return success;</span>
+
+<span class="nc" id="L72">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L73">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L74">            log.error(&quot;Refund processing interrupted&quot;, e);</span>
+<span class="nc" id="L75">            return false;</span>
+<span class="nc" id="L76">        } catch (Exception e) {</span>
+<span class="nc" id="L77">            log.error(&quot;Error processing refund&quot;, e);</span>
+<span class="nc" id="L78">            return false;</span>
+        }
+    }
+
+    @Override
+    public PaymentResult authorizePayment(PaymentInfo paymentInfo) {
+<span class="nc" id="L84">        log.info(&quot;Authorizing payment for amount: {}&quot;, paymentInfo.getAmount());</span>
+
+        try {
+<span class="nc" id="L87">            Thread.sleep(800);</span>
+
+<span class="nc" id="L89">            String authorizationId = &quot;AUTH_&quot; + UUID.randomUUID().toString().substring(0, 8).toUpperCase();</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.05;</span>
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L93">                log.info(&quot;Payment authorized with ID: {}&quot;, authorizationId);</span>
+<span class="nc" id="L94">                return PaymentResult.success(authorizationId, &quot;Payment authorized successfully&quot;);</span>
+            } else {
+<span class="nc" id="L96">                return PaymentResult.failure(&quot;AUTH_DECLINED&quot;, &quot;Authorization declined&quot;);</span>
+            }
+
+<span class="nc" id="L99">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L100">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L101">            return PaymentResult.failure(&quot;PROCESSING_ERROR&quot;, &quot;Authorization interrupted&quot;);</span>
+        }
+    }
+
+    @Override
+    public boolean capturePayment(String authorizationId, BigDecimal amount) {
+<span class="nc" id="L107">        log.info(&quot;Capturing payment for authorization: {} amount: {}&quot;, authorizationId, amount);</span>
+
+        try {
+<span class="nc" id="L110">            Thread.sleep(600);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.02;</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L114">                log.info(&quot;Payment captured successfully for authorization: {}&quot;, authorizationId);</span>
+            } else {
+<span class="nc" id="L116">                log.warn(&quot;Payment capture failed for authorization: {}&quot;, authorizationId);</span>
+            }
+
+<span class="nc" id="L119">            return success;</span>
+
+<span class="nc" id="L121">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L122">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L123">            log.error(&quot;Payment capture interrupted&quot;, e);</span>
+<span class="nc" id="L124">            return false;</span>
+        }
+    }
+
+    @Override
+    public boolean voidAuthorization(String authorizationId) {
+<span class="nc" id="L130">        log.info(&quot;Voiding authorization: {}&quot;, authorizationId);</span>
+
+        try {
+<span class="nc" id="L133">            Thread.sleep(300);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.01;</span>
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L137">                log.info(&quot;Authorization voided successfully: {}&quot;, authorizationId);</span>
+            } else {
+<span class="nc" id="L139">                log.warn(&quot;Failed to void authorization: {}&quot;, authorizationId);</span>
+            }
+
+<span class="nc" id="L142">            return success;</span>
+
+<span class="nc" id="L144">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L145">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L146">            log.error(&quot;Authorization void interrupted&quot;, e);</span>
+<span class="nc" id="L147">            return false;</span>
+        }
+    }
+
+    @Override
+    public PaymentResult verifyCard(PaymentInfo paymentInfo) {
+<span class="nc" id="L153">        log.info(&quot;Verifying card for order: {}&quot;, paymentInfo.getOrderId());</span>
+
+        try {
+<span class="nc" id="L156">            Thread.sleep(400);</span>
+
+            // Basic card validation
+<span class="nc bnc" id="L159" title="All 4 branches missed.">            if (paymentInfo.getCardNumber() == null || paymentInfo.getCardNumber().length() &lt; 13) {</span>
+<span class="nc" id="L160">                return PaymentResult.failure(&quot;INVALID_CARD&quot;, &quot;Invalid card number&quot;);</span>
+            }
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            boolean success = Math.random() &gt; 0.1;</span>
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            if (success) {</span>
+<span class="nc" id="L166">                return PaymentResult.success(&quot;VERIFIED&quot;, &quot;Card verified successfully&quot;);</span>
+            } else {
+<span class="nc" id="L168">                return PaymentResult.failure(&quot;VERIFICATION_FAILED&quot;, &quot;Card verification failed&quot;);</span>
+            }
+
+<span class="nc" id="L171">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L172">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L173">            return PaymentResult.failure(&quot;PROCESSING_ERROR&quot;, &quot;Card verification interrupted&quot;);</span>
+        }
+    }
+
+    @Override
+    public boolean isHealthy() {
+<span class="nc" id="L179">        log.debug(&quot;Checking payment gateway health&quot;);</span>
+
+        try {
+            // Simulate health check
+<span class="nc" id="L183">            Thread.sleep(100);</span>
+            // Simulate 99% uptime
+<span class="nc bnc" id="L185" title="All 2 branches missed.">            return Math.random() &gt; 0.01;</span>
+
+<span class="nc" id="L187">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L188">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L189">            return false;</span>
+        }
+    }
+
+    @Override
+    public PaymentGatewayInfo getGatewayInfo() {
+<span class="nc" id="L195">        return PaymentGatewayInfo.builder()</span>
+<span class="nc" id="L196">                .name(&quot;Mock Payment Gateway&quot;)</span>
+<span class="nc" id="L197">                .version(&quot;1.0.0&quot;)</span>
+<span class="nc" id="L198">                .supportedCurrencies(java.util.List.of(&quot;SEK&quot;, &quot;USD&quot;, &quot;EUR&quot;))</span>
+<span class="nc" id="L199">                .provider(&quot;Mock Provider&quot;)</span>
+<span class="nc" id="L200">                .supportsRefunds(true)</span>
+<span class="nc" id="L201">                .status(&quot;ACTIVE&quot;)</span>
+<span class="nc" id="L202">                .build();</span>
+    }
+
+    @Override
+    public ValidationResult validatePaymentInfo(PaymentInfo paymentInfo) {
+<span class="nc" id="L207">        log.debug(&quot;Validating payment info for order: {}&quot;, paymentInfo.getOrderId());</span>
+
+<span class="nc" id="L209">        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();</span>
+
+        // Basic validation
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (paymentInfo == null) {</span>
+<span class="nc" id="L213">            return resultBuilder</span>
+<span class="nc" id="L214">                    .valid(false)</span>
+<span class="nc" id="L215">                    .errorCode(&quot;NULL_PAYMENT_INFO&quot;)</span>
+<span class="nc" id="L216">                    .errorMessage(&quot;Payment information is null&quot;)</span>
+<span class="nc" id="L217">                    .build();</span>
+        }
+
+<span class="nc bnc" id="L220" title="All 4 branches missed.">        if (paymentInfo.getAmount() == null || paymentInfo.getAmount().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="nc" id="L221">            return resultBuilder</span>
+<span class="nc" id="L222">                    .valid(false)</span>
+<span class="nc" id="L223">                    .errorCode(&quot;INVALID_AMOUNT&quot;)</span>
+<span class="nc" id="L224">                    .errorMessage(&quot;Invalid payment amount&quot;)</span>
+<span class="nc" id="L225">                    .build();</span>
+        }
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (paymentInfo.getOrderId() == null) {</span>
+<span class="nc" id="L229">            return resultBuilder</span>
+<span class="nc" id="L230">                    .valid(false)</span>
+<span class="nc" id="L231">                    .errorCode(&quot;MISSING_ORDER_ID&quot;)</span>
+<span class="nc" id="L232">                    .errorMessage(&quot;Order ID is required&quot;)</span>
+<span class="nc" id="L233">                    .build();</span>
+        }
+
+        // For credit card payments, validate card info
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (paymentInfo.getCardNumber() != null) {</span>
+<span class="nc bnc" id="L238" title="All 4 branches missed.">            if (paymentInfo.getCardNumber().length() &lt; 13 || paymentInfo.getCardNumber().length() &gt; 19) {</span>
+<span class="nc" id="L239">                return resultBuilder</span>
+<span class="nc" id="L240">                        .valid(false)</span>
+<span class="nc" id="L241">                        .errorCode(&quot;INVALID_CARD_NUMBER&quot;)</span>
+<span class="nc" id="L242">                        .errorMessage(&quot;Invalid card number length&quot;)</span>
+<span class="nc" id="L243">                        .build();</span>
+            }
+
+<span class="nc bnc" id="L246" title="All 4 branches missed.">            if (paymentInfo.getCvv() == null || paymentInfo.getCvv().length() &lt; 3) {</span>
+<span class="nc" id="L247">                return resultBuilder</span>
+<span class="nc" id="L248">                        .valid(false)</span>
+<span class="nc" id="L249">                        .errorCode(&quot;INVALID_CVV&quot;)</span>
+<span class="nc" id="L250">                        .errorMessage(&quot;Invalid CVV&quot;)</span>
+<span class="nc" id="L251">                        .build();</span>
+            }
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (paymentInfo.getExpiryMonth() == null ||</span>
+<span class="nc bnc" id="L255" title="All 4 branches missed.">                    paymentInfo.getExpiryMonth() &lt; 1 || paymentInfo.getExpiryMonth() &gt; 12) {</span>
+<span class="nc" id="L256">                return resultBuilder</span>
+<span class="nc" id="L257">                        .valid(false)</span>
+<span class="nc" id="L258">                        .errorCode(&quot;INVALID_EXPIRY_MONTH&quot;)</span>
+<span class="nc" id="L259">                        .errorMessage(&quot;Invalid expiry month&quot;)</span>
+<span class="nc" id="L260">                        .build();</span>
+            }
+
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            if (paymentInfo.getExpiryYear() == null ||</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                    paymentInfo.getExpiryYear() &lt; LocalDateTime.now().getYear()) {</span>
+<span class="nc" id="L265">                return resultBuilder</span>
+<span class="nc" id="L266">                        .valid(false)</span>
+<span class="nc" id="L267">                        .errorCode(&quot;INVALID_EXPIRY_YEAR&quot;)</span>
+<span class="nc" id="L268">                        .errorMessage(&quot;Invalid expiry year&quot;)</span>
+<span class="nc" id="L269">                        .build();</span>
+            }
+        }
+
+<span class="nc" id="L273">        log.debug(&quot;Payment info validation successful&quot;);</span>
+<span class="nc" id="L274">        return resultBuilder</span>
+<span class="nc" id="L275">                .valid(true)</span>
+<span class="nc" id="L276">                .errorCode(null)</span>
+<span class="nc" id="L277">                .errorMessage(&quot;Validation successful&quot;)</span>
+<span class="nc" id="L278">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

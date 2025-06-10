@@ -44,4 +44,36 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.user = :user")
     Double sumTotalAmountByUser(@Param("user") User user);
+
+    // NYA METODER FÖR ATT LÖSA LAZY INITIALIZATION PROBLEM
+
+    /**
+     * Hämta order med orderItems eager loaded för att undvika LazyInitializationException
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
+    Optional<Order> findByIdWithItems(@Param("orderId") Long orderId);
+
+    /**
+     * Hämta order med orderItems eager loaded och kontrollera ägarskap
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId AND o.user = :user")
+    Optional<Order> findByIdAndUserWithItems(@Param("orderId") Long orderId, @Param("user") User user);
+
+    /**
+     * Hämta alla orders för en användare med orderItems eager loaded
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.user = :user ORDER BY o.orderDate DESC")
+    List<Order> findByUserWithItems(@Param("user") User user);
+
+    /**
+     * Hämta order med orderItems baserat på ordernummer
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.orderNumber = :orderNumber")
+    Optional<Order> findByOrderNumberWithItems(@Param("orderNumber") String orderNumber);
+
+    /**
+     * Hämta order med orderItems baserat på ordernummer och användare
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.orderNumber = :orderNumber AND o.user = :user")
+    Optional<Order> findByOrderNumberAndUserWithItems(@Param("orderNumber") String orderNumber, @Param("user") User user);
 }

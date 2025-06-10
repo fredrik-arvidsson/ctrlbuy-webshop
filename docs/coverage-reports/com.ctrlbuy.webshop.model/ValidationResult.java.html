@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidationResult.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.model</a> &gt; <span class="el_source">ValidationResult.java</span></div><h1>ValidationResult.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+/**
+ * Resultat från validering av betalningsinformation
+ */
+<span class="nc bnc" id="L13" title="All 42 branches missed.">@Data</span>
+<span class="nc" id="L14">@Builder</span>
+<span class="nc" id="L15">@AllArgsConstructor</span>
+<span class="nc" id="L16">@NoArgsConstructor</span>
+public class ValidationResult {
+<span class="nc" id="L18">    private boolean valid;</span>
+    private List&lt;String&gt; errors;
+    private List&lt;String&gt; warnings;
+<span class="nc" id="L21">    private String errorCode;</span>
+<span class="nc" id="L22">    private String errorMessage;</span>
+
+    // Builder-kompatibel konstruktor
+    public ValidationResult(boolean valid) {
+<span class="nc" id="L26">        this();</span>
+<span class="nc" id="L27">        this.valid = valid;</span>
+<span class="nc" id="L28">    }</span>
+
+    // Säkerställ att listor inte är null
+    public List&lt;String&gt; getErrors() {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (errors == null) {</span>
+<span class="nc" id="L33">            errors = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L35">        return errors;</span>
+    }
+
+    public List&lt;String&gt; getWarnings() {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (warnings == null) {</span>
+<span class="nc" id="L40">            warnings = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L42">        return warnings;</span>
+    }
+
+    // Utility methods
+    public void addError(String error) {
+<span class="nc" id="L47">        getErrors().add(error);</span>
+<span class="nc" id="L48">        this.valid = false;</span>
+<span class="nc" id="L49">    }</span>
+
+    public void addWarning(String warning) {
+<span class="nc" id="L52">        getWarnings().add(warning);</span>
+<span class="nc" id="L53">    }</span>
+
+    public boolean hasErrors() {
+<span class="nc bnc" id="L56" title="All 4 branches missed.">        return getErrors() != null &amp;&amp; !getErrors().isEmpty();</span>
+    }
+
+    public boolean hasWarnings() {
+<span class="nc bnc" id="L60" title="All 4 branches missed.">        return getWarnings() != null &amp;&amp; !getWarnings().isEmpty();</span>
+    }
+
+    public String getFirstError() {
+<span class="nc" id="L64">        List&lt;String&gt; errorList = getErrors();</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        return errorList.isEmpty() ? null : errorList.get(0);</span>
+    }
+
+    public static ValidationResult success() {
+<span class="nc" id="L69">        return ValidationResult.builder()</span>
+<span class="nc" id="L70">                .valid(true)</span>
+<span class="nc" id="L71">                .errors(new ArrayList&lt;&gt;())</span>
+<span class="nc" id="L72">                .warnings(new ArrayList&lt;&gt;())</span>
+<span class="nc" id="L73">                .build();</span>
+    }
+
+    public static ValidationResult failure(String error) {
+<span class="nc" id="L77">        ValidationResult result = ValidationResult.builder()</span>
+<span class="nc" id="L78">                .valid(false)</span>
+<span class="nc" id="L79">                .errors(new ArrayList&lt;&gt;())</span>
+<span class="nc" id="L80">                .warnings(new ArrayList&lt;&gt;())</span>
+<span class="nc" id="L81">                .build();</span>
+<span class="nc" id="L82">        result.addError(error);</span>
+<span class="nc" id="L83">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

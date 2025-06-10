@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -9,13 +9,16 @@ spring:
     hibernate:
       ddl-auto: create-drop
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
+        globally_quoted_identifiers: false
+        hbm2ddl:
+          auto: create-drop
 
   h2:
     console:
@@ -31,6 +34,13 @@ spring:
       - org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration
       - org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration
 
+  # Security konfiguration för tester
+  security:
+    user:
+      name: testuser
+      password: testpass
+      roles: USER
+
 # JWT test properties
 jwt:
   secret: testSecretKey123456789012345678901234567890
@@ -42,3 +52,4 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.ctrlbuy.webshop: DEBUG
+    org.springframework.security: DEBUG

@@ -10,13 +10,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -61,11 +62,31 @@ public class User implements UserDetails {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    // NYA FÄLT: Tidsstämplar för skapande och uppdatering
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @Builder.Default
-    private List<String> roles = new ArrayList<>(List.of("USER"));  // FIXAT: Mutable lista
+    private List<String> roles = new ArrayList<>(List.of("USER"));
+
+    // NYA METODER: Automatisk tidsstämpling
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     // UserDetails implementation
     @Override
@@ -95,6 +116,14 @@ public class User implements UserDetails {
         return active && emailVerified;
     }
 
+    // ✅ KRITISKA KOMPATIBILITETSMETODER för UserService
+    /**
+     * Kompatibilitetsmetod för UserService - mappar active till enabled
+     */
+    public void setEnabled(boolean enabled) {
+        this.active = enabled;
+    }
+
     // TILLAGDA: Manuella is-metoder för kompatibilitet med Boolean wrapper types
     public boolean isActive() {
         return active != null && active;
@@ -104,10 +133,11 @@ public class User implements UserDetails {
         return emailVerified != null && emailVerified;
     }
 
-    // Utility methods
+    // Utility methods - FÖRBÄTTRAD VERSION
     public String getFullName() {
-        if (firstName != null && lastName != null) {
-            return "%s %s".formatted(firstName, lastName);
+        if (firstName != null && !firstName.trim().isEmpty() &&
+                lastName != null && !lastName.trim().isEmpty()) {
+            return "%s %s".formatted(firstName.trim(), lastName.trim());
         }
         return username;
     }
@@ -128,5 +158,29 @@ public class User implements UserDetails {
         return resetToken != null &&
                 resetTokenExpiry != null &&
                 LocalDateTime.now().isBefore(resetTokenExpiry);
+    }
+
+    // NYA HJÄLPMETODER för datum - FÖRBÄTTRADE VERSIONER
+    public String getFormattedCreatedAt() {
+        if (createdAt != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+            return createdAt.format(formatter);
+        }
+        return "Okänt datum";
+    }
+
+    public String getFormattedUpdatedAt() {
+        if (updatedAt != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+            return updatedAt.format(formatter);
+        }
+        return "Aldrig uppdaterad";
+    }
+
+    // NY METOD: Kontrollerar om profilen är komplett
+    public boolean hasCompleteProfile() {
+        return firstName != null && !firstName.trim().isEmpty() &&
+                lastName != null && !lastName.trim().isEmpty() &&
+                emailVerified != null && emailVerified;
     }
 }

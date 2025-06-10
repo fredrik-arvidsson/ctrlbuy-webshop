@@ -13,46 +13,79 @@ public class DataInitializer {
 
     @Bean
     @Profile("!test")  // Kör INTE under test-profil
-    public CommandLineRunner init(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner init(UserRepository userRepository,
+                                  PasswordEncoder passwordEncoder) {
         return args -> {
             System.out.println("DataInitializer: Kör data-initialisering...");
 
-            // Se till att metoden existsByUsernameOrEmail finns i UserRepository
+            // ✅ SKAPA BACKUP ADMIN
             if (userRepository.findByUsername("admin").isEmpty() &&
-                    userRepository.findByEmail("admin@example.com").isEmpty()) {
+                    userRepository.findByEmail("admin@ctrlbuy.com").isEmpty()) {
                 User admin = new User();
                 admin.setUsername("admin");
-                admin.setEmail("admin@example.com");
-
-                // Två alternativ för lösenordshantering:
-
-                // Alternativ 1: Använd PasswordEncoder (rekommenderas)
-                admin.setPassword(passwordEncoder.encode("password"));
-
-                // Alternativ 2: Behåll {noop} prefixet för klartext (endast för utveckling)
-                // admin.setPassword("{noop}password");
-
+                admin.setEmail("admin@ctrlbuy.com");  // Professionell email
+                admin.setFirstName("Admin");
+                admin.setLastName("Användare");
+                admin.setPassword(passwordEncoder.encode("admin123"));  // Starkare lösenord
                 admin.setActive(true);
-                admin.addRole("ROLE_ADMIN");  // Här använder vi addRole-metoden
+                admin.setEmailVerified(true);  // Admin är förverifierad
+                admin.addRole("ROLE_ADMIN");  // ✅ Backup admin
                 userRepository.save(admin);
-                System.out.println("Admin user created.");
+                System.out.println("✅ Backup admin skapad - Användarnamn: admin, Lösenord: admin123");
             }
 
-            // Skapa en testanvändare för enklare inloggning
-            if (userRepository.findByUsername("user").isEmpty()) {
+            // ✅ SKAPA FREDRIK (DU) SOM HUVUDADMIN
+            if (userRepository.findByUsername("fredrik").isEmpty() &&
+                    userRepository.findByEmail("fredrik.g.arvidsson@gmail.com").isEmpty()) {
+                User fredrik = new User();
+                fredrik.setUsername("fredrik");
+                fredrik.setEmail("fredrik.g.arvidsson@gmail.com");
+                fredrik.setFirstName("Fredrik");
+                fredrik.setLastName("Arvidsson");
+                fredrik.setPassword(passwordEncoder.encode("password123"));
+                fredrik.setActive(true);
+                fredrik.setEmailVerified(true);  // Förverifierad
+                fredrik.addRole("ROLE_ADMIN");  // ✅ DU är admin!
+                userRepository.save(fredrik);
+                System.out.println("✅ Fredrik skapad som HUVUDADMIN");
+            }
+
+            // ✅ TESTANVÄNDARE FÖR UTVECKLING
+            if (userRepository.findByUsername("user").isEmpty() &&
+                    userRepository.findByEmail("user@example.com").isEmpty()) {
                 User user = new User();
                 user.setUsername("user");
                 user.setEmail("user@example.com");
-
-                // Använd samma hantering som för admin
+                user.setFirstName("Test");
+                user.setLastName("Användare");
                 user.setPassword(passwordEncoder.encode("password"));
-                // ELLER: user.setPassword("{noop}password");
-
                 user.setActive(true);
-                user.addRole("ROLE_USER");
+                user.setEmailVerified(false);  // Behöver verifiering
+                user.addRole("ROLE_USER");  // ✅ Test user
                 userRepository.save(user);
-                System.out.println("Test user created.");
+                System.out.println("✅ Testanvändare skapad (ej verifierad)");
             }
+
+            // ✅ TA BORT GAMLA ADMIN@EXAMPLE.COM OM DEN FINNS
+            userRepository.findByEmail("admin@example.com").ifPresent(oldAdmin -> {
+                if (!oldAdmin.getEmail().equals("admin@ctrlbuy.com")) {
+                    try {
+                        userRepository.delete(oldAdmin);
+                        System.out.println("🗑️ Gamla admin@example.com borttagen");
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Kunde inte ta bort gamla admin: " + e.getMessage());
+                        oldAdmin.setActive(false);
+                        oldAdmin.setUsername("old_admin_" + System.currentTimeMillis());
+                        oldAdmin.setEmail("deactivated_" + System.currentTimeMillis() + "@example.com");
+                        userRepository.save(oldAdmin);
+                        System.out.println("🔒 Gamla admin deaktiverad istället");
+                    }
+                }
+            });
+
+            System.out.println("🎉 Data-initialisering slutförd!");
+            System.out.println("📝 Fredrik (HUVUDADMIN): användarnamn='fredrik', lösenord='password123'");
+            System.out.println("📝 Backup admin: användarnamn='admin', lösenord='admin123'");
         };
     }
 
