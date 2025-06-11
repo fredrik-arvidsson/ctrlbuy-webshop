@@ -28,7 +28,7 @@ webshop,com.ctrlbuy.webshop.model,PaymentInfo,934,49,164,0,72,18,118,14,36,14
 webshop,com.ctrlbuy.webshop.model,ValidationResult.ValidationResultBuilder,56,0,0,0,1,0,8,0,8,0
 webshop,com.ctrlbuy.webshop.response,JwtResponse,63,0,0,0,15,0,13,0,13,0
 webshop,com.ctrlbuy.webshop.response,MessageResponse,16,0,0,0,6,0,4,0,4,0
-webshop,com.ctrlbuy.webshop.service.impl,EmailServiceImpl,902,0,4,0,195,0,15,0,13,0
+webshop,com.ctrlbuy.webshop.service.impl,EmailServiceImpl,1349,0,36,0,263,0,43,0,25,0
 webshop,com.ctrlbuy.webshop.service.impl,PaymentGatewayImpl,457,0,60,0,145,0,41,0,11,0
 webshop,com.ctrlbuy.webshop.security.handler,CustomAuthenticationSuccessHandler,48,0,2,0,14,0,5,0,4,0
 webshop,com.ctrlbuy.webshop.controller,HomeController,150,174,14,8,36,42,12,6,1,6
@@ -47,13 +47,13 @@ webshop,com.ctrlbuy.webshop.controller,SwedishRoutesController,0,3,0,0,0,1,0,1,0
 webshop,com.ctrlbuy.webshop.controller,CustomErrorController,0,116,0,16,0,20,0,11,0,3
 webshop,com.ctrlbuy.webshop.controller,OrderHistoryController,18,228,7,11,7,46,7,9,0,7
 webshop,com.ctrlbuy.webshop.controller,PasswordResetController,0,191,0,20,0,50,0,16,0,6
-webshop,com.ctrlbuy.webshop.controller,AdminController,747,0,49,0,187,0,37,0,12,0
+webshop,com.ctrlbuy.webshop.controller,AdminController,934,0,65,0,228,0,46,0,13,0
 webshop,com.ctrlbuy.webshop.controller,LoginController,0,57,0,14,0,16,0,10,0,3
 webshop,com.ctrlbuy.webshop.controller,CheckoutController,231,60,16,6,60,16,10,6,0,5
 webshop,com.ctrlbuy.webshop.controller,ProductController,228,477,26,28,45,104,24,16,1,12
 webshop,com.ctrlbuy.webshop.controller,EmailTestController,291,0,22,0,58,0,19,0,8,0
 webshop,com.ctrlbuy.webshop.controller,DebugController,415,60,20,2,75,19,11,6,0,6
-webshop,com.ctrlbuy.webshop.controller,RegisterController,164,172,21,25,44,39,21,9,2,5
+webshop,com.ctrlbuy.webshop.controller,RegisterController,146,315,13,29,34,67,13,19,0,11
 webshop,com.ctrlbuy.webshop.security.filter,JwtAuthenticationFilter,170,0,10,0,29,0,8,0,3,0
 webshop,com.ctrlbuy.webshop.security,UserDetailsImpl,28,0,0,0,10,0,8,0,8,0
 webshop,com.ctrlbuy.webshop.security,JwtService,121,0,8,0,28,0,10,0,6,0

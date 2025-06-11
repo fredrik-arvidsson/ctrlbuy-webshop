@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.ctrlbuy.webshop.controller.OrderHistoryControllerTest
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.382 s -- in com.ctrlbuy.webshop.controller.OrderHistoryControllerTest
