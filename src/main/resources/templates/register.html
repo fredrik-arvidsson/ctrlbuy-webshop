@@ -244,15 +244,13 @@
                 <span th:text="${success}"></span>
               </div>
 
-              <!-- Felmeddelanden -->
-              <div th:if="${errors}" class="alert alert-danger" role="alert">
+              <!-- Generellt felmeddelande -->
+              <div th:if="${error}" class="alert alert-danger" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
-                <ul class="mb-0">
-                  <li th:each="error : ${errors}" th:text="${error}"></li>
-                </ul>
+                <span th:text="${error}"></span>
               </div>
 
-              <!-- Thymeleaf-formulär -->
+              <!-- Thymeleaf-formulär med FELHANTERING -->
               <form th:action="@{/register}" th:object="${registerRequest}" method="post" id="registerForm">
                 <div class="row">
                   <div class="col-md-6 mb-3">
@@ -261,10 +259,15 @@
                     </label>
                     <input type="text"
                            class="form-control"
+                           th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
                            id="firstName"
                            th:field="*{firstName}"
                            placeholder="Ditt förnamn"
                            required>
+                    <!-- FELMEDDELANDE FÖR FÖRNAMN -->
+                    <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
+                      <span th:errors="*{firstName}"></span>
+                    </div>
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="lastName" class="form-label">
@@ -272,10 +275,15 @@
                     </label>
                     <input type="text"
                            class="form-control"
+                           th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
                            id="lastName"
                            th:field="*{lastName}"
                            placeholder="Ditt efternamn"
                            required>
+                    <!-- FELMEDDELANDE FÖR EFTERNAMN -->
+                    <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
+                      <span th:errors="*{lastName}"></span>
+                    </div>
                   </div>
                 </div>
 
@@ -285,11 +293,16 @@
                   </label>
                   <input type="text"
                          class="form-control"
+                         th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
                          id="username"
                          th:field="*{username}"
                          placeholder="Välj ett användarnamn"
                          required
                          minlength="3">
+                  <!-- FELMEDDELANDE FÖR ANVÄNDARNAMN -->
+                  <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
+                    <span th:errors="*{username}"></span>
+                  </div>
                   <div class="form-text">Minst 3 tecken långt</div>
                 </div>
 
@@ -299,10 +312,15 @@
                   </label>
                   <input type="email"
                          class="form-control"
+                         th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
                          id="email"
                          th:field="*{email}"
                          placeholder="din@email.com"
                          required>
+                  <!-- FELMEDDELANDE FÖR E-POST -->
+                  <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                    <span th:errors="*{email}"></span>
+                  </div>
                 </div>
 
                 <div class="mb-3">
@@ -312,6 +330,7 @@
                   <div class="input-group">
                     <input type="password"
                            class="form-control"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
                            id="password"
                            th:field="*{password}"
                            placeholder="Välj ett säkert lösenord"
@@ -323,6 +342,10 @@
                       <i class="fas fa-eye" id="passwordToggleIcon"></i>
                     </button>
                   </div>
+                  <!-- FELMEDDELANDE FÖR LÖSENORD -->
+                  <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
+                    <span th:errors="*{password}"></span>
+                  </div>
                   <div class="password-strength" id="passwordStrength"></div>
                   <div class="form-text">Minst 6 tecken. Använd en blandning av bokstäver, siffror och specialtecken.</div>
                 </div>
@@ -333,18 +356,32 @@
                   </label>
                   <input type="password"
                          class="form-control"
+                         th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
                          id="confirmPassword"
                          th:field="*{confirmPassword}"
                          placeholder="Upprepa ditt lösenord"
                          required>
+                  <!-- FELMEDDELANDE FÖR BEKRÄFTA LÖSENORD -->
+                  <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
+                    <span th:errors="*{confirmPassword}"></span>
+                  </div>
                 </div>
 
                 <div class="mb-4">
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
-                    <label class="form-check-label" for="terms">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid' : ''"
+                           id="acceptTerms"
+                           th:field="*{acceptTerms}"
+                           required>
+                    <label class="form-check-label" for="acceptTerms">
                       Jag accepterar <a href="/terms" target="_blank">användarvillkoren</a> och <a href="/privacy" target="_blank">sekretesspolicyn</a>
                     </label>
+                    <!-- FELMEDDELANDE FÖR ANVÄNDARVILLKOR -->
+                    <div th:if="${#fields.hasErrors('acceptTerms')}" class="invalid-feedback">
+                      <span th:errors="*{acceptTerms}"></span>
+                    </div>
                   </div>
                 </div>
 

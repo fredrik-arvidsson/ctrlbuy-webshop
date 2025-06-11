@@ -1,7 +1,9 @@
 package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
 import com.ctrlbuy.webshop.service.UserService;
+import com.ctrlbuy.webshop.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,10 +14,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,6 +27,12 @@ public class AdminController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Admin Dashboard - huvudsida efter inloggning
@@ -104,11 +114,11 @@ public class AdminController {
     }
 
     /**
-     * ✅ NY: Inaktivera användare (mjuk borttagning)
+     * ✅ UPPDATERAD: Inaktivera användare (mjuk borttagning) med e-postnotifiering
      */
     @PostMapping("/users/deactivate/{id}")
     @ResponseBody
-    public ResponseEntity<?> deactivateUser(@PathVariable Long id) {
+    public ResponseEntity<?> deactivateUser(@PathVariable Long id, @RequestParam(required = false) String reason) {
         try {
             User user = userService.findById(id);
             if (user == null) {
@@ -135,6 +145,15 @@ public class AdminController {
             user.setActive(false);
             userService.save(user);
 
+            // Skicka e-postnotifiering till användaren
+            try {
+                String adminUsername = auth != null ? auth.getName() : "System";
+                emailService.sendAccountDeactivationNotification(user, adminUsername, reason);
+            } catch (Exception emailError) {
+                // Logga men låt inte e-post-fel stoppa inaktiveringen
+                System.err.println("Kunde inte skicka inaktiveringsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
+
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
@@ -148,7 +167,7 @@ public class AdminController {
     }
 
     /**
-     * ✅ NY: Reaktivera användare
+     * ✅ UPPDATERAD: Reaktivera användare med e-postnotifiering
      */
     @PostMapping("/users/reactivate/{id}")
     @ResponseBody
@@ -164,6 +183,16 @@ public class AdminController {
             user.setActive(true);
             userService.save(user);
 
+            // Skicka e-postnotifiering till användaren
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                String adminUsername = auth != null ? auth.getName() : "System";
+                emailService.sendAccountReactivationNotification(user, adminUsername);
+            } catch (Exception emailError) {
+                // Logga men låt inte e-post-fel stoppa reaktiveringen
+                System.err.println("Kunde inte skicka reaktiveringsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
+
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
@@ -177,11 +206,11 @@ public class AdminController {
     }
 
     /**
-     * ✅ NY: Snabb inaktivering via e-post
+     * ✅ UPPDATERAD: Snabb inaktivering via e-post med notifiering
      */
     @PostMapping("/users/quick-deactivate")
     @ResponseBody
-    public ResponseEntity<?> quickDeactivateByEmail(@RequestParam("email") String email) {
+    public ResponseEntity<?> quickDeactivateByEmail(@RequestParam("email") String email, @RequestParam(required = false) String reason) {
         try {
             // Hitta användare via e-post
             Optional<User> userOpt = userService.findByEmail(email);
@@ -216,6 +245,15 @@ public class AdminController {
             user.setActive(false);
             userService.save(user);
 
+            // Skicka e-postnotifiering till användaren
+            try {
+                String adminUsername = auth != null ? auth.getName() : "System";
+                emailService.sendAccountDeactivationNotification(user, adminUsername, reason);
+            } catch (Exception emailError) {
+                // Logga men låt inte e-post-fel stoppa inaktiveringen
+                System.err.println("Kunde inte skicka inaktiveringsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
+
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
@@ -229,7 +267,7 @@ public class AdminController {
     }
 
     /**
-     * ✅ BEHÅLLEN: Toggle active (för snabb växling)
+     * ✅ UPPDATERAD: Toggle active (för snabb växling) med e-postnotifiering
      */
     @PostMapping("/users/toggle-active/{id}")
     @ResponseBody
@@ -261,6 +299,21 @@ public class AdminController {
             userService.toggleUserActive(id);
             String action = wasActive ? "inaktiverad" : "aktiverad";
 
+            // Skicka e-postnotifiering
+            try {
+                String adminUsername = auth != null ? auth.getName() : "System";
+                if (wasActive) {
+                    // Blev inaktiverad
+                    emailService.sendAccountDeactivationNotification(user, adminUsername, null);
+                } else {
+                    // Blev aktiverad
+                    emailService.sendAccountReactivationNotification(user, adminUsername);
+                }
+            } catch (Exception emailError) {
+                // Logga men låt inte e-post-fel stoppa statusändringen
+                System.err.println("Kunde inte skicka statusändringsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
+
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
@@ -274,32 +327,45 @@ public class AdminController {
     }
 
     /**
-     * ✅ FIX: Återställ verifiering med korrekt JSON-respons
+     * ✅ UPPDATERAD: Skicka om verifieringsmail
      */
     @PostMapping("/users/{id}/reset-verification")
     @ResponseBody
-    public Map<String, Object> resetUserVerification(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> resetUserVerification(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            User user = userService.findById(id);
-            if (user == null) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("success", false);
-                result.put("message", "Användaren finns inte");
-                return result;
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Användare hittades inte"));
+
+            // Kontrollera om användaren redan är verifierad
+            if (user.isEmailVerified()) {
+                response.put("success", false);
+                response.put("message", "Användaren är redan verifierad");
+                return ResponseEntity.ok(response);
             }
 
-            userService.resetUserVerification(id);
+            // Generera ny token
+            String token = UUID.randomUUID().toString();
+            user.setVerificationToken(token);
+            user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+            userRepository.save(user);
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("message", "E-postverifiering återställd för '" + user.getUsername() + "'");
-            return result;
+            // Skicka mail
+            boolean emailSent = emailService.sendVerificationEmail(user.getEmail(), token);
 
+            if (emailSent) {
+                response.put("success", true);
+                response.put("message", "Verifieringsmail har skickats om till " + user.getEmail());
+            } else {
+                response.put("success", false);
+                response.put("message", "Kunde inte skicka verifieringsmail. Kontrollera e-postkonfigurationen.");
+            }
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", false);
-            result.put("message", "Fel vid återställning: " + e.getMessage());
-            return result;
+            response.put("success", false);
+            response.put("message", "Fel: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 
@@ -357,11 +423,11 @@ public class AdminController {
     }
 
     /**
-     * ✅ UPPDATERAD: Permanent borttagning av användare (form-baserad)
+     * ✅ UPPDATERAD: Permanent borttagning av användare (form-baserad) med e-postnotifiering
      */
     @PostMapping("/users/{id}/delete-permanently")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deletePermanently(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deletePermanently(@PathVariable Long id, @RequestParam(required = false) String reason, RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(id);
             if (user == null) {
@@ -370,6 +436,16 @@ public class AdminController {
             }
 
             String userInfo = user.getUsername() + " (" + user.getEmail() + ")";
+
+            // Skicka e-postnotifiering INNAN borttagning
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                String adminUsername = auth != null ? auth.getName() : "System";
+                emailService.sendAccountDeletionNotification(user, adminUsername, reason);
+            } catch (Exception emailError) {
+                // Logga men fortsätt med borttagning
+                System.err.println("Kunde inte skicka borttagningsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
 
             // Anropa uppdaterade metoden (kastar nu exceptions)
             userService.deletePermanently(id);
@@ -390,13 +466,13 @@ public class AdminController {
     }
 
     /**
-     * ✅ UPPDATERAD: Permanent borttagning av användare (AJAX-baserad)
+     * ✅ UPPDATERAD: Permanent borttagning av användare (AJAX-baserad) med e-postnotifiering
      * Hanterar nu exceptions från UserService
      */
     @PostMapping("/users/{id}/delete-permanently-ajax")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
-    public ResponseEntity<?> deletePermanentlyAjax(@PathVariable Long id) {
+    public ResponseEntity<?> deletePermanentlyAjax(@PathVariable Long id, @RequestParam(required = false) String reason) {
         try {
             User user = userService.findById(id);
             if (user == null) {
@@ -405,6 +481,16 @@ public class AdminController {
             }
 
             String userInfo = user.getUsername() + " (" + user.getEmail() + ")";
+
+            // Skicka e-postnotifiering INNAN borttagning
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                String adminUsername = auth != null ? auth.getName() : "System";
+                emailService.sendAccountDeletionNotification(user, adminUsername, reason);
+            } catch (Exception emailError) {
+                // Logga men fortsätt med borttagning
+                System.err.println("Kunde inte skicka borttagningsnotifiering till " + user.getEmail() + ": " + emailError.getMessage());
+            }
 
             // Anropa uppdaterade metoden (kastar nu exceptions istället för att returnera boolean)
             userService.deletePermanently(id);

@@ -24,6 +24,14 @@ public interface EmailService {
     void sendVerificationEmail(String email, String token, String firstName);
 
     /**
+     * Send verification email with just email and token
+     * @param email Email address
+     * @param token Verification token
+     * @return true if email was sent successfully
+     */
+    boolean sendVerificationEmail(String email, String token);
+
+    /**
      * Send welcome email after successful verification
      * @param user The verified user
      */
@@ -45,6 +53,14 @@ public interface EmailService {
     void sendPasswordResetEmail(String email, String resetToken, String firstName);
 
     /**
+     * Send password reset email with just email and token
+     * @param email Email address
+     * @param resetToken Reset token
+     * @return true if email was sent successfully
+     */
+    boolean sendPasswordResetEmail(String email, String resetToken);
+
+    /**
      * Send order confirmation email
      * @param user The user who placed the order
      * @param orderNumber The order number
@@ -59,8 +75,45 @@ public interface EmailService {
     void sendOrderConfirmation(Order order, String email);
 
     /**
+     * Send order confirmation email
+     * @param email Customer email
+     * @param order The order object
+     * @return true if email was sent successfully
+     */
+    boolean sendOrderConfirmation(String email, Order order);
+
+    /**
+     * Send notification to user when their account has been permanently deleted
+     * @param deletedUser The user whose account was deleted
+     * @param adminUsername The admin who performed the deletion
+     * @param reason Optional reason for deletion
+     */
+    void sendAccountDeletionNotification(User deletedUser, String adminUsername, String reason);
+
+    /**
+     * Send notification to user when their account has been deactivated
+     * @param deactivatedUser The user whose account was deactivated
+     * @param adminUsername The admin who performed the deactivation
+     * @param reason Optional reason for deactivation
+     */
+    void sendAccountDeactivationNotification(User deactivatedUser, String adminUsername, String reason);
+
+    /**
+     * Send notification to user when their account has been reactivated
+     * @param reactivatedUser The user whose account was reactivated
+     * @param adminUsername The admin who performed the reactivation
+     */
+    void sendAccountReactivationNotification(User reactivatedUser, String adminUsername);
+
+    /**
      * Test email connection
      * @return true if connection works
      */
     boolean testEmailConnection();
+
+    /**
+     * Check if email service is configured
+     * @return true if configured
+     */
+    boolean isConfigured();
 }

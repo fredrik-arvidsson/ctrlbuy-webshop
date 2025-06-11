@@ -1,4 +1,6 @@
-# === Byggmappar ===
+# =======================================
+# === BYGGMAPPAR & KOMPILERAD KOD ===
+# =======================================
 target/
 build/
 dist/
@@ -12,13 +14,16 @@ nbdist/
 # === Maven Wrapper ===
 !.mvn/wrapper/maven-wrapper.jar
 
-# === IDE: IntelliJ IDEA ===
+# =======================================
+# === IDE-SPECIFIKA FILER ===
+# =======================================
+# IntelliJ IDEA
 .idea/
 *.iws
 *.iml
 *.ipr
 
-# === IDE: Spring Tool Suite (STS) ===
+# Spring Tool Suite (STS)
 .apt_generated
 .classpath
 .factorypath
@@ -27,21 +32,85 @@ nbdist/
 .springBeans
 .sts4-cache
 
-# === IDE: NetBeans ===
+# NetBeans
 /nbproject/private/
 /.nb-gradle/
 
-# === IDE: Visual Studio Code ===
+# Visual Studio Code
 .vscode/
 
-# === Operativsystem ===
+# =======================================
+# === OPERATIVSYSTEM ===
+# =======================================
 .DS_Store
+Thumbs.db
+desktop.ini
 
-# === Loggar & tillfälliga filer ===
+# =======================================
+# === LOGGAR & TILLFÄLLIGA FILER ===
+# =======================================
 *.log
 *.tmp
-
-# === Miljöfiler ===
-*.env
 *.swp
 *.gz
+*.pid
+*.seed
+*.pid.lock
+
+# =======================================
+# === SÄKERHETSKRITISKA FILER ===
+# =======================================
+
+# Spring Boot profiler med känslig data
+application-local.properties
+application-local.yml
+application-prod.properties
+application-staging.properties
+application-dev.properties
+application-*.properties
+!application.properties
+!application-test.properties
+
+# Miljövariabler
+*.env
+.env
+.env.*
+!.env.example
+
+# Säkerhetsnycklar och certifikat
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.truststore
+*.cer
+*.crt
+
+# Backup-filer som kan innehålla känslig data
+*.backup
+*.bak
+*.old
+*.orig
+
+# Konfigurationsfiler med känslig data
+secrets.properties
+jwt.properties
+api-keys.properties
+config/secrets.yml
+config/database.yml
+**/secrets/**
+**/credentials/**
+
+# Databas-filer
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# =======================================
+# === SÄKERHETSNOTERING ===
+# =======================================
+# För att verifiera att känsliga filer inte spåras:
+# git ls-files | grep -E "(password|secret|key|local\.properties)"
+# Ska inte visa några resultat!
