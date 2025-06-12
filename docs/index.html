@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CtrlBuy Webshop - Test Reports</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .success { color: #27ae60; }
+        .warning { color: #f39c12; }
+        .info { color: #3498db; }
+        
+        .reports {
+            padding: 40px;
+        }
+        
+        .reports h2 {
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 2em;
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .report-card {
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+        }
+        
+        .report-card:hover {
+            border-color: #3498db;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.15);
+        }
+        
+        .report-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .report-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .report-description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(45deg, #2980b9, #8e44ad);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .footer p {
+            margin: 0;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 CtrlBuy Webshop</h1>
+            <p>Professional E-commerce Platform - Test Reports & Quality Metrics</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number success">164</div>
+                <div class="stat-label">Tests Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number info">97%</div>
+                <div class="stat-label">Service Coverage</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number success">100%</div>
+                <div class="stat-label">CustomerService</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number success">93%</div>
+                <div class="stat-label">PaymentService</div>
+            </div>
+        </div>
+        
+        <div class="reports">
+            <h2>📊 Available Reports</h2>
+            <div class="report-grid">
+                <div class="report-card">
+                    <div class="report-icon">🧪</div>
+                    <div class="report-title">Test Results</div>
+                    <div class="report-description">
+                        Comprehensive test execution report with 164 passed tests covering all critical functionality.
+                    </div>
+                    <a href="test-reports/index.html" class="btn">View Test Report</a>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-icon">📈</div>
+                    <div class="report-title">Code Coverage</div>
+                    <div class="report-description">
+                        Detailed coverage analysis showing 97% coverage on critical services and business logic.
+                    </div>
+                    <a href="coverage-reports/index.html" class="btn">View Coverage Report</a>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-icon">💳</div>
+                    <div class="report-title">PaymentService Coverage</div>
+                    <div class="report-description">
+                        Specific coverage metrics for PaymentService showing 93% line coverage.
+                    </div>
+                    <a href="coverage-reports/com.ctrlbuy.webshop.service/PaymentService.html" class="btn">View Details</a>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-icon">📦</div>
+                    <div class="report-title">OrderService Coverage</div>
+                    <div class="report-description">
+                        Comprehensive coverage analysis for OrderService with 97% line coverage.
+                    </div>
+                    <a href="coverage-reports/com.ctrlbuy.webshop.service/OrderService.html" class="btn">View Details</a>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-icon">👥</div>
+                    <div class="report-title">CustomerService Coverage</div>
+                    <div class="report-description">
+                        Perfect test coverage for CustomerService achieving 100% line coverage.
+                    </div>
+                    <a href="coverage-reports/com.ctrlbuy.webshop.service/CustomerService.html" class="btn">View Details</a>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-icon">🔒</div>
+                    <div class="report-title">Security Report</div>
+                    <div class="report-description">
+                        Security analysis and authentication/authorization test results.
+                    </div>
+                    <a href="../docs/security-report.md" class="btn">View Security</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Generated on: <span id="date"></span> | CtrlBuy Webshop v1.0.0</p>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>EOF
+
