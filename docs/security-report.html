@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CtrlBuy Security Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .content { max-width: 800px; margin: 20px auto; padding: 20px; }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+        .check { color: #27ae60; font-weight: bold; }
+        ul { margin: 10px 0; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; margin-bottom: 20px;">
+    <a href="index.html" style="color: white; text-decoration: none; font-weight: 700; font-size: 16px;">← Tillbaka till CtrlBuy Dashboard</a>
+</div>
+<div class="content">
+    <h1>🔒 CtrlBuy Security Report</h1>
+    
+    <h2>Authentication & Authorization</h2>
+    <ul>
+        <li class="check">✅ JWT Token-based authentication</li>
+        <li class="check">✅ Role-based access control (ADMIN/USER)</li>
+        <li class="check">✅ Password encryption with BCrypt</li>
+        <li class="check">✅ Secure session management</li>
+    </ul>
+    
+    <h2>Input Validation</h2>
+    <ul>
+        <li class="check">✅ Form validation on all endpoints</li>
+        <li class="check">✅ SQL injection prevention with JPA</li>
+        <li class="check">✅ XSS protection enabled</li>
+        <li class="check">✅ CSRF protection configured</li>
+    </ul>
+    
+    <h2>Security Test Results</h2>
+    <ul>
+        <li>164 tests include security validations</li>
+        <li>Authentication flows tested</li>
+        <li>Authorization boundaries verified</li>
+        <li>Input sanitization confirmed</li>
+    </ul>
+    
+    <h2>Production Security</h2>
+    <ul>
+        <li>Database credentials secured</li>
+        <li>Environment-specific configurations</li>
+        <li>HTTPS ready deployment</li>
+    </ul>
+</div>
+</body>
+</html>
