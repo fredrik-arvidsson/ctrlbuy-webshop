@@ -2,6 +2,9 @@ package com.ctrlbuy.webshop.config;
 
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,43 +14,54 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class DataInitializer {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+
+    @Value("${ADMIN_USERNAME:admin}")
+    private String adminUsername;
+
+    @Value("${ADMIN_PASSWORD:admin123}")
+    private String adminPassword;
+
+    @Value("${ADMIN_EMAIL:admin@ctrlbuy.com}")
+    private String adminEmail;
+
     @Bean
     @Profile("!test")  // Kör INTE under test-profil
     public CommandLineRunner init(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder) {
         return args -> {
-            System.out.println("DataInitializer: Kör data-initialisering...");
+            logger.info("DataInitializer: Kör data-initialisering...");
 
             // ✅ SKAPA BACKUP ADMIN
-            if (userRepository.findByUsername("admin").isEmpty() &&
-                    userRepository.findByEmail("admin@ctrlbuy.com").isEmpty()) {
+            if (userRepository.findByUsername(adminUsername).isEmpty() &&
+                    userRepository.findByEmail(adminEmail).isEmpty()) {
                 User admin = new User();
-                admin.setUsername("admin");
-                admin.setEmail("admin@ctrlbuy.com");  // Professionell email
+                admin.setUsername(adminUsername);
+                admin.setEmail(adminEmail);
                 admin.setFirstName("Admin");
                 admin.setLastName("Användare");
-                admin.setPassword(passwordEncoder.encode("admin123"));  // Starkare lösenord
+                admin.setPassword(passwordEncoder.encode(adminPassword));
                 admin.setActive(true);
                 admin.setEmailVerified(true);  // Admin är förverifierad
                 admin.addRole("ROLE_ADMIN");  // ✅ Backup admin
                 userRepository.save(admin);
-                System.out.println("✅ Backup admin skapad - Användarnamn: admin, Lösenord: admin123");
+                logger.info("✅ Backup admin created successfully");
             }
 
-            // ✅ SKAPA FREDRIK (DU) SOM HUVUDADMIN
-            if (userRepository.findByUsername("fredrik").isEmpty() &&
-                    userRepository.findByEmail("fredrik.g.arvidsson@gmail.com").isEmpty()) {
-                User fredrik = new User();
-                fredrik.setUsername("fredrik");
-                fredrik.setEmail("fredrik.g.arvidsson@gmail.com");
-                fredrik.setFirstName("Fredrik");
-                fredrik.setLastName("Arvidsson");
-                fredrik.setPassword(passwordEncoder.encode("password123"));
-                fredrik.setActive(true);
-                fredrik.setEmailVerified(true);  // Förverifierad
-                fredrik.addRole("ROLE_ADMIN");  // ✅ DU är admin!
-                userRepository.save(fredrik);
-                System.out.println("✅ Fredrik skapad som HUVUDADMIN");
+            // ✅ SKAPA HUVUDADMIN (UTVECKLARE)
+            if (userRepository.findByUsername("developer").isEmpty() &&
+                    userRepository.findByEmail("developer@ctrlbuy.com").isEmpty()) {
+                User developer = new User();
+                developer.setUsername("developer");
+                developer.setEmail("developer@ctrlbuy.com");
+                developer.setFirstName("Developer");
+                developer.setLastName("Admin");
+                developer.setPassword(passwordEncoder.encode("dev123"));
+                developer.setActive(true);
+                developer.setEmailVerified(true);  // Förverifierad
+                developer.addRole("ROLE_ADMIN");  // ✅ Utvecklare som admin
+                userRepository.save(developer);
+                logger.info("✅ Developer admin created successfully");
             }
 
             // ✅ TESTANVÄNDARE FÖR UTVECKLING
@@ -63,29 +77,29 @@ public class DataInitializer {
                 user.setEmailVerified(false);  // Behöver verifiering
                 user.addRole("ROLE_USER");  // ✅ Test user
                 userRepository.save(user);
-                System.out.println("✅ Testanvändare skapad (ej verifierad)");
+                logger.info("✅ Test user created successfully");
             }
 
             // ✅ TA BORT GAMLA ADMIN@EXAMPLE.COM OM DEN FINNS
             userRepository.findByEmail("admin@example.com").ifPresent(oldAdmin -> {
-                if (!oldAdmin.getEmail().equals("admin@ctrlbuy.com")) {
+                if (!oldAdmin.getEmail().equals(adminEmail)) {
                     try {
                         userRepository.delete(oldAdmin);
-                        System.out.println("🗑️ Gamla admin@example.com borttagen");
+                        logger.info("🗑️ Old admin@example.com removed");
                     } catch (Exception e) {
-                        System.err.println("⚠️ Kunde inte ta bort gamla admin: " + e.getMessage());
+                        logger.warn("⚠️ Could not remove old admin: " + e.getMessage());
                         oldAdmin.setActive(false);
                         oldAdmin.setUsername("old_admin_" + System.currentTimeMillis());
                         oldAdmin.setEmail("deactivated_" + System.currentTimeMillis() + "@example.com");
                         userRepository.save(oldAdmin);
-                        System.out.println("🔒 Gamla admin deaktiverad istället");
+                        logger.info("🔒 Old admin deactivated instead");
                     }
                 }
             });
 
-            System.out.println("🎉 Data-initialisering slutförd!");
-            System.out.println("📝 Fredrik (HUVUDADMIN): användarnamn='fredrik', lösenord='password123'");
-            System.out.println("📝 Backup admin: användarnamn='admin', lösenord='admin123'");
+            logger.info("🎉 Data initialization completed!");
+            logger.info("📝 Admin credentials configured via environment variables");
+            logger.info("📝 Developer admin: username='developer', password='dev123'");
         };
     }
 
@@ -93,7 +107,7 @@ public class DataInitializer {
     @Profile("test")  // Kör endast under test-profil
     public CommandLineRunner testInit() {
         return args -> {
-            System.out.println("Test CommandLineRunner: Skippar data-initialisering");
+            logger.info("Test CommandLineRunner: Skipping data initialization");
         };
     }
 }

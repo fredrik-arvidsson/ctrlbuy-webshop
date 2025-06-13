@@ -85,7 +85,7 @@ public class EmailTestController {
             testOrder.setTotalAmount(999.00); // Double istället för BigDecimal
             testOrder.setStatus(Order.OrderStatus.PENDING); // Enum istället för String
 
-            String testEmail = "fredrik.g.arvidsson@gmail.com";
+            String testEmail = "test@example.com";
 
             log.info("Sending test order confirmation to: {}", testEmail);
             emailService.sendOrderConfirmation(testOrder, testEmail);
