@@ -1,0 +1,4 @@
+📊 Testing Pyramid
+🔴 E2E Tests (Few)
+🟡 Integration Tests (Some)  
+🟢 Unit Tests (Many)

@@ -25,6 +25,9 @@ public class DataInitializer {
     @Value("${ADMIN_EMAIL:admin@ctrlbuy.com}")
     private String adminEmail;
 
+    @Value("${DEV_ADMIN_PASSWORD:dev123}")
+    private String devAdminPassword;
+
     @Bean
     @Profile("!test")  // Kör INTE under test-profil
     public CommandLineRunner init(UserRepository userRepository,
@@ -56,7 +59,7 @@ public class DataInitializer {
                 developer.setEmail("developer@ctrlbuy.com");
                 developer.setFirstName("Developer");
                 developer.setLastName("Admin");
-                developer.setPassword(passwordEncoder.encode("dev123"));
+                developer.setPassword(passwordEncoder.encode(devAdminPassword));
                 developer.setActive(true);
                 developer.setEmailVerified(true);  // Förverifierad
                 developer.addRole("ROLE_ADMIN");  // ✅ Utvecklare som admin
@@ -99,7 +102,7 @@ public class DataInitializer {
 
             logger.info("🎉 Data initialization completed!");
             logger.info("📝 Admin credentials configured via environment variables");
-            logger.info("📝 Developer admin: username='developer', password='dev123'");
+            logger.info("📝 Developer admin created successfully");
         };
     }
 

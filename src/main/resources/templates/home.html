@@ -117,6 +117,14 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
+        /* Produktbild styling för hemsidan */
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+            border-bottom: 1px solid #eee;
+        }
+
         /* Admin panel styling */
         .admin-panel {
             background: linear-gradient(135deg, #007bff, #6f42c1);
@@ -273,6 +281,12 @@
         <div class="row">
             <div th:each="product : ${featuredProducts}" class="col-md-4 mb-4">
                 <div class="card product-card h-100">
+                    <!-- ✨ NYTT: Produktbild -->
+                    <img th:src="@{'/images/products/' + ${product.name.toLowerCase().replaceAll('[^a-z0-9]', '') + '.jpg'}}"
+                         class="product-image"
+                         th:alt="${product.name}"
+                         onerror="this.src='/images/products/placeholder.jpg'">
+
                     <div class="card-body">
                         <h5 class="card-title" th:text="${product.name}">Produktnamn</h5>
                         <p class="card-text text-muted" th:text="${#strings.abbreviate(product.description, 80)}">Beskrivning</p>

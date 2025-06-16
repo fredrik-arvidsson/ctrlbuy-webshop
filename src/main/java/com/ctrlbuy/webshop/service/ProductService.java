@@ -31,11 +31,34 @@ public class ProductService {
 
     /**
      * Hämtar alla produkter från databasen
-     * BEFINTLIG - fungerar med nuvarande databas
+     * FIXAT - explicit transaction och debugging
      */
+    @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
-        log.debug("Hämtar alla produkter");
-        return productRepository.findAll();
+        log.info("🔍 DEBUGGING: Hämtar alla produkter från databas");
+
+        try {
+            List<Product> products = productRepository.findAll();
+            log.info("🔍 DEBUGGING: Repository returnerade {} produkter", products.size());
+
+            // Debug första produkterna
+            if (!products.isEmpty()) {
+                Product first = products.get(0);
+                log.info("🔍 DEBUGGING: Första produkten: ID={}, Name={}, Category={}",
+                        first.getId(), first.getName(), first.getCategory());
+            } else {
+                log.warn("🔍 DEBUGGING: Repository returnerade tom lista!");
+
+                // Testa direct count
+                long count = productRepository.count();
+                log.warn("🔍 DEBUGGING: Repository count() returnerar: {}", count);
+            }
+
+            return products;
+        } catch (Exception e) {
+            log.error("🔍 DEBUGGING: Fel vid hämtning av produkter: {}", e.getMessage(), e);
+            return List.of();
+        }
     }
 
     /**
