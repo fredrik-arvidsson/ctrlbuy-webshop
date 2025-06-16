@@ -17,6 +17,11 @@ jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
 
+    # Lägg till environment för Pages deployment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,12 +61,66 @@ jobs:
           path: |
             target/surefire-reports/
             target/site/jacoco/
+            .github/badges/
           retention-days: 30
 
-      - name: Deploy till GitHub Pages
+      # Ny modern GitHub Pages deployment
+      - name: Förbered Pages innehåll
         if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+        run: |
+          mkdir -p _site/coverage
+          cp -r target/site/jacoco/* _site/coverage/
+          
+          # Skapa en huvudsida som länkar till coverage
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>CtrlBuy Webshop - Test Reports</title>
+              <meta charset="utf-8">
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; }
+                  .container { max-width: 800px; margin: 0 auto; }
+                  .badge { margin: 10px 0; }
+                  .link { display: inline-block; margin: 10px 0; padding: 10px 20px; background: #0066cc; color: white; text-decoration: none; border-radius: 5px; }
+                  .link:hover { background: #0052a3; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🛒 CtrlBuy Webshop - Test Reports</h1>
+          
+                  <h2>📊 Code Coverage</h2>
+                  <div class="badge">
+                      <img src="https://img.shields.io/badge/Coverage-Loading...-yellow" alt="Coverage Badge" id="coverage-badge">
+                  </div>
+          
+                  <a href="coverage/" class="link">📈 View Detailed Coverage Report</a>
+          
+                  <h2>🔗 Useful Links</h2>
+                  <ul>
+                      <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop">📁 GitHub Repository</a></li>
+                      <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions">⚙️ GitHub Actions</a></li>
+                  </ul>
+          
+                  <hr>
+                  <p><small>Last updated: $(date)</small></p>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: target/site/jacoco
-          destination_dir: coverage
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: deployment
+        uses: actions/deploy-pages@v4

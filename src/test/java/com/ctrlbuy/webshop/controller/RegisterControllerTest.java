@@ -85,8 +85,8 @@ class RegisterControllerTest {
         RegistrationResult mockResult = new RegistrationResult(mockUser, verificationToken);
 
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(userService.existsByUsernameIncludingInactive(any())).thenReturn(false);
-        when(userService.existsByEmailIncludingInactive(any())).thenReturn(false);
+        when(userService.existsByUsernameIncludingInactive("johndoe")).thenReturn(false);
+        when(userService.existsByEmailIncludingInactive("test@example.com")).thenReturn(false);
         when(userService.registerNewUserWithToken(registerRequest)).thenReturn(mockResult);
 
         // Act
@@ -103,9 +103,20 @@ class RegisterControllerTest {
     void registerUser_WithPasswordMismatch_ShouldAddErrorAndReturnRegisterView() {
         // Arrange
         registerRequest.setConfirmPassword("differentPassword");
-        when(bindingResult.hasErrors()).thenReturn(false); // Initially no errors
-        when(userService.existsByUsernameIncludingInactive(any())).thenReturn(false);
-        when(userService.existsByEmailIncludingInactive(any())).thenReturn(false);
+
+        // Skapa en AtomicBoolean för att spåra om error har lagts till
+        when(userService.existsByUsernameIncludingInactive("johndoe")).thenReturn(false);
+        when(userService.existsByEmailIncludingInactive("test@example.com")).thenReturn(false);
+
+        // Mock hasErrors() att returnera false först, sedan true efter rejectValue
+        when(bindingResult.hasErrors()).thenReturn(false);
+
+        // Vi skapar en mock som ändrar hasErrors() när rejectValue anropas
+        doAnswer(invocation -> {
+            when(bindingResult.hasErrors()).thenReturn(true);
+            return null;
+        }).when(bindingResult).rejectValue("confirmPassword", "password.mismatch",
+                "Lösenorden matchar inte. Kontrollera att du har skrivit samma lösenord i båda fälten.");
 
         // Act
         String result = registerController.registerUser(registerRequest, bindingResult, model, redirectAttributes);
@@ -116,14 +127,27 @@ class RegisterControllerTest {
                 "Lösenorden matchar inte. Kontrollera att du har skrivit samma lösenord i båda fälten.");
         verify(userService, never()).registerNewUserWithToken(any());
         verify(emailService, never()).sendVerificationEmail(any(User.class), any());
+
+        // Verifiera att validation-metoderna anropades
+        verify(userService).existsByUsernameIncludingInactive("johndoe");
+        verify(userService).existsByEmailIncludingInactive("test@example.com");
     }
 
     @Test
     void registerUser_WithExistingUsername_ShouldAddErrorAndReturnRegisterView() {
         // Arrange
-        when(bindingResult.hasErrors()).thenReturn(false);
         when(userService.existsByUsernameIncludingInactive("johndoe")).thenReturn(true);
-        when(userService.existsByEmailIncludingInactive(any())).thenReturn(false);
+        when(userService.existsByEmailIncludingInactive("test@example.com")).thenReturn(false);
+
+        // Mock hasErrors() att returnera false först, sedan true efter rejectValue
+        when(bindingResult.hasErrors()).thenReturn(false);
+
+        // Vi skapar en mock som ändrar hasErrors() när rejectValue anropas
+        doAnswer(invocation -> {
+            when(bindingResult.hasErrors()).thenReturn(true);
+            return null;
+        }).when(bindingResult).rejectValue("username", "username.exists",
+                "Detta användarnamn är redan upptaget. Välj ett annat användarnamn.");
 
         // Act
         String result = registerController.registerUser(registerRequest, bindingResult, model, redirectAttributes);
@@ -134,14 +158,27 @@ class RegisterControllerTest {
                 "Detta användarnamn är redan upptaget. Välj ett annat användarnamn.");
         verify(userService, never()).registerNewUserWithToken(any());
         verify(emailService, never()).sendVerificationEmail(any(User.class), any());
+
+        // Verifiera att validation-metoderna anropades
+        verify(userService).existsByUsernameIncludingInactive("johndoe");
+        verify(userService).existsByEmailIncludingInactive("test@example.com");
     }
 
     @Test
     void registerUser_WithExistingEmail_ShouldAddErrorAndReturnRegisterView() {
         // Arrange
-        when(bindingResult.hasErrors()).thenReturn(false);
-        when(userService.existsByUsernameIncludingInactive(any())).thenReturn(false);
+        when(userService.existsByUsernameIncludingInactive("johndoe")).thenReturn(false);
         when(userService.existsByEmailIncludingInactive("test@example.com")).thenReturn(true);
+
+        // Mock hasErrors() att returnera false först, sedan true efter rejectValue
+        when(bindingResult.hasErrors()).thenReturn(false);
+
+        // Vi skapar en mock som ändrar hasErrors() när rejectValue anropas
+        doAnswer(invocation -> {
+            when(bindingResult.hasErrors()).thenReturn(true);
+            return null;
+        }).when(bindingResult).rejectValue("email", "email.exists",
+                "Denna e-postadress är redan registrerad. Om du har glömt ditt lösenord kan du återställa det här.");
 
         // Act
         String result = registerController.registerUser(registerRequest, bindingResult, model, redirectAttributes);
@@ -152,15 +189,23 @@ class RegisterControllerTest {
                 "Denna e-postadress är redan registrerad. Om du har glömt ditt lösenord kan du återställa det här.");
         verify(userService, never()).registerNewUserWithToken(any());
         verify(emailService, never()).sendVerificationEmail(any(User.class), any());
+
+        // Verifiera att validation-metoderna anropades
+        verify(userService).existsByUsernameIncludingInactive("johndoe");
+        verify(userService).existsByEmailIncludingInactive("test@example.com");
     }
 
     @Test
     void registerUser_WithValidationErrors_ShouldReturnRegisterView() {
-        // Arrange
-        when(bindingResult.hasErrors()).thenReturn(true);
+        // Arrange - Vi måste mocka validation-metoderna eftersom de ALLTID anropas
+        when(bindingResult.hasErrors()).thenReturn(true); // Redan errors från början
         when(bindingResult.getAllErrors()).thenReturn(Collections.singletonList(
                 new ObjectError("registerRequest", "Förnamn är obligatoriskt")
         ));
+
+        // Även om hasErrors() är true körs validateRegistration() först, så vi måste mocka
+        when(userService.existsByUsernameIncludingInactive("johndoe")).thenReturn(false);
+        when(userService.existsByEmailIncludingInactive("test@example.com")).thenReturn(false);
 
         // Act
         String result = registerController.registerUser(registerRequest, bindingResult, model, redirectAttributes);
@@ -169,6 +214,9 @@ class RegisterControllerTest {
         assertEquals("register", result);
         verify(userService, never()).registerNewUserWithToken(any());
         verify(emailService, never()).sendVerificationEmail(any(User.class), any());
+        // validateRegistration() körs ALLTID först, så dessa anrop sker
+        verify(userService).existsByUsernameIncludingInactive("johndoe");
+        verify(userService).existsByEmailIncludingInactive("test@example.com");
     }
 
     @Test
