@@ -1,4 +1,4 @@
-# 🛒 CtrlBuy Webshop - Professional E-commerce Platform
+# 🛒 CtrlBuy Webshop 🚀 - Professional E-commerce Platform
 
 <div align="center">
   <img src="docs/images/ctrlbuy-logo.png" alt="CtrlBuy Logo" width="300"/>
