@@ -53,11 +53,11 @@ webshop,com.ctrlbuy.webshop.controller,CheckoutController,231,60,16,6,60,16,10,6
 webshop,com.ctrlbuy.webshop.controller,ProductController,228,477,26,28,45,104,24,16,1,12
 webshop,com.ctrlbuy.webshop.controller,EmailTestController,291,0,22,0,58,0,19,0,8,0
 webshop,com.ctrlbuy.webshop.controller,DebugController,415,60,20,2,75,19,11,6,0,6
-webshop,com.ctrlbuy.webshop.controller,RegisterController,146,315,13,29,34,67,13,19,0,11
+webshop,com.ctrlbuy.webshop.controller,RegisterController,160,301,13,29,38,63,13,19,0,11
 webshop,com.ctrlbuy.webshop.security.filter,JwtAuthenticationFilter,170,0,10,0,29,0,8,0,3,0
 webshop,com.ctrlbuy.webshop.security,UserDetailsImpl,28,0,0,0,10,0,8,0,8,0
 webshop,com.ctrlbuy.webshop.security,JwtService,121,0,8,0,28,0,10,0,6,0
-webshop,com.ctrlbuy.webshop.service,ProductService,10,586,3,11,1,127,3,45,0,41
+webshop,com.ctrlbuy.webshop.service,ProductService,31,623,4,12,7,134,4,45,0,41
 webshop,com.ctrlbuy.webshop.service,PasswordResetService,243,4,14,0,68,1,14,1,7,1
 webshop,com.ctrlbuy.webshop.service,PaymentService,48,644,12,76,13,156,8,53,0,17
 webshop,com.ctrlbuy.webshop.service,UserDetailsServiceImpl,8,0,0,0,2,0,2,0,2,0

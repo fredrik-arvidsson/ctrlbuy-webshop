@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 20px; margin-bottom: 15px; border-radius: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">    <a href="../../../index.html" style="color: white; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; gap: 8px;">        ← Tillbaka till CtrlBuy Dashboard    </a></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">ProductService.java</span></div><h1>ProductService.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">ProductService.java</span></div><h1>ProductService.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
 
 import com.ctrlbuy.webshop.model.Product;
 import com.ctrlbuy.webshop.repository.ProductRepository;
@@ -31,11 +31,34 @@ public class ProductService {
 
     /**
      * Hämtar alla produkter från databasen
-     * BEFINTLIG - fungerar med nuvarande databas
+     * FIXAT - explicit transaction och debugging
      */
+    @Transactional(readOnly = true)
     public List&lt;Product&gt; getAllProducts() {
-<span class="fc" id="L37">        log.debug(&quot;Hämtar alla produkter&quot;);</span>
-<span class="fc" id="L38">        return productRepository.findAll();</span>
+<span class="fc" id="L38">        log.info(&quot;🔍 DEBUGGING: Hämtar alla produkter från databas&quot;);</span>
+
+        try {
+<span class="fc" id="L41">            List&lt;Product&gt; products = productRepository.findAll();</span>
+<span class="fc" id="L42">            log.info(&quot;🔍 DEBUGGING: Repository returnerade {} produkter&quot;, products.size());</span>
+
+            // Debug första produkterna
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            if (!products.isEmpty()) {</span>
+<span class="fc" id="L46">                Product first = products.get(0);</span>
+<span class="fc" id="L47">                log.info(&quot;🔍 DEBUGGING: Första produkten: ID={}, Name={}, Category={}&quot;,</span>
+<span class="fc" id="L48">                        first.getId(), first.getName(), first.getCategory());</span>
+<span class="fc" id="L49">            } else {</span>
+<span class="nc" id="L50">                log.warn(&quot;🔍 DEBUGGING: Repository returnerade tom lista!&quot;);</span>
+
+                // Testa direct count
+<span class="nc" id="L53">                long count = productRepository.count();</span>
+<span class="nc" id="L54">                log.warn(&quot;🔍 DEBUGGING: Repository count() returnerar: {}&quot;, count);</span>
+            }
+
+<span class="fc" id="L57">            return products;</span>
+<span class="nc" id="L58">        } catch (Exception e) {</span>
+<span class="nc" id="L59">            log.error(&quot;🔍 DEBUGGING: Fel vid hämtning av produkter: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L60">            return List.of();</span>
+        }
     }
 
     /**
@@ -43,19 +66,19 @@ public class ProductService {
      * BEFINTLIG - använder befintlig databasstruktur
      */
     public Page&lt;Product&gt; findAllActive(Pageable pageable) {
-<span class="fc" id="L46">        log.debug(&quot;Hämtar produkter med paginering: {}&quot;, pageable);</span>
+<span class="fc" id="L69">        log.debug(&quot;Hämtar produkter med paginering: {}&quot;, pageable);</span>
 
         // Använd repository proxy för &quot;aktiva&quot; produkter
-<span class="fc" id="L49">        List&lt;Product&gt; activeProducts = productRepository.findActiveProductsProxy();</span>
+<span class="fc" id="L72">        List&lt;Product&gt; activeProducts = productRepository.findActiveProductsProxy();</span>
 
         // Konvertera till Page med manuell paginering
-<span class="fc" id="L52">        int start = (int) pageable.getOffset();</span>
-<span class="fc" id="L53">        int end = Math.min((start + pageable.getPageSize()), activeProducts.size());</span>
+<span class="fc" id="L75">        int start = (int) pageable.getOffset();</span>
+<span class="fc" id="L76">        int end = Math.min((start + pageable.getPageSize()), activeProducts.size());</span>
 
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        List&lt;Product&gt; pageContent = start &lt; activeProducts.size() ?</span>
-<span class="pc" id="L56">                activeProducts.subList(start, end) : List.of();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        List&lt;Product&gt; pageContent = start &lt; activeProducts.size() ?</span>
+<span class="pc" id="L79">                activeProducts.subList(start, end) : List.of();</span>
 
-<span class="fc" id="L58">        return new PageImpl&lt;&gt;(pageContent, pageable, activeProducts.size());</span>
+<span class="fc" id="L81">        return new PageImpl&lt;&gt;(pageContent, pageable, activeProducts.size());</span>
     }
 
     /**
@@ -63,9 +86,9 @@ public class ProductService {
      * UPPDATERAD - använder ID som proxy för popularitet
      */
     public List&lt;Product&gt; getPopularProducts() {
-<span class="fc" id="L66">        log.debug(&quot;Hämtar populära produkter (top 8 baserat på ID)&quot;);</span>
-<span class="fc" id="L67">        Pageable pageable = PageRequest.of(0, 8);</span>
-<span class="fc" id="L68">        return productRepository.findRecentProductsAsPopular(pageable);</span>
+<span class="fc" id="L89">        log.debug(&quot;Hämtar populära produkter (top 8 baserat på ID)&quot;);</span>
+<span class="fc" id="L90">        Pageable pageable = PageRequest.of(0, 8);</span>
+<span class="fc" id="L91">        return productRepository.findRecentProductsAsPopular(pageable);</span>
     }
 
     /**
@@ -73,8 +96,8 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public List&lt;Product&gt; getProductsByCategory(String category) {
-<span class="fc" id="L76">        log.debug(&quot;Hämtar produkter i kategori: {}&quot;, category);</span>
-<span class="fc" id="L77">        return productRepository.findByCategory(category);</span>
+<span class="fc" id="L99">        log.debug(&quot;Hämtar produkter i kategori: {}&quot;, category);</span>
+<span class="fc" id="L100">        return productRepository.findByCategory(category);</span>
     }
 
     /**
@@ -82,8 +105,8 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public Page&lt;Product&gt; findByCategory(String category, Pageable pageable) {
-<span class="fc" id="L85">        log.debug(&quot;Hämtar produkter i kategori {} med paginering&quot;, category);</span>
-<span class="fc" id="L86">        return productRepository.findByCategory(category, pageable);</span>
+<span class="fc" id="L108">        log.debug(&quot;Hämtar produkter i kategori {} med paginering&quot;, category);</span>
+<span class="fc" id="L109">        return productRepository.findByCategory(category, pageable);</span>
     }
 
     /**
@@ -91,19 +114,19 @@ public class ProductService {
      * UPPDATERAD - kommer att räkna visningar när view_count läggs till
      */
     public Product getProductById(Long id) {
-<span class="fc" id="L94">        log.debug(&quot;Hämtar produkt med ID: {}&quot;, id);</span>
-<span class="fc" id="L95">        Optional&lt;Product&gt; product = productRepository.findById(id);</span>
+<span class="fc" id="L117">        log.debug(&quot;Hämtar produkt med ID: {}&quot;, id);</span>
+<span class="fc" id="L118">        Optional&lt;Product&gt; product = productRepository.findById(id);</span>
 
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (product.isPresent()) {</span>
-<span class="fc" id="L98">            Product p = product.get();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (product.isPresent()) {</span>
+<span class="fc" id="L121">            Product p = product.get();</span>
             // TODO: Implementera visningsräkning när view_count kolumn läggs till
             // p.incrementViewCount();
             // productRepository.save(p);
-<span class="fc" id="L102">            log.debug(&quot;Hämtade produkt: {}&quot;, p.getName());</span>
-<span class="fc" id="L103">            return p;</span>
+<span class="fc" id="L125">            log.debug(&quot;Hämtade produkt: {}&quot;, p.getName());</span>
+<span class="fc" id="L126">            return p;</span>
         }
 
-<span class="fc" id="L106">        return null;</span>
+<span class="fc" id="L129">        return null;</span>
     }
 
     /**
@@ -111,18 +134,18 @@ public class ProductService {
      * UPPDATERAD - kommer att räkna visningar när view_count läggs till
      */
     public Optional&lt;Product&gt; findById(Long id) {
-<span class="fc" id="L114">        log.debug(&quot;Hämtar produkt (Optional) med ID: {}&quot;, id);</span>
-<span class="fc" id="L115">        Optional&lt;Product&gt; productOpt = productRepository.findById(id);</span>
+<span class="fc" id="L137">        log.debug(&quot;Hämtar produkt (Optional) med ID: {}&quot;, id);</span>
+<span class="fc" id="L138">        Optional&lt;Product&gt; productOpt = productRepository.findById(id);</span>
 
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (productOpt.isPresent()) {</span>
-<span class="fc" id="L118">            Product product = productOpt.get();</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (productOpt.isPresent()) {</span>
+<span class="fc" id="L141">            Product product = productOpt.get();</span>
             // TODO: Implementera visningsräkning när view_count kolumn läggs till
             // product.incrementViewCount();
             // productRepository.save(product);
-<span class="fc" id="L122">            log.debug(&quot;Hämtade produkt: {}&quot;, product.getName());</span>
+<span class="fc" id="L145">            log.debug(&quot;Hämtade produkt: {}&quot;, product.getName());</span>
         }
 
-<span class="fc" id="L125">        return productOpt;</span>
+<span class="fc" id="L148">        return productOpt;</span>
     }
 
     /**
@@ -130,8 +153,8 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public List&lt;Product&gt; searchProducts(String keyword) {
-<span class="fc" id="L133">        log.debug(&quot;Söker produkter med nyckelord: {}&quot;, keyword);</span>
-<span class="fc" id="L134">        return productRepository.findByNameContainingOrDescriptionContainingIgnoreCase(keyword, keyword);</span>
+<span class="fc" id="L156">        log.debug(&quot;Söker produkter med nyckelord: {}&quot;, keyword);</span>
+<span class="fc" id="L157">        return productRepository.findByNameContainingOrDescriptionContainingIgnoreCase(keyword, keyword);</span>
     }
 
     /**
@@ -139,8 +162,8 @@ public class ProductService {
      * UPPDATERAD - använder ny Query-metod
      */
     public Page&lt;Product&gt; searchProducts(String keyword, Pageable pageable) {
-<span class="fc" id="L142">        log.debug(&quot;Söker produkter med paginering för: {}&quot;, keyword);</span>
-<span class="fc" id="L143">        return productRepository.searchProducts(keyword, pageable);</span>
+<span class="fc" id="L165">        log.debug(&quot;Söker produkter med paginering för: {}&quot;, keyword);</span>
+<span class="fc" id="L166">        return productRepository.searchProducts(keyword, pageable);</span>
     }
 
     /**
@@ -148,8 +171,8 @@ public class ProductService {
      * UPPDATERAD - använder optimerad Query
      */
     public List&lt;String&gt; getAllCategories() {
-<span class="fc" id="L151">        log.debug(&quot;Hämtar alla kategorier&quot;);</span>
-<span class="fc" id="L152">        return productRepository.findDistinctCategories();</span>
+<span class="fc" id="L174">        log.debug(&quot;Hämtar alla kategorier&quot;);</span>
+<span class="fc" id="L175">        return productRepository.findDistinctCategories();</span>
     }
 
     /**
@@ -157,8 +180,8 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public List&lt;Product&gt; getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-<span class="fc" id="L160">        log.debug(&quot;Hämtar produkter inom prisintervall: {} - {}&quot;, minPrice, maxPrice);</span>
-<span class="fc" id="L161">        return productRepository.findByPriceBetween(minPrice, maxPrice);</span>
+<span class="fc" id="L183">        log.debug(&quot;Hämtar produkter inom prisintervall: {} - {}&quot;, minPrice, maxPrice);</span>
+<span class="fc" id="L184">        return productRepository.findByPriceBetween(minPrice, maxPrice);</span>
     }
 
     /**
@@ -166,7 +189,7 @@ public class ProductService {
      * TILLFÄLLIG - kommer att implementeras när view_count läggs till
      */
     public void incrementViewCount(Long productId) {
-<span class="fc" id="L169">        log.debug(&quot;Visningsräkning för produkt: {} (väntar på view_count kolumn)&quot;, productId);</span>
+<span class="fc" id="L192">        log.debug(&quot;Visningsräkning för produkt: {} (väntar på view_count kolumn)&quot;, productId);</span>
         // TODO: Implementera när view_count kolumn läggs till
         /*
         productRepository.findById(productId)
@@ -177,16 +200,16 @@ public class ProductService {
                              product.getName(), product.getViewCount());
                 });
         */
-<span class="fc" id="L180">    }</span>
+<span class="fc" id="L203">    }</span>
 
     /**
      * Hämtar nyligen tillagda produkter
      * UPPDATERAD - använder ID som proxy för datum
      */
     public List&lt;Product&gt; getNewArrivals() {
-<span class="fc" id="L187">        log.debug(&quot;Hämtar nyligen tillagda produkter (top 10 baserat på ID)&quot;);</span>
-<span class="fc" id="L188">        Pageable pageable = PageRequest.of(0, 10);</span>
-<span class="fc" id="L189">        return productRepository.findNewestProductsByIdProxy(pageable);</span>
+<span class="fc" id="L210">        log.debug(&quot;Hämtar nyligen tillagda produkter (top 10 baserat på ID)&quot;);</span>
+<span class="fc" id="L211">        Pageable pageable = PageRequest.of(0, 10);</span>
+<span class="fc" id="L212">        return productRepository.findNewestProductsByIdProxy(pageable);</span>
     }
 
     /**
@@ -194,8 +217,8 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public Product saveProduct(Product product) {
-<span class="fc" id="L197">        log.info(&quot;Sparar produkt: {}&quot;, product.getName());</span>
-<span class="fc" id="L198">        return productRepository.save(product);</span>
+<span class="fc" id="L220">        log.info(&quot;Sparar produkt: {}&quot;, product.getName());</span>
+<span class="fc" id="L221">        return productRepository.save(product);</span>
     }
 
     /**
@@ -203,37 +226,37 @@ public class ProductService {
      * BEFINTLIG - fungerar med nuvarande databas
      */
     public void deleteProduct(Long id) {
-<span class="fc" id="L206">        log.info(&quot;Tar bort produkt: {}&quot;, id);</span>
-<span class="fc" id="L207">        productRepository.deleteById(id);</span>
-<span class="fc" id="L208">    }</span>
+<span class="fc" id="L229">        log.info(&quot;Tar bort produkt: {}&quot;, id);</span>
+<span class="fc" id="L230">        productRepository.deleteById(id);</span>
+<span class="fc" id="L231">    }</span>
 
     /**
      * Debug-metod för att kontrollera produkter
      * UPPDATERAD - förbättrad statistik
      */
     public void debugProductCount() {
-<span class="fc" id="L215">        long totalCount = productRepository.count();</span>
-<span class="fc" id="L216">        long inStockCount = productRepository.countInStockProducts();</span>
-<span class="fc" id="L217">        long outOfStockCount = productRepository.countOutOfStockProducts();</span>
+<span class="fc" id="L238">        long totalCount = productRepository.count();</span>
+<span class="fc" id="L239">        long inStockCount = productRepository.countInStockProducts();</span>
+<span class="fc" id="L240">        long outOfStockCount = productRepository.countOutOfStockProducts();</span>
 
-<span class="fc" id="L219">        System.out.println(&quot;=== PRODUCT DEBUG ===&quot;);</span>
-<span class="fc" id="L220">        System.out.println(&quot;Total products in database: &quot; + totalCount);</span>
-<span class="fc" id="L221">        System.out.println(&quot;Products in stock: &quot; + inStockCount);</span>
-<span class="fc" id="L222">        System.out.println(&quot;Products out of stock: &quot; + outOfStockCount);</span>
+<span class="fc" id="L242">        System.out.println(&quot;=== PRODUCT DEBUG ===&quot;);</span>
+<span class="fc" id="L243">        System.out.println(&quot;Total products in database: &quot; + totalCount);</span>
+<span class="fc" id="L244">        System.out.println(&quot;Products in stock: &quot; + inStockCount);</span>
+<span class="fc" id="L245">        System.out.println(&quot;Products out of stock: &quot; + outOfStockCount);</span>
 
-<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if (totalCount &gt; 0) {</span>
-<span class="fc" id="L225">            List&lt;Product&gt; sample = productRepository.findAll().stream().limit(3).toList();</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if (totalCount &gt; 0) {</span>
+<span class="fc" id="L248">            List&lt;Product&gt; sample = productRepository.findAll().stream().limit(3).toList();</span>
 
-<span class="fc bfc" id="L227" title="All 2 branches covered.">            for (Product product : sample) {</span>
-<span class="fc" id="L228">                System.out.println(&quot;Sample product: ID=&quot; + product.getId() +</span>
-<span class="fc" id="L229">                        &quot;, Name=&quot; + product.getName() +</span>
-<span class="fc" id="L230">                        &quot;, Category=&quot; + product.getCategory() +</span>
-<span class="fc" id="L231">                        &quot;, Price=&quot; + product.getPrice() +</span>
-<span class="fc" id="L232">                        &quot;, Stock=&quot; + product.getStockQuantity());</span>
-<span class="fc" id="L233">            }</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">            for (Product product : sample) {</span>
+<span class="fc" id="L251">                System.out.println(&quot;Sample product: ID=&quot; + product.getId() +</span>
+<span class="fc" id="L252">                        &quot;, Name=&quot; + product.getName() +</span>
+<span class="fc" id="L253">                        &quot;, Category=&quot; + product.getCategory() +</span>
+<span class="fc" id="L254">                        &quot;, Price=&quot; + product.getPrice() +</span>
+<span class="fc" id="L255">                        &quot;, Stock=&quot; + product.getStockQuantity());</span>
+<span class="fc" id="L256">            }</span>
         }
-<span class="fc" id="L235">        System.out.println(&quot;===================&quot;);</span>
-<span class="fc" id="L236">    }</span>
+<span class="fc" id="L258">        System.out.println(&quot;===================&quot;);</span>
+<span class="fc" id="L259">    }</span>
 
     // ================================
     // NYA METODER SOM FUNGERAR MED NUVARANDE DATABAS
@@ -243,81 +266,81 @@ public class ProductService {
      * Hämtar alla aktiva produkter (proxy-metod)
      */
     public List&lt;Product&gt; getAllActiveProducts() {
-<span class="fc" id="L246">        log.debug(&quot;Hämtar alla 'aktiva' produkter (proxy)&quot;);</span>
-<span class="fc" id="L247">        return productRepository.findActiveProductsProxy();</span>
+<span class="fc" id="L269">        log.debug(&quot;Hämtar alla 'aktiva' produkter (proxy)&quot;);</span>
+<span class="fc" id="L270">        return productRepository.findActiveProductsProxy();</span>
     }
 
     /**
      * Hämtar produkter med paginering och sortering
      */
     public Page&lt;Product&gt; getActiveProducts(int page, int size, String sortBy, String sortDir) {
-<span class="fc" id="L254">        log.debug(&quot;Hämtar produkter - sida: {}, storlek: {}, sortering: {} {}&quot;,</span>
-<span class="fc" id="L255">                page, size, sortBy, sortDir);</span>
+<span class="fc" id="L277">        log.debug(&quot;Hämtar produkter - sida: {}, storlek: {}, sortering: {} {}&quot;,</span>
+<span class="fc" id="L278">                page, size, sortBy, sortDir);</span>
 
-<span class="pc bpc" id="L257" title="1 of 2 branches missed.">        Sort sort = sortDir.equalsIgnoreCase(&quot;desc&quot;) ?</span>
-<span class="nc" id="L258">                Sort.by(sortBy).descending() :</span>
-<span class="fc" id="L259">                Sort.by(sortBy).ascending();</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        Sort sort = sortDir.equalsIgnoreCase(&quot;desc&quot;) ?</span>
+<span class="nc" id="L281">                Sort.by(sortBy).descending() :</span>
+<span class="fc" id="L282">                Sort.by(sortBy).ascending();</span>
 
-<span class="fc" id="L261">        Pageable pageable = PageRequest.of(page, size, sort);</span>
+<span class="fc" id="L284">        Pageable pageable = PageRequest.of(page, size, sort);</span>
 
         // Använd findAll med sortering för nu
-<span class="fc" id="L264">        return productRepository.findAll(pageable);</span>
+<span class="fc" id="L287">        return productRepository.findAll(pageable);</span>
     }
 
     /**
      * Hämtar produkter per kategori (alias)
      */
     public List&lt;Product&gt; getActiveProductsByCategory(String category) {
-<span class="fc" id="L271">        return getProductsByCategory(category);</span>
+<span class="fc" id="L294">        return getProductsByCategory(category);</span>
     }
 
     /**
      * Hämta produkt utan att räkna visning
      */
     public Optional&lt;Product&gt; getProductByIdWithoutView(Long id) {
-<span class="fc" id="L278">        log.debug(&quot;Hämtar produkt utan visningsräkning: {}&quot;, id);</span>
-<span class="fc" id="L279">        return productRepository.findById(id);</span>
+<span class="fc" id="L301">        log.debug(&quot;Hämtar produkt utan visningsräkning: {}&quot;, id);</span>
+<span class="fc" id="L302">        return productRepository.findById(id);</span>
     }
 
     /**
      * Sök aktiva produkter (alias)
      */
     public List&lt;Product&gt; searchActiveProducts(String searchTerm) {
-<span class="fc" id="L286">        return searchProducts(searchTerm);</span>
+<span class="fc" id="L309">        return searchProducts(searchTerm);</span>
     }
 
     /**
      * Hämta produkter på rea (tillfällig proxy-metod)
      */
     public List&lt;Product&gt; getProductsOnSale() {
-<span class="fc" id="L293">        log.debug(&quot;Hämtar produkter på 'rea' (proxy baserat på nyckelord)&quot;);</span>
-<span class="fc" id="L294">        return productRepository.findSaleProductsProxy();</span>
+<span class="fc" id="L316">        log.debug(&quot;Hämtar produkter på 'rea' (proxy baserat på nyckelord)&quot;);</span>
+<span class="fc" id="L317">        return productRepository.findSaleProductsProxy();</span>
     }
 
     /**
      * Hämta populära produkter (med limit)
      */
     public List&lt;Product&gt; getPopularProducts(int limit) {
-<span class="fc" id="L301">        log.debug(&quot;Hämtar {} populära produkter&quot;, limit);</span>
-<span class="fc" id="L302">        Pageable pageable = PageRequest.of(0, limit);</span>
-<span class="fc" id="L303">        return productRepository.findRecentProductsAsPopular(pageable);</span>
+<span class="fc" id="L324">        log.debug(&quot;Hämtar {} populära produkter&quot;, limit);</span>
+<span class="fc" id="L325">        Pageable pageable = PageRequest.of(0, limit);</span>
+<span class="fc" id="L326">        return productRepository.findRecentProductsAsPopular(pageable);</span>
     }
 
     /**
      * Hämta nya produkter (med limit)
      */
     public List&lt;Product&gt; getNewestProducts(int limit) {
-<span class="fc" id="L310">        log.debug(&quot;Hämtar {} nyaste produkter&quot;, limit);</span>
-<span class="fc" id="L311">        Pageable pageable = PageRequest.of(0, limit);</span>
-<span class="fc" id="L312">        return productRepository.findNewestProductsByIdProxy(pageable);</span>
+<span class="fc" id="L333">        log.debug(&quot;Hämtar {} nyaste produkter&quot;, limit);</span>
+<span class="fc" id="L334">        Pageable pageable = PageRequest.of(0, limit);</span>
+<span class="fc" id="L335">        return productRepository.findNewestProductsByIdProxy(pageable);</span>
     }
 
     /**
      * Hämta produkter med lågt lager
      */
     public List&lt;Product&gt; getLowStockProducts(int threshold) {
-<span class="fc" id="L319">        log.debug(&quot;Hämtar produkter med lager under {}&quot;, threshold);</span>
-<span class="fc" id="L320">        return productRepository.findByStockQuantityLessThan(threshold);</span>
+<span class="fc" id="L342">        log.debug(&quot;Hämtar produkter med lager under {}&quot;, threshold);</span>
+<span class="fc" id="L343">        return productRepository.findByStockQuantityLessThan(threshold);</span>
     }
 
     // ================================
@@ -325,59 +348,59 @@ public class ProductService {
     // ================================
 
     public Product createProduct(Product product) {
-<span class="fc" id="L328">        log.info(&quot;Skapar ny produkt: {}&quot;, product.getName());</span>
-<span class="fc" id="L329">        product.setId(null); // Säkerställ att det är en ny produkt</span>
-<span class="fc" id="L330">        return productRepository.save(product);</span>
+<span class="fc" id="L351">        log.info(&quot;Skapar ny produkt: {}&quot;, product.getName());</span>
+<span class="fc" id="L352">        product.setId(null); // Säkerställ att det är en ny produkt</span>
+<span class="fc" id="L353">        return productRepository.save(product);</span>
     }
 
     public Product updateProduct(Long id, Product updatedProduct) {
-<span class="fc" id="L334">        log.info(&quot;Uppdaterar produkt med ID: {}&quot;, id);</span>
+<span class="fc" id="L357">        log.info(&quot;Uppdaterar produkt med ID: {}&quot;, id);</span>
 
-<span class="fc" id="L336">        return productRepository.findById(id)</span>
-<span class="fc" id="L337">                .map(existingProduct -&gt; {</span>
-<span class="fc" id="L338">                    updatedProduct.setId(id);</span>
+<span class="fc" id="L359">        return productRepository.findById(id)</span>
+<span class="fc" id="L360">                .map(existingProduct -&gt; {</span>
+<span class="fc" id="L361">                    updatedProduct.setId(id);</span>
                     // TODO: Behåll timestamps när kolumnerna läggs till
-<span class="fc" id="L340">                    return productRepository.save(updatedProduct);</span>
+<span class="fc" id="L363">                    return productRepository.save(updatedProduct);</span>
                 })
-<span class="fc" id="L342">                .orElseThrow(() -&gt; new RuntimeException(&quot;Produkt med ID &quot; + id + &quot; hittades inte&quot;));</span>
+<span class="fc" id="L365">                .orElseThrow(() -&gt; new RuntimeException(&quot;Produkt med ID &quot; + id + &quot; hittades inte&quot;));</span>
     }
 
     public void hardDeleteProduct(Long id) {
-<span class="fc" id="L346">        log.warn(&quot;Permanent borttagning av produkt: {}&quot;, id);</span>
-<span class="fc" id="L347">        productRepository.deleteById(id);</span>
-<span class="fc" id="L348">    }</span>
+<span class="fc" id="L369">        log.warn(&quot;Permanent borttagning av produkt: {}&quot;, id);</span>
+<span class="fc" id="L370">        productRepository.deleteById(id);</span>
+<span class="fc" id="L371">    }</span>
 
     // ================================
     // LAGERHANTERING
     // ================================
 
     public boolean updateStock(Long productId, Integer newQuantity) {
-<span class="fc" id="L355">        log.info(&quot;Uppdaterar lager för produkt {} till {}&quot;, productId, newQuantity);</span>
+<span class="fc" id="L378">        log.info(&quot;Uppdaterar lager för produkt {} till {}&quot;, productId, newQuantity);</span>
 
-<span class="fc" id="L357">        return productRepository.findById(productId)</span>
-<span class="fc" id="L358">                .map(product -&gt; {</span>
-<span class="fc" id="L359">                    product.setStockQuantity(newQuantity);</span>
-<span class="fc" id="L360">                    productRepository.save(product);</span>
-<span class="fc" id="L361">                    return true;</span>
+<span class="fc" id="L380">        return productRepository.findById(productId)</span>
+<span class="fc" id="L381">                .map(product -&gt; {</span>
+<span class="fc" id="L382">                    product.setStockQuantity(newQuantity);</span>
+<span class="fc" id="L383">                    productRepository.save(product);</span>
+<span class="fc" id="L384">                    return true;</span>
                 })
-<span class="fc" id="L363">                .orElse(false);</span>
+<span class="fc" id="L386">                .orElse(false);</span>
     }
 
     public boolean decreaseStock(Long productId, Integer quantity) {
-<span class="fc" id="L367">        log.info(&quot;Minskar lager för produkt {} med {}&quot;, productId, quantity);</span>
+<span class="fc" id="L390">        log.info(&quot;Minskar lager för produkt {} med {}&quot;, productId, quantity);</span>
 
-<span class="fc" id="L369">        return productRepository.findById(productId)</span>
-<span class="fc" id="L370">                .map(product -&gt; {</span>
-<span class="fc bfc" id="L371" title="All 2 branches covered.">                    if (product.getStockQuantity() &gt;= quantity) {</span>
-<span class="fc" id="L372">                        product.setStockQuantity(product.getStockQuantity() - quantity);</span>
-<span class="fc" id="L373">                        productRepository.save(product);</span>
-<span class="fc" id="L374">                        return true;</span>
+<span class="fc" id="L392">        return productRepository.findById(productId)</span>
+<span class="fc" id="L393">                .map(product -&gt; {</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">                    if (product.getStockQuantity() &gt;= quantity) {</span>
+<span class="fc" id="L395">                        product.setStockQuantity(product.getStockQuantity() - quantity);</span>
+<span class="fc" id="L396">                        productRepository.save(product);</span>
+<span class="fc" id="L397">                        return true;</span>
                     }
-<span class="fc" id="L376">                    log.warn(&quot;Otillräckligt lager för produkt {}. Finns: {}, Begärt: {}&quot;,</span>
-<span class="fc" id="L377">                            productId, product.getStockQuantity(), quantity);</span>
-<span class="fc" id="L378">                    return false;</span>
+<span class="fc" id="L399">                    log.warn(&quot;Otillräckligt lager för produkt {}. Finns: {}, Begärt: {}&quot;,</span>
+<span class="fc" id="L400">                            productId, product.getStockQuantity(), quantity);</span>
+<span class="fc" id="L401">                    return false;</span>
                 })
-<span class="fc" id="L380">                .orElse(false);</span>
+<span class="fc" id="L403">                .orElse(false);</span>
     }
 
     // ================================
@@ -385,15 +408,15 @@ public class ProductService {
     // ================================
 
     public long getTotalActiveProducts() {
-<span class="fc" id="L388">        return productRepository.count(); // Alla produkter för nu</span>
+<span class="fc" id="L411">        return productRepository.count(); // Alla produkter för nu</span>
     }
 
     public long getTotalProductsOnSale() {
-<span class="fc" id="L392">        return productRepository.findSaleProductsProxy().size(); // Proxy-metod</span>
+<span class="fc" id="L415">        return productRepository.findSaleProductsProxy().size(); // Proxy-metod</span>
     }
 
     public BigDecimal getAveragePrice() {
-<span class="fc" id="L396">        return productRepository.findAveragePrice();</span>
+<span class="fc" id="L419">        return productRepository.findAveragePrice();</span>
     }
 
     // ================================
@@ -406,8 +429,8 @@ public class ProductService {
     public Page&lt;Product&gt; findProductsWithFilters(String category, BigDecimal minPrice,
                                                  BigDecimal maxPrice, Boolean inStock,
                                                  String searchTerm, Pageable pageable) {
-<span class="fc" id="L409">        log.debug(&quot;Avancerad sökning med filter&quot;);</span>
-<span class="fc" id="L410">        return productRepository.findProductsWithFilters(category, minPrice, maxPrice,</span>
+<span class="fc" id="L432">        log.debug(&quot;Avancerad sökning med filter&quot;);</span>
+<span class="fc" id="L433">        return productRepository.findProductsWithFilters(category, minPrice, maxPrice,</span>
                 inStock, searchTerm, pageable);
     }
 
@@ -415,9 +438,9 @@ public class ProductService {
      * Hitta relaterade produkter
      */
     public List&lt;Product&gt; getRelatedProducts(String category, Long excludeId, int limit) {
-<span class="fc" id="L418">        log.debug(&quot;Hämtar relaterade produkter i kategori: {}&quot;, category);</span>
-<span class="fc" id="L419">        Pageable pageable = PageRequest.of(0, limit);</span>
-<span class="fc" id="L420">        return productRepository.findRelatedProductsByCategory(category, excludeId, pageable);</span>
+<span class="fc" id="L441">        log.debug(&quot;Hämtar relaterade produkter i kategori: {}&quot;, category);</span>
+<span class="fc" id="L442">        Pageable pageable = PageRequest.of(0, limit);</span>
+<span class="fc" id="L443">        return productRepository.findRelatedProductsByCategory(category, excludeId, pageable);</span>
     }
 
     // ================================
