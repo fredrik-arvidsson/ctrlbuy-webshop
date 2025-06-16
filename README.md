@@ -282,3 +282,4 @@ java -version  # Ska visa version 21
 **Se utvecklingen i realtid med live coverage-rapporter och transparent CI/CD pipeline!**
 
 </div>
+
