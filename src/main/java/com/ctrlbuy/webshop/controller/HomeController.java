@@ -38,18 +38,37 @@ public class HomeController {
             model.addAttribute("title", "Hem - CTRL+BUY Solutions");
             logger.trace("Added title to model");
 
-            // Hantera produkter för startsidan
+            // Hantera produkter för startsidan - FÖRBÄTTRAD VERSION
             try {
                 logger.trace("Loading featured products...");
-                List<Product> featuredProducts = productRepository.findAll()
-                        .stream()
-                        .limit(6)  // Visa 6 produkter på startsidan
-                        .toList();
+
+                // Försök först med featured products, fallback till de första 6
+                List<Product> featuredProducts = productRepository.findByIsFeaturedTrue();
+
+                if (featuredProducts.isEmpty()) {
+                    logger.debug("No featured products found, using first 6 products");
+                    featuredProducts = productRepository.findAll()
+                            .stream()
+                            .filter(product -> product.getIsActive() != null && product.getIsActive())
+                            .limit(6)
+                            .toList();
+                } else {
+                    // Begränsa till 6 även om fler är märkta som featured
+                    featuredProducts = featuredProducts.stream().limit(6).toList();
+                }
+
                 model.addAttribute("featuredProducts", featuredProducts);
-                logger.trace("Successfully loaded {} featured products", featuredProducts.size());
+                logger.info("Successfully loaded {} featured products for homepage", featuredProducts.size());
+
+                // Debug: logga produktinformation
+                for (Product product : featuredProducts) {
+                    logger.debug("Featured product: {} - Image: {}", product.getName(), product.getImageUrl());
+                }
+
             } catch (Exception e) {
                 logger.warn("Could not load featured products: {}", e.getMessage());
                 // Fortsätt utan produkter om det misslyckas
+                model.addAttribute("featuredProducts", Collections.emptyList());
             }
 
             // Hantera autentisering
@@ -126,27 +145,6 @@ public class HomeController {
         model.addAttribute("title", "Om oss - CtrlBuy");
         return "about";
     }
-
-    // ❌ TAR BORT DENNA METOD FÖR ATT UNDVIKA KONFLIKT
-    // ProductController hanterar nu /products istället
-    /*
-    @GetMapping("/products")
-    public String products(Model model) {
-        logger.debug("Products page requested");
-        model.addAttribute("title", "Produkter - CtrlBuy");
-
-        try {
-            List<Product> allProducts = productRepository.findAll();
-            model.addAttribute("products", allProducts);
-            logger.debug("Loaded {} products for products page", allProducts.size());
-        } catch (Exception e) {
-            logger.error("Error loading products: {}", e.getMessage());
-            model.addAttribute("products", Collections.emptyList());
-        }
-
-        return "products";
-    }
-    */
 
     @GetMapping("/min-profil")
     public String minProfil(Authentication authentication, HttpSession session) {
