@@ -28,145 +28,58 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, Authentication authentication, HttpServletRequest request) {
-        logger.trace("=== HOME CONTROLLER START ===");
-        logger.trace("Request URL: {}", request.getRequestURL());
-        logger.trace("Request Method: {}", request.getMethod());
-        logger.trace("Request Headers: {}", Collections.list(request.getHeaderNames()));
-
         try {
-            // Sätt grundläggande titel
             model.addAttribute("title", "Hem - CTRL+BUY Solutions");
-            logger.trace("Added title to model");
-
-            // Hantera produkter för startsidan - FÖRBÄTTRAD VERSION
-            try {
-                logger.trace("Loading featured products...");
-
-                // Försök först med featured products, fallback till de första 6
-                List<Product> featuredProducts = productRepository.findByIsFeaturedTrue();
-
-                if (featuredProducts.isEmpty()) {
-                    logger.debug("No featured products found, using first 6 products");
-                    featuredProducts = productRepository.findAll()
-                            .stream()
-                            .filter(product -> product.getIsActive() != null && product.getIsActive())
-                            .limit(6)
-                            .toList();
-                } else {
-                    // Begränsa till 6 även om fler är märkta som featured
-                    featuredProducts = featuredProducts.stream().limit(6).toList();
-                }
-
-                model.addAttribute("featuredProducts", featuredProducts);
-                logger.info("Successfully loaded {} featured products for homepage", featuredProducts.size());
-
-                // Debug: logga produktinformation
-                for (Product product : featuredProducts) {
-                    logger.debug("Featured product: {} - Image: {}", product.getName(), product.getImageUrl());
-                }
-
-            } catch (Exception e) {
-                logger.warn("Could not load featured products: {}", e.getMessage());
-                // Fortsätt utan produkter om det misslyckas
-                model.addAttribute("featuredProducts", Collections.emptyList());
-            }
-
+            
+            // Ladda produkter för startsidan
+            List<Product> featuredProducts = productRepository.findAll()
+                    .stream()
+                    .limit(6)
+                    .toList();
+            model.addAttribute("featuredProducts", featuredProducts);
+            
             // Hantera autentisering
-            if (authentication != null) {
-                logger.trace("Authentication found: {}", authentication.getClass().getSimpleName());
-                logger.trace("Is authenticated: {}", authentication.isAuthenticated());
-                logger.trace("Principal: {}", authentication.getPrincipal());
-                logger.trace("Name: {}", authentication.getName());
-                logger.trace("Authorities: {}", authentication.getAuthorities());
-
-                if (authentication.isAuthenticated() &&
-                        !authentication.getName().equals("anonymousUser")) {
-
-                    String username = authentication.getName();
-                    logger.trace("Setting user as logged in: {}", username);
-
-                    model.addAttribute("isLoggedIn", true);
-                    model.addAttribute("username", username);
-                    model.addAttribute("user", username); // För Thymeleaf kompatibilitet
-
-                    // Kontrollera admin-status
-                    boolean isAdmin = authentication.getAuthorities().stream()
-                            .anyMatch(authority -> {
-                                String auth = authority.getAuthority();
-                                logger.trace("Checking authority: {}", auth);
-                                return "ROLE_ADMIN".equals(auth);
-                            });
-
-                    logger.trace("User {} is admin: {}", username, isAdmin);
-                    model.addAttribute("isAdmin", isAdmin);
-
-                } else {
-                    logger.trace("User not authenticated or is anonymous");
-                    model.addAttribute("isLoggedIn", false);
-                    model.addAttribute("isAdmin", false);
-                }
+            if (authentication != null && authentication.isAuthenticated() && 
+                !authentication.getName().equals("anonymousUser")) {
+                model.addAttribute("isLoggedIn", true);
+                model.addAttribute("username", authentication.getName());
+                
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+                model.addAttribute("isAdmin", isAdmin);
             } else {
-                logger.trace("No authentication found");
                 model.addAttribute("isLoggedIn", false);
                 model.addAttribute("isAdmin", false);
             }
-
-            logger.trace("Model attributes before return: {}", model.asMap().keySet());
-            logger.trace("Returning template: home");
+            
             return "home";
-
+            
         } catch (Exception e) {
-            logger.error("=== EXCEPTION IN HOME CONTROLLER ===");
-            logger.error("Exception class: {}", e.getClass().getName());
-            logger.error("Exception message: {}", e.getMessage());
-            logger.error("Exception cause: {}", e.getCause() != null ? e.getCause().getMessage() : "No cause");
-            logger.error("Full stack trace: ", e);
-            logger.error("Model state when error occurred: {}", model.asMap());
-            logger.error("Authentication state: {}", authentication != null ? authentication.toString() : "null");
-            logger.error("====================================");
-
-            // Rethrow för att Spring ska hantera det
+            logger.error("Error in home controller: {}", e.getMessage());
             throw e;
-
-        } finally {
-            logger.trace("=== HOME CONTROLLER END ===");
         }
     }
 
     @GetMapping("/welcome")
     public String welcome(Model model) {
-        logger.debug("Welcome endpoint called, redirecting to home");
         return "redirect:/";
     }
 
-    @GetMapping("/about")
+    @GetMapping("/about") 
     public String about(Model model) {
-        logger.debug("About page requested");
         model.addAttribute("title", "Om oss - CtrlBuy");
         return "about";
     }
 
     @GetMapping("/min-profil")
     public String minProfil(Authentication authentication, HttpSession session) {
-        logger.debug("=== MIN-PROFIL DEBUG ===");
-        logger.debug("Username: {}", authentication != null ? authentication.getName() : "null");
-        logger.debug("Session userRole: {}", session.getAttribute("userRole"));
-        if (authentication != null) {
-            logger.debug("Authorities: {}", authentication.getAuthorities());
-        }
-        logger.debug("========================");
-
-        // Tillfällig lösning: kolla både session och username
         String role = (String) session.getAttribute("userRole");
-        boolean isAdmin = "admin".equals(role) ||
+        boolean isAdmin = "admin".equals(role) || 
                 (authentication != null && "admin".equals(authentication.getName()));
-
+                
         if (isAdmin) {
-            logger.debug("Redirecting admin to dashboard");
             return "redirect:/admin/dashboard";
         }
-
-        logger.debug("Redirecting regular user to user profile");
         return "redirect:/user/profil";
     }
 }
