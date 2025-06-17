@@ -211,6 +211,23 @@ public class Product {
         this.active = active;
     }
 
+    // ⭐ BOOLEAN CONVENIENCE METHODS (för Thymeleaf kompatibilitet)
+    public boolean isActive() {
+        return getActive();
+    }
+
+    public boolean isFeatured() {
+        return getFeatured();
+    }
+
+    public boolean isNew() {
+        return createdAt != null && createdAt.isAfter(LocalDateTime.now().minusDays(30));
+    }
+
+    public boolean hasImage() {
+        return imageUrl != null && !imageUrl.trim().isEmpty();
+    }
+
     // ⭐ UTILITY METHODS
     public void incrementViewCount() {
         this.viewCount = getViewCount() + 1;
@@ -256,6 +273,8 @@ public class Product {
                 ", viewCount=" + viewCount +
                 ", createdAt=" + createdAt +
                 ", active=" + active +
+                ", featured=" + featured +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

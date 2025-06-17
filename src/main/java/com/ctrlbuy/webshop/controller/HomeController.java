@@ -38,15 +38,21 @@ public class HomeController {
             model.addAttribute("title", "Hem - CTRL+BUY Solutions");
             logger.trace("Added title to model");
 
-            // Hantera produkter för startsidan
+            // Hantera produkter för startsidan - NU MED PRODUCTSERVICE!
             try {
-                logger.trace("Loading featured products...");
-                List<Product> featuredProducts = productRepository.findAll()
+                logger.trace("Loading featured products with ProductService...");
+                // ✅ ÄNDRING: Använd ProductService istället för ProductRepository
+                List<Product> featuredProducts = productService.getAllProducts()
                         .stream()
                         .limit(6)  // Visa 6 produkter på startsidan
                         .toList();
                 model.addAttribute("featuredProducts", featuredProducts);
-                logger.trace("Successfully loaded {} featured products", featuredProducts.size());
+                logger.trace("Successfully loaded {} featured products with images", featuredProducts.size());
+
+                // Debug: logga första produktens bildURL
+                if (!featuredProducts.isEmpty()) {
+                    logger.trace("First product image URL: {}", featuredProducts.get(0).getImageUrl());
+                }
             } catch (Exception e) {
                 logger.warn("Could not load featured products: {}", e.getMessage());
                 // Fortsätt utan produkter om det misslyckas
@@ -125,6 +131,13 @@ public class HomeController {
         logger.debug("About page requested");
         model.addAttribute("title", "Om oss - CtrlBuy");
         return "about";
+    }
+
+    @GetMapping("/privacy")
+    public String privacy(Model model) {
+        logger.debug("Privacy page requested");
+        model.addAttribute("title", "Integritetspolicy - CTRL+BUY Solutions");
+        return "coming-soon";
     }
 
     // ❌ TAR BORT DENNA METOD FÖR ATT UNDVIKA KONFLIKT

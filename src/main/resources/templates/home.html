@@ -281,8 +281,8 @@
         <div class="row">
             <div th:each="product : ${featuredProducts}" class="col-md-4 mb-4">
                 <div class="card product-card h-100">
-                    <!-- ✨ NYTT: Produktbild -->
-                    <img th:src="@{'/images/products/' + ${product.name.toLowerCase().replaceAll('[^a-z0-9]', '') + '.jpg'}}"
+                    <!-- ✅ FIXAT: Använd product.imageUrl istället för lokala filer -->
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/products/placeholder.jpg'}"
                          class="product-image"
                          th:alt="${product.name}"
                          onerror="this.src='/images/products/placeholder.jpg'">

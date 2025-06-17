@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ctrlbuy.webshop.repository.ProductRepository;
+import com.ctrlbuy.webshop.service.ProductService;
 import com.ctrlbuy.webshop.model.Product;
 
 @Controller
@@ -27,10 +28,74 @@ public class DebugController {
     private ProductRepository productRepository;
 
     @Autowired
+    private ProductService productService;
+
+    @Autowired
     private DataSource dataSource;
 
     @Autowired
     private EntityManager entityManager;
+
+    @GetMapping("/featured-products")
+    @ResponseBody
+    public String debugFeaturedProducts() {
+        logger.debug("🔍 Debug featured products endpoint called");
+        try {
+            List<Product> featuredProducts = productService.getAllProducts()
+                    .stream()
+                    .limit(6)
+                    .toList();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("<h1>🔍 Debug: Featured Products för Hemsida</h1>");
+            sb.append("<p><strong>Antal produkter:</strong> ").append(featuredProducts.size()).append("</p>");
+            sb.append("<p><strong>Källa:</strong> ProductService.getAllProducts()</p>");
+            sb.append("<hr>");
+
+            for (int i = 0; i < featuredProducts.size(); i++) {
+                Product p = featuredProducts.get(i);
+                sb.append("<div style='border: 1px solid #ddd; padding: 15px; margin: 10px 0;'>");
+                sb.append("<h3>📦 Produkt ").append(i + 1).append(": ").append(p.getName()).append("</h3>");
+                sb.append("<p><strong>ID:</strong> ").append(p.getId()).append("</p>");
+                sb.append("<p><strong>ImageURL:</strong> ").append(p.getImageUrl() != null ? p.getImageUrl() : "NULL").append("</p>");
+                sb.append("<p><strong>Category:</strong> ").append(p.getCategory()).append("</p>");
+                sb.append("<p><strong>Price:</strong> ").append(p.getPrice()).append(" kr</p>");
+                sb.append("<p><strong>Stock:</strong> ").append(p.getStockQuantity()).append("</p>");
+                sb.append("<p><strong>Is Active:</strong> ").append(p.isActive()).append("</p>");
+                sb.append("<p><strong>Is Featured:</strong> ").append(p.isFeatured()).append("</p>");
+
+                // Visa faktiska bilden
+                if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
+                    sb.append("<div style='margin: 10px 0;'>");
+                    sb.append("<p><strong>Bildförhandsvisning:</strong></p>");
+                    sb.append("<img src='").append(p.getImageUrl()).append("' style='max-width: 200px; border: 1px solid #ccc; display: block;' alt='").append(p.getName()).append("'>");
+                    sb.append("</div>");
+                } else {
+                    sb.append("<p style='color: red; font-weight: bold;'>❌ INGEN BILD!</p>");
+                }
+                sb.append("</div>");
+            }
+
+            // Jämför med Repository direkt
+            sb.append("<hr><h2>🔧 Jämförelse med Repository (direkt)</h2>");
+            List<Product> repoProducts = productRepository.findAll()
+                    .stream()
+                    .limit(3)
+                    .toList();
+
+            for (int i = 0; i < repoProducts.size() && i < 3; i++) {
+                Product p = repoProducts.get(i);
+                sb.append("<p><strong>Repo Produkt ").append(i + 1).append(":</strong> ").append(p.getName());
+                sb.append(" | ImageURL: ").append(p.getImageUrl() != null ? p.getImageUrl() : "NULL").append("</p>");
+            }
+
+            return sb.toString();
+
+        } catch (Exception e) {
+            logger.error("❌ Error in debug featured products: ", e);
+            return "<h1>❌ ERROR:</h1><pre>" + e.getMessage() + "\n\nStack: " + e.getClass().getSimpleName() + "</pre>";
+        }
+    }
 
     @GetMapping("/products")
     @ResponseBody
@@ -52,6 +117,7 @@ public class DebugController {
                 result.append("  Price: ").append(product.getPrice()).append("\n");
                 result.append("  Category: ").append(product.getCategory()).append("\n");
                 result.append("  Stock: ").append(product.getStockQuantity()).append("\n");
+                result.append("  Image URL: ").append(product.getImageUrl()).append("\n");
                 result.append("  Description: ").append(
                         product.getDescription() != null ?
                                 product.getDescription().substring(0, Math.min(50, product.getDescription().length())) + "..."
@@ -85,6 +151,7 @@ public class DebugController {
                 result.append("Name: ").append(first.getName()).append("<br>");
                 result.append("Price: ").append(first.getPrice()).append("<br>");
                 result.append("Category: ").append(first.getCategory()).append("<br>");
+                result.append("Image URL: ").append(first.getImageUrl()).append("<br>");
             }
 
             return result.toString();
@@ -113,13 +180,14 @@ public class DebugController {
             }
             rs.close();
 
-            rs = stmt.executeQuery("SELECT id, name, price, category FROM products LIMIT 3");
+            rs = stmt.executeQuery("SELECT id, name, price, category, image_url FROM products LIMIT 3");
             result.append("<h4>First 3 products (Raw SQL):</h4>");
             while (rs.next()) {
                 result.append("ID: ").append(rs.getLong("id"))
                         .append(", Name: ").append(rs.getString("name"))
                         .append(", Price: ").append(rs.getBigDecimal("price"))
                         .append(", Category: ").append(rs.getString("category"))
+                        .append(", Image URL: ").append(rs.getString("image_url"))
                         .append("<br>");
             }
             rs.close();
@@ -153,7 +221,7 @@ public class DebugController {
             result.append("<h3>NATIVE SQL DEBUG</h3>");
             result.append("Native COUNT: ").append(countResult.toString()).append("<br><br>");
 
-            Query dataQuery = entityManager.createNativeQuery("SELECT id, name, price FROM products LIMIT 3");
+            Query dataQuery = entityManager.createNativeQuery("SELECT id, name, price, image_url FROM products LIMIT 3");
             @SuppressWarnings("unchecked")
             List<Object[]> results = dataQuery.getResultList();
 
@@ -162,6 +230,7 @@ public class DebugController {
                 result.append("ID: ").append(row[0])
                         .append(", Name: ").append(row[1])
                         .append(", Price: ").append(row[2])
+                        .append(", Image URL: ").append(row[3])
                         .append("<br>");
             }
 

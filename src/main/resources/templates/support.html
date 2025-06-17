@@ -236,12 +236,12 @@
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li><span class="text-muted">👤 Min profil (Kommer snart)</span></li>
+            <li><a th:href="@{/support/kundtjanst}" class="text-decoration-none">👤 Min profil</a></li>
             <li><a th:href="@{/varukorg}" class="text-decoration-none">🛒 Varukorg</a></li>
             <li><a th:href="@{/products}" class="text-decoration-none">🛍️ Produkter</a></li>
-            <li><a href="#" class="text-decoration-none">📦 Spåra beställning</a></li>
-            <li><a href="#" class="text-decoration-none">🔄 Returer</a></li>
-            <li><a href="#" class="text-decoration-none">📋 Garantivillkor</a></li>
+            <li><a th:href="@{/support/returer}" class="text-decoration-none">📦 Mina beställningar</a></li>
+            <li><a th:href="@{/support/returer}" class="text-decoration-none">🔄 Returer</a></li>
+            <li><a th:href="@{/support/garantivillkor}" class="text-decoration-none">📋 Garantivillkor</a></li>
           </ul>
         </div>
       </div>
@@ -270,10 +270,10 @@
           <h3 class="mb-0">Nödlänkar</h3>
         </div>
         <div class="card-body">
-          <p><a href="#" class="text-decoration-none">🔒 Glömt lösenord?</a></p>
-          <p><a href="#" class="text-decoration-none">❗ Rapportera problem</a></p>
-          <p><a href="#" class="text-decoration-none">🛡️ Säkerhet & Integritet</a></p>
-          <p><a href="#" class="text-decoration-none">📱 Mobilapp support</a></p>
+          <p><a th:href="@{/forgot-password}" class="text-decoration-none">🔒 Glömt lösenord?</a></p>
+          <p><a th:href="@{/support/kundtjanst}" class="text-decoration-none">❗ Rapportera problem</a></p>
+          <p><a th:href="@{/privacy-policy}" class="text-decoration-none">🛡️ Säkerhet & Integritet</a></p>
+          <p><a th:href="@{/support/spara-bestallning}" class="text-decoration-none">💾 Spara beställning</a></p>
         </div>
       </div>
     </div>

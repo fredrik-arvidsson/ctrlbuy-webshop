@@ -33,6 +33,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
+                        // 🔥 H2-KONSOLL - MÅSTE VARA FÖRST!
+                        .requestMatchers("/h2-console/**").permitAll()
+
                         // Statiska resurser
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
 
@@ -63,7 +66,7 @@ public class SecurityConfig {
                         // Cart endpoints
                         .requestMatchers("/cart/**", "/varukorg/**").permitAll()
 
-                        // Coming Soon sidor (publika)
+                        // Coming Soon sidor (publika) - 🆕 UPPDATERAD med alla URLs
                         .requestMatchers("/returer", "/spara-bestallning", "/garantivillkor", "/coming-soon").permitAll()
 
                         // Profil-sidor kräver inloggning
@@ -95,7 +98,12 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/test-email/**", "/api/test/**", "/admin/**", "/cart/**", "/varukorg/**")
+                        // 🔥 VIKTIGT: Lägg till H2-konsoll här också!
+                        .ignoringRequestMatchers("/h2-console/**", "/test-email/**", "/api/test/**", "/admin/**", "/cart/**", "/varukorg/**")
+                )
+                // 🔥 NYTT: Headers för H2-konsoll
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )
                 .userDetailsService(customUserDetailsService);
 

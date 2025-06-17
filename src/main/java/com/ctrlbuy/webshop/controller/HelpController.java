@@ -1,5 +1,6 @@
 package com.ctrlbuy.webshop.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +57,40 @@ public class HelpController {
         model.addAttribute("message", "Direktkontakt med vår kundtjänst för personlig hjälp och support.");
         model.addAttribute("details", "Kundtjänstfunktionen utvecklas för närvarande. Snart kan du chatta direkt med våra supportagenter.");
         model.addAttribute("returnUrl", "/contact");
+        return "coming-soon";
+    }
+
+    // 🆕 NYA MAPPNINGAR FÖR SNABBLÄNKARNA
+    @GetMapping("/spara-bestallning")
+    public String sparaBestallning(Model model, Authentication authentication) {
+        logger.debug("Spåra beställning page requested");
+        model.addAttribute("pageTitle", "Spåra beställning - CtrlBuy");
+        model.addAttribute("feature", "Beställningsspårning");
+        model.addAttribute("icon", "truck");
+        model.addAttribute("message", "Realtidsspårning av dina leveranser, SMS-notifieringar och interaktiv karta. Håll koll på dina paket från lager till dörr!");
+        model.addAttribute("returnUrl", "/min-profil");
+        return "coming-soon";
+    }
+
+    @GetMapping("/returer")
+    public String returer(Model model, Authentication authentication) {
+        logger.debug("Returer page requested");
+        model.addAttribute("pageTitle", "Returer - CtrlBuy");
+        model.addAttribute("feature", "Returer");
+        model.addAttribute("icon", "undo");
+        model.addAttribute("message", "Enkla digitala returetiketter, automatisk återbetalning och kostnadsfri retur för defekta produkter. Allt inom 30 dagar!");
+        model.addAttribute("returnUrl", "/min-profil");
+        return "coming-soon";
+    }
+
+    @GetMapping("/garantivillkor")
+    public String garantivillkor(Model model, Authentication authentication) {
+        logger.debug("Garantivillkor page requested");
+        model.addAttribute("pageTitle", "Garantivillkor - CtrlBuy");
+        model.addAttribute("feature", "Garantivillkor");
+        model.addAttribute("icon", "shield-alt");
+        model.addAttribute("message", "Minst 2 års garanti på alla produkter, möjlighet till utökad garanti upp till 5 år och snabb garantihantering!");
+        model.addAttribute("returnUrl", "/min-profil");
         return "coming-soon";
     }
 

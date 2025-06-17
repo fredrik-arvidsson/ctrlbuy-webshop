@@ -9,7 +9,7 @@
 [![Maven](https://img.shields.io/badge/Maven-3.9+-red.svg)](https://maven.apache.org/)
 
 <!-- LIVE BADGES från din GitHub Pages! -->
-[![Tests](https://img.shields.io/badge/Tests-164%20passed-success.svg)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)
+[![Tests](https://img.shields.io/badge/Tests-392%20passed-success.svg)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)
 [![Live Coverage](https://img.shields.io/endpoint?url=https://fredrik-arvidsson.github.io/ctrlbuy-webshop/badges/jacoco.json)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/)
 [![Branch Coverage](https://img.shields.io/endpoint?url=https://fredrik-arvidsson.github.io/ctrlbuy-webshop/badges/branches.json)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/)
 
@@ -25,7 +25,7 @@
 
 > **En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot. Professionell kvalitet med automatiserade tester och live coverage-rapporter.**
 
-## ⚡ Quick Start (30 sekunder)
+## ⚡ Quick Start (8 sekunder)
 
 **Vill du bara testa applikationen snabbt? Här är det snabbaste sättet:**
 
@@ -35,15 +35,30 @@ git clone https://github.com/fredrik-arvidsson/ctrlbuy-webshop.git
 cd ctrlbuy-webshop
 
 # 2. Starta applikationen (använder H2 in-memory databas)
-./mvnw spring-boot:run -Dspring.profiles.active=dev
+./mvnw clean spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
 
-**🎉 Klart!** Applikationen kör nu på: **http://localhost:8080**
+**🎉 Klart!** Applikationen kör nu på: **http://localhost:8080** (startar på ~8 sekunder)
 
-**💡 H2 Databas Console:** http://localhost:8080/h2-console
+### 🔍 Verify Everything Works
+
+**1. Main Application:**
+```
+http://localhost:8080
+```
+
+**2. H2 Database Console (development):**
+```
+http://localhost:8080/h2-console
+```
 - JDBC URL: `jdbc:h2:mem:ctrlbuydb`
 - Username: `sa`
-- Password: *(lämna tomt)*
+- Password: *(leave empty)*
+
+**3. Test Login:**
+- **Admin:** `backup.admin` / `AdminPass123!`
+- **Developer:** `developer.admin` / `DevPass123!`
+- **User:** `test.user` / `TestPass123!`
 
 ---
 
@@ -55,7 +70,7 @@ cd ctrlbuy-webshop
 **✅ Inget setup krävs - fungerar direkt!**
 
 ```bash
-./mvnw spring-boot:run -Dspring.profiles.active=dev
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
 
 **Fördelar:**
@@ -151,7 +166,7 @@ xdg-open target/site/jacoco/index.html  # Linux
 ### Olika utvecklingsmiljöer
 ```bash
 # Development med H2
-./mvnw spring-boot:run -Dspring.profiles.active=dev
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 
 # Production med MySQL
 ./mvnw spring-boot:run -Dspring.profiles.active=prod
@@ -216,7 +231,7 @@ Access denied for user 'root'@'localhost'
 ```
 **Lösning:** Använd H2 istället:
 ```bash
-./mvnw spring-boot:run -Dspring.profiles.active=dev
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
 
 ### Problem: Port redan används
@@ -225,7 +240,7 @@ Port 8080 was already in use
 ```
 **Lösning:** Ändra port:
 ```bash
-./mvnw spring-boot:run -Dserver.port=8081 -Dspring.profiles.active=dev
+./mvnw spring-boot:run -Dserver.port=8081 -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
 
 ### Problem: Java version
@@ -282,4 +297,3 @@ java -version  # Ska visa version 21
 **Se utvecklingen i realtid med live coverage-rapporter och transparent CI/CD pipeline!**
 
 </div>
-

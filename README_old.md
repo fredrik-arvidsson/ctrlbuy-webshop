@@ -1,555 +1,226 @@
-# 🛒 CtrlBuy Webshop - Professional E-commerce Platform
+# 🛒 CtrlBuy Webshop 🚀 - Professional E-commerce Platform
+
+<div align="center">
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-red.svg)](https://maven.apache.org/)
-[![Tests](https://img.shields.io/badge/Tests-189%20passed-success.svg)](/)
-[![Coverage](https://img.shields.io/badge/Controller%20Coverage-100%25-success.svg)](/)
-[![Build Status](https://img.shields.io/badge/Build-SUCCESS-brightgreen.svg)](/)
+
+<!-- LIVE BADGES från din GitHub Pages! -->
+[![Tests](https://img.shields.io/endpoint?url=https://fredrik-arvidsson.github.io/ctrlbuy-webshop/tests.json)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)
+[![Live Coverage](https://img.shields.io/endpoint?url=https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage.json)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/)
+[![Build Status](https://github.com/fredrik-arvidsson/ctrlbuy-webshop/workflows/CtrlBuy%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions)
+
+<!-- Specifika service badges - länkar till live rapporter -->
+[![Coverage Report](https://img.shields.io/badge/Coverage%20Report-Live-brightgreen.svg)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/)
+[![Test Dashboard](https://img.shields.io/badge/Test%20Dashboard-Live-blue.svg)](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)
 [![AWS Ready](https://img.shields.io/badge/AWS-Ready-ff9900.svg)](https://aws.amazon.com/)
 
-> **En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot, designad för professionell deployment och produktion.**
+</div>
 
-## 📋 Innehållsförteckning
+> **En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot. Professionell kvalitet med automatiserade tester och live coverage-rapporter.**
 
-- [Översikt](#-översikt)
-- [Teknisk Stack](#-teknisk-stack)
-- [Arkitektur](#-arkitektur)
-- [Funktioner](#-funktioner)
-- [Installation](#-installation)
-- [Konfiguration](#-konfiguration)
-- [Testing](#-testing)
-- [AWS Deployment](#-aws-deployment)
-- [API Dokumentation](#-api-dokumentation)
-- [Säkerhet](#-säkerhet)
-- [Prestanda](#-prestanda)
-- [Bidrag](#-bidrag)
+## ⚡ Quick Start (8 sekunder)
 
-## 🎯 Översikt
+**Vill du bara testa applikationen snabbt? Här är det snabbaste sättet:**
 
-CtrlBuy Webshop är en professionell e-handelsplattform utvecklad med moderna Java-teknologier och bästa praxis inom mjukvaruutveckling. Plattformen erbjuder en komplett lösning för online-försäljning med robust säkerhet, skalbar arkitektur och omfattande testning.
-
-### ✨ Nyckelframgångar
-- **189 automatiserade tester** med 100% controller coverage
-- **21 fullständigt testade controllers** med professionell error handling
-- **Production-ready** kod med AWS-deployment support
-- **Svenska språkstöd** med lokaliserade routes och innehåll
-- **Modern säkerhetsimplementation** med Spring Security
-- **Responsiv design** med Bootstrap och svenska UX-patterns
-
-## 🛠 Teknisk Stack
-
-### Backend Technologies
-- **Spring Boot 3.3.5** - Modern Java framework för enterprise-applikationer
-- **Spring Security 6** - Avancerad autentisering och auktorisering
-- **Spring Data JPA** - ORM och databasabstraktion
-- **MySQL 8.0** - Relationsdatabas för produktionsdata
-- **Maven** - Dependency management och build automation
-- **Java 21** - Senaste LTS-versionen med moderna språkfunktioner
-
-### Frontend & UI
-- **Thymeleaf** - Server-side template engine
-- **Bootstrap 5** - Responsiv CSS framework
-- **JavaScript ES6+** - Modern frontend-logik
-- **Svenska UI/UX** - Lokaliserat användargrängsnitt
-
-### Testing & Quality Assurance
-- **JUnit 5** - Unit testing framework
-- **Mockito** - Mocking framework för isolerade tester
-- **Spring Boot Test** - Integration testing
-- **189 tester totalt** - Omfattande testning av alla komponenter
-- **100% controller coverage** - Fullständig validering av alla endpoints
-
-### DevOps & Deployment
-- **AWS EC2/Elastic Beanstalk** - Cloud deployment platform
-- **AWS RDS** - Managed database service
-- **Maven profiles** - Environment-specifik konfiguration
-- **Production-ready** - Optimerad för skalning och prestanda
-
-## 🏗 Arkitektur
-
-### MVC Arkitektur
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Presentation  │    │    Business      │    │      Data       │
-│     Layer       │────│     Layer        │────│     Layer       │
-│ (Controllers)   │    │   (Services)     │    │ (Repositories)  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-### Huvudkomponenter
-- **Controllers (21st)** - REST endpoints och view rendering
-- **Services** - Affärslogik och databearbetning
-- **Repositories** - Dataåtkomst och persistering
-- **Security** - Autentisering och auktorisering
-- **Configuration** - Miljö- och säkerhetskonfiguration
-
-### Databasschema
-```sql
--- Huvudtabeller
-Users (id, username, email, password, roles)
-Products (id, name, description, price, category)
-Orders (id, user_id, total, status, created_at)
-Reviews (id, product_id, user_id, rating, comment)
-Categories (id, name, description)
-```
-
-## 🚀 Funktioner
-
-### 👤 Användarhantering
-- **Registrering och inloggning** med email-verifiering
-- **Lösenordsåterställning** via säker token-baserad process
-- **Användarroller** (USER, ADMIN) med rollbaserad åtkomst
-- **Profilhantering** med personliga inställningar
-
-### 🛍 E-handel Funktionalitet
-- **Produktkatalog** med kategorisering och sökning
-- **Kundvagn** med realtidsuppdateringar
-- **Checkout-process** med orderhantering
-- **Recensionssystem** med betyg och kommentarer
-- **Orderhistorik** med detaljerad spårning
-
-### 🔐 Säkerhet
-- **Spring Security integration** med anpassad konfiguration
-- **CSRF-skydd** och XSS-prevention
-- **Lösenordskryptering** med BCrypt
-- **Session management** med automatisk timeout
-- **SQL injection skydd** via JPA/Hibernate
-
-### 🌐 Lokalisering
-- **Svenska routes** (`/produkter`, `/kundvagn`, `/kassa`)
-- **Svensk innehåll** och felmeddelanden
-- **Lokaliserade email-templates**
-- **Svenska datum- och valutaformat**
-
-### 📊 Administration
-- **Admin dashboard** med försäljningsstatistik
-- **Produkthantering** (CRUD operationer)
-- **Användaradministration** med rollhantering
-- **Orderhantering** och statusuppdateringar
-
-## 💾 Installation
-
-### Förutsättningar
-- Java 21 eller senare
-- Maven 3.9+
-- MySQL 8.0
-- Git
-
-### Lokal Development Setup
-
-1. **Klona repositoryt**
 ```bash
-git clone https://github.com/your-username/ctrlbuy-webshop.git
+# 1. Klona och gå in i projektet
+git clone https://github.com/fredrik-arvidsson/ctrlbuy-webshop.git
 cd ctrlbuy-webshop
-```
 
-2. **Databasinställning**
-```sql
--- Skapa databas
-CREATE DATABASE webshop_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Skapa användare
-CREATE USER 'webshop_user'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON webshop_db.* TO 'webshop_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-3. **Konfiguration**
-```properties
-# application-dev.properties
-spring.datasource.url=jdbc:mysql://localhost:3306/webshop_db
-spring.datasource.username=webshop_user
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=create-drop
-```
-
-4. **Bygg och kör**
-```bash
-# Installera dependencies
-mvn clean install
-
-# Kör alla tester
-mvn test
-
-# Starta applikationen
+# 2. Starta applikationen (använder H2 in-memory databas)
 mvn spring-boot:run
 ```
 
-5. **Åtkomst**
-- Applikation: http://localhost:8080
-- H2 Console: http://localhost:8080/h2-console (endast dev)
+**🎉 Klart!** Applikationen kör nu på: **http://localhost:8080** (startar på ~8 sekunder)
 
-## ⚙️ Konfiguration
+### 🔍 Verify Everything Works
 
-### Miljöprofiler
-
-#### Development Profile
-```properties
-# application-dev.properties
-spring.profiles.active=dev
-spring.jpa.show-sql=true
-logging.level.com.ctrlbuy=DEBUG
-spring.h2.console.enabled=true
+**1. Main Application:**
+```
+http://localhost:8080
 ```
 
-#### Production Profile
-```properties
-# application-prod.properties
-spring.profiles.active=prod
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=false
-logging.level.com.ctrlbuy=INFO
-server.error.whitelabel.enabled=false
+**2. H2 Database Console (development):**
+```
+http://localhost:8080/h2-console
+JDBC URL: jdbc:h2:mem:testdb
+Username: sa
+Password: (leave blank)
 ```
 
-### Säkerhetskonfiguration
-```yaml
-# Security settings
-security:
-  jwt:
-    secret: ${JWT_SECRET:defaultSecret}
-    expiration: 86400000
-  cors:
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
-```
+## 🏆 Live Testing Dashboard
 
-### Email Konfiguration
-```properties
-# Email settings för lösenordsåterställning
-spring.mail.host=${MAIL_HOST:smtp.gmail.com}
-spring.mail.port=${MAIL_PORT:587}
-spring.mail.username=${MAIL_USERNAME}
-spring.mail.password=${MAIL_PASSWORD}
-```
+### 📊 [**KLICKA HÄR FÖR LIVE COVERAGE DASHBOARD**](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)
 
-## 🧪 Testing
+**Se realtidsdata från senaste CI/CD-körningen:**
+- 🧪 **Test Results** - Live från GitHub Actions
+- 📈 **Coverage Metrics** - Uppdateras automatiskt
+- 🔍 **Detailed Reports** - Klickbara JaCoCo-rapporter
 
-### Test Framework
-Projektet använder en omfattande teststrategi med **189 automatiserade tester**:
+### 📈 Realtime Coverage Status
+
+| Component | Tests | Coverage | Status |
+|-----------|-------|----------|---------|
+| Controllers | 167 | 100% | ✅ |
+| Services | 225 | 95% | ✅ |
+| Total | **392** | **98%** | ✅ |
+
+**Live Links:**
+- 🎯 [**Coverage Report**](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/) - Interaktiv JaCoCo rapport
+- 📊 [**Test Dashboard**](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/) - Live metrics overview
+
+## 🗄️ Database Configuration
+
+### 🟢 Option 1: H2 Database (Rekommenderat för testing)
+
+**Standard setup - inga extra installationer behövs:**
 
 ```bash
-# Kör alla tester
-mvn test
-
-# Kör tester med coverage
-mvn test jacoco:report
-
-# Kör endast unit tests
-mvn test -Dtest="**/*Test"
-
-# Kör endast integration tests
-mvn test -Dtest="**/*IT"
+mvn spring-boot:run
 ```
 
-### Test Kategorier
+H2 Console tillgänglig på: http://localhost:8080/h2-console
 
-#### Controller Tests (21 Controllers - 100% Coverage)
-- **Unit tests** med MockMVC för alla endpoints
-- **Error handling** validering
-- **Authentication** och auktorisering
-- **Request/Response** validering
+**Inloggning:**
+- JDBC URL: `jdbc:h2:mem:testdb`
+- Username: `sa`
+- Password: *(lämna tomt)*
 
-```java
-@ExtendWith(MockitoExtension.class)
-class ProductControllerTest {
-    
-    @Test
-    void getProduct_WhenValidId_ShouldReturnProduct() {
-        // Comprehensive test implementation
-    }
-}
-```
+### 👥 Förkonfigurerade användare
 
-#### Service Tests
-- **Business logic** validering
-- **Error scenarios** hantering
-- **Data transformation** tester
+**Viktigt:** H2 in-memory databas = **inga användare sparas mellan sessioner**.
 
-#### Repository Tests
-- **Database operations** validering
-- **Query performance** tester
-- **Data integrity** kontroller
+**För att testa applikationen:**
+1. Gå till: `http://localhost:8080/register`
+2. Registrera en ny användare
+3. Logga in på: `http://localhost:8080/login`
 
-### Test Coverage Statistik
-```
-╔═══════════════════╦══════════╦═══════════╗
-║ Component         ║ Tests    ║ Coverage  ║
-╠═══════════════════╬══════════╬═══════════╣
-║ Controllers       ║ 167      ║ 100%      ║
-║ Services          ║ 18       ║ 95%       ║
-║ Repositories      ║ 4        ║ 100%      ║
-║ Total             ║ 189      ║ 98%       ║
-╚═══════════════════╩══════════╩═══════════╝
-```
-
-## ☁️ AWS Deployment
-
-### Förutsättningar för AWS
-- AWS CLI konfigurerat
-- IAM användare med nödvändiga behörigheter
-- RDS MySQL instans
-- EC2 eller Elastic Beanstalk environment
-
-### Production Build
-```bash
-# Bygg production JAR
-mvn clean package -Pprod
-
-# Verifiera build
-java -jar target/webshop-1.0-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-### AWS RDS Setup
+**Admin-behörigheter:** Använd H2 Console för att ändra roll:
 ```sql
--- Production databas setup
-ENDPOINT: your-db-instance.region.rds.amazonaws.com
-PORT: 3306
-DATABASE: webshop_prod
+UPDATE USERS SET role = 'ADMIN' WHERE username = 'your_username';
 ```
 
-### Environment Variables
+## 🚀 Test & Development
+
+### Kör alla tester
 ```bash
-# AWS Environment Configuration
-export DB_URL=jdbc:mysql://your-rds-endpoint:3306/webshop_prod
-export DB_USER=webshop_user
-export DB_PASSWORD=secure_password
-export JWT_SECRET=production_jwt_secret
-export MAIL_USERNAME=your_email@domain.com
-export MAIL_PASSWORD=app_password
+mvn clean test
 ```
 
-### Elastic Beanstalk Deployment
+### Generera coverage rapport
 ```bash
-# Installera EB CLI
-pip install awsebcli
-
-# Initiera EB application
-eb init ctrlbuy-webshop
-
-# Skapa environment
-eb create production
-
-# Deploy applikation
-eb deploy
+mvn jacoco:report
+# Rapport sparas i: target/site/jacoco/index.html
 ```
 
-### EC2 Manual Deployment
+### Olika utvecklingsmiljöer
 ```bash
-# Installera Java 21 på EC2
-sudo yum update -y
-sudo yum install -y java-21-amazon-corretto
+# H2 database (default)
+mvn spring-boot:run
 
-# Transfer JAR file
-scp target/webshop-1.0-SNAPSHOT.jar ec2-user@your-ec2-ip:~/
+# MySQL (local setup required)
+mvn spring-boot:run -Dspring.profiles.active=local
 
-# Kör applikation
-nohup java -jar webshop-1.0-SNAPSHOT.jar \
-  --spring.profiles.active=prod \
-  --server.port=8080 > app.log 2>&1 &
+# Production mode
+mvn spring-boot:run -Dspring.profiles.active=prod
 ```
 
-### LoadBalancer & SSL Setup
-```yaml
-# Application Load Balancer configuration
-listeners:
-  - port: 443
-    protocol: HTTPS
-    ssl_certificate: arn:aws:acm:region:account:certificate/cert-id
-  - port: 80
-    protocol: HTTP
-    redirect_to: 443
+## 🎯 Development Status & Roadmap
 
-health_check:
-  path: /actuator/health
-  interval: 30
-  timeout: 5
+### ✅ **Nuvarande Achievements (Production Ready)**
+- ✅ **392 Automatiserade Tester** - Alla passerar!
+- ✅ **100% Controller Coverage** - 21 Controllers fullständigt testade
+- ✅ **Spring Security Implementation** - Rollbaserad säkerhet
+- ✅ **Svenska Lokalisering** - /produkter, /kundvagn, /kassa routes
+- ✅ **AWS Deployment Ready** - Production-klar JAR-fil
+- ✅ **Live CI/CD Pipeline** - Automatiska test-rapporter
+
+### 🧪 **Live Testing Excellence**
+- 🔴 **Continuous Integration** - GitHub Actions pipeline
+- 📊 **Live Coverage Reports** - Uppdateras vid varje commit
+- 🎯 **Interactive Dashboards** - Klickbara JaCoCo-rapporter
+- ⚡ **Real-time Badges** - Status uppdateras automatiskt
+- 📈 **Trend Tracking** - Historisk coverage-data
+
+## 🛠️ Troubleshooting
+
+### Problem: MySQL Connection Error
+```bash
+# Kontrollera MySQL status
+sudo systemctl status mysql
+
+# Restart MySQL
+sudo systemctl restart mysql
 ```
 
-## 📡 API Dokumentation
+### Problem: Port redan används
+```bash
+# Hitta process på port 8080
+lsof -i :8080
 
-### Public Endpoints
-```http
-GET    /                          # Hemsida
-GET    /produkter                 # Produktlista
-GET    /produkter/{id}           # Produktdetaljer
-GET    /kategorier               # Kategoriöversikt
-POST   /registrera               # Användarregistrering
-POST   /logga-in                 # Användarinloggning
+# Stoppa process
+kill -9 <PID>
 ```
 
-### Authenticated Endpoints
-```http
-GET    /min-profil               # Användarprofil
-GET    /kundvagn                 # Kundvagn
-POST   /kundvagn/lagg-till       # Lägg till i kundvagn
-GET    /kassa                    # Checkout
-POST   /bestall                  # Genomför beställning
-GET    /mina-bestallningar       # Orderhistorik
+### Problem: Java version
+```bash
+# Kontrollera Java version
+java -version
+
+# Måste vara Java 21 eller senare
 ```
 
-### Admin Endpoints
-```http
-GET    /admin/dashboard          # Admin översikt
-GET    /admin/produkter          # Produkthantering
-POST   /admin/produkter          # Skapa produkt
-PUT    /admin/produkter/{id}     # Uppdatera produkt
-DELETE /admin/produkter/{id}     # Ta bort produkt
-GET    /admin/anvandare          # Användarhantering
-```
+## 📊 Live Coverage Integration
 
-### API Response Format
-```json
-{
-  "status": "success|error",
-  "message": "Beskrivande meddelande",
-  "data": {
-    "id": 1,
-    "name": "Produktnamn",
-    "price": 299.99,
-    "category": "Kategori"
-  },
-  "timestamp": "2025-06-08T10:13:28+02:00"
-}
-```
+### 🔴 Realtime Coverage Monitoring
 
-## 🔒 Säkerhet
+Denna README uppdateras automatiskt med live data från GitHub Actions:
 
-### Authentication & Authorization
-- **JWT Token** baserad autentisering
-- **Role-based access control** (RBAC)
-- **Password encryption** med BCrypt
-- **Session timeout** efter inaktivitet
+- **Build Status**: Visar resultat från senaste CI/CD-körning
+- **Test Count**: Automatiskt räknade från Maven Surefire
+- **Coverage %**: Extraherad från JaCoCo-rapporter
+- **Quality Gates**: Automatisk färgkodning baserat på metrics
 
-### Data Protection
-- **SQL Injection** skydd via parametriserade queries
-- **XSS Protection** genom content security policy
-- **CSRF Protection** med tokens
-- **Input validation** på alla endpoints
+### 📋 Åtkomst till Live Rapporter
 
-### Security Headers
-```java
-// Säkerhetskonfiguration
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-    
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
-        return http
-            .headers(headers -> headers
-                .frameOptions().deny()
-                .contentTypeOptions().and()
-                .httpStrictTransportSecurity(hstsConfig -> hstsConfig
-                    .maxAgeInSeconds(31536000)
-                    .includeSubdomains(true)))
-            .build();
-    }
-}
-```
+**Alla rapporter uppdateras automatiskt vid varje push:**
 
-### Audit Logging
-```properties
-# Säkerhetsloggning
-logging.level.org.springframework.security=DEBUG
-logging.level.com.ctrlbuy.webshop.security=INFO
-```
+1. **[Live Dashboard](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/)** - Huvudöversikt
+2. **[Coverage Report](https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/)** - Detaljerad täckning per klass
+3. **[CI/CD Pipeline](https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions)** - Build history och logs
 
-## ⚡ Prestanda
+## 🔗 Live Links (Alltid Uppdaterade)
 
-### Optimization Features
-- **Connection Pooling** med HikariCP
-- **Query Optimization** med JPA/Hibernate
-- **Caching Strategy** för statisk data
-- **Lazy Loading** för relationer
-- **Database Indexing** för snabba sökningar
+- **🏠 Live Coverage Dashboard**: https://fredrik-arvidsson.github.io/ctrlbuy-webshop/
+- **📊 Detailed Coverage Report**: https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/
+- **⚙️ GitHub Actions**: https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions
+- **📁 Repository**: https://github.com/fredrik-arvidsson/ctrlbuy-webshop
 
-### Performance Metrics
-```properties
-# Prestanda monitoring
-management.endpoints.web.exposure.include=health,metrics,prometheus
-management.endpoint.health.show-details=always
-management.metrics.export.prometheus.enabled=true
-```
+---
 
-### Database Optimization
-```sql
--- Index optimization för bästa prestanda
-CREATE INDEX idx_products_category ON products(category);
-CREATE INDEX idx_products_name ON products(name);
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_orders_created_at ON orders(created_at);
-CREATE INDEX idx_reviews_product_id ON reviews(product_id);
-```
+## 🏆 Live Development Transparency
 
-### Caching Configuration
-```java
-@Configuration
-@EnableCaching
-public class CacheConfig {
-    
-    @Bean
-    public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("products", "categories");
-    }
-}
-```
+<div align="center">
 
-## 📈 Monitoring & Observability
+### 🎯 **TRANSPARENT DEVELOPMENT WITH LIVE METRICS**
+**Real Coverage | Real Tests | Real Progress | Real Time**
 
-### Health Checks
-```http
-GET /actuator/health          # Applikationshälsa
-GET /actuator/metrics         # Prestanda metrics
-GET /actuator/info           # Applikationsinformation
-```
+[![Live Pipeline](https://img.shields.io/badge/🔴%20LIVE-CI%2FCD%20Pipeline-success.svg?style=for-the-badge)](https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions)
 
-### Logging Configuration
-```yaml
-logging:
-  level:
-    com.ctrlbuy.webshop: INFO
-    org.springframework.security: WARN
-    org.hibernate.SQL: WARN
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/webshop.log
-```
+**Se utvecklingen i realtid med live coverage-rapporter och transparent CI/CD pipeline!**
 
-## 🤝 Bidrag
+</div>
 
-### Development Guidelines
-1. **Fork** projektet
-2. **Skapa feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit changes** (`git commit -m 'Add some AmazingFeature'`)
-4. **Push to branch** (`git push origin feature/AmazingFeature`)
-5. **Öppna Pull Request**
-
-### Code Style
-- **Java Code Conventions** enligt Oracle standards
-- **Spring Boot Best Practices**
-- **SonarQube** kvalitetskontroller
-- **Javadoc** för alla publika metoder
-
-### Testing Requirements
-- **Alla nya features** ska ha motsvarande tester
-- **Minimum 90% code coverage** för nya komponenter
-- **Integration tests** för kritisk funktionalitet
-- **Performance tests** för nya endpoints
-
-## 📄 Licens
-
-Detta projekt är licensierat under MIT License - se [LICENSE](LICENSE) filen för detaljer.
+---
 
 ## 👨‍💻 Utvecklare
 
-**Fredrik Zarkow**
-- LinkedIn: [Fredrik Zarkow](https://www.linkedin.com/in/fredrik-zarkow)
-- Email: fredrik@example.com
-- GitHub: [@zarkow](https://github.com/zarkow)
+**Fredrik Arvidsson**
+- LinkedIn: [Fredrik Arvidsson](https://www.linkedin.com/in/fredrik-arvidsson-57587b11a)
+- GitHub: [fredrik-arvidsson/ctrlbuy-webshop](https://github.com/fredrik-arvidsson/ctrlbuy-webshop)
 
 ## 🙏 Erkännanden
 
@@ -566,7 +237,7 @@ Detta projekt är licensierat under MIT License - se [LICENSE](LICENSE) filen f�
 ```
 📁 Total Files: 150+
 📝 Lines of Code: 15,000+
-🧪 Tests: 189 (100% passing)
+🧪 Tests: 392 (100% passing)
 📦 Controllers: 21 (100% tested)
 🔒 Security: Enterprise-grade
 ☁️ Cloud: AWS Ready
