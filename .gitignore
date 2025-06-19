@@ -113,4 +113,4 @@ config/database.yml
 # =======================================
 # För att verifiera att känsliga filer inte spåras:
 # git ls-files | grep -E "(password|secret|key|local\.properties)"
-# Ska inte visa några resultat!
+# Ska inte visa några resultat!.elasticbeanstalk/
