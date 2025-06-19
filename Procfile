@@ -1,1 +1,1 @@
-web: java -Dserver.port=5000 -jar target/webshop-1.0-SNAPSHOT.jar
+web: java -jar webshop-1.0-SNAPSHOT.jar --server.port=5000
