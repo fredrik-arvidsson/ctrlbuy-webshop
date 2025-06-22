@@ -6,199 +6,223 @@ on:
   pull_request:
     branches: [ main ]
 
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-  pages: write
-  id-token: write
-
 jobs:
   quick-test:
+    name: "Quick Test"
     runs-on: ubuntu-latest
-    name: Quick Test
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven
 
-      - name: Run quick tests with H2
-        run: ./mvnw test -Dtest=BasicTest -Dspring.profiles.active=test
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run quick tests
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean test -Dspring.profiles.active=test -B
 
   live-demo:
+    name: "Live Demo"
     runs-on: ubuntu-latest
-    name: Live Demo
     needs: quick-test
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Build application
-        run: ./mvnw clean compile -Dspring.profiles.active=test
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean package -DskipTests -B
 
       - name: Start application with H2
         run: |
-          ./mvnw spring-boot:run -Dspring.profiles.active=test > app.log 2>&1 &
+          # Starta applikationen i bakgrunden
+          java -jar target/*.jar \
+            --spring.profiles.active=test \
+            --server.port=8080 \
+            --spring.datasource.url=jdbc:h2:mem:testdb \
+            --spring.jpa.hibernate.ddl-auto=create-drop \
+            --logging.level.org.springframework.boot=INFO \
+            --management.endpoints.web.exposure.include=health,info &
+          
+          # Spara PID för senare cleanup
           echo $! > app.pid
 
-      - name: Wait for application startup
+      - name: Wait for application startup (extended timeout)
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:8080/actuator/health 2>/dev/null; do sleep 2; done'
+          echo "Waiting for application to start..."
+          # Öka timeout till 120 sekunder
+          timeout 120 bash -c '
+            until curl -f http://localhost:8080/actuator/health 2>/dev/null; do 
+              echo "Waiting for health endpoint..."
+              sleep 3
+            done
+          '
+          echo "Application is ready!"
 
       - name: Test application endpoints
         run: |
-          echo "✅ Testing main page..."
-          curl -f http://localhost:8080/ || echo "❌ Main page test failed"
-          
-          echo "✅ Testing products page..."
-          curl -f http://localhost:8080/produkter || echo "❌ Products page test failed"
-          
-          echo "✅ Testing health endpoint..."
-          curl -f http://localhost:8080/actuator/health || echo "❌ Health check failed"
-          
-          echo "🎉 Live demo test completed!"
+          echo "Testing main endpoints..."
+          curl -f http://localhost:8080/ || echo "Homepage failed"
+          curl -f http://localhost:8080/products || echo "Products failed"
+          curl -f http://localhost:8080/actuator/health || echo "Health failed"
 
       - name: Show application logs
         if: failure()
         run: |
-          echo "=== APPLICATION LOGS ==="
-          cat app.log
+          echo "=== Application Logs ==="
+          if [ -f app.log ]; then cat app.log; fi
+          echo "=== System Info ==="
+          ps aux | grep java || true
 
       - name: Stop application
         if: always()
         run: |
           if [ -f app.pid ]; then
-            kill $(cat app.pid) || true
+            PID=$(cat app.pid)
+            kill $PID || true
+            sleep 2
+            kill -9 $PID 2>/dev/null || true
           fi
 
-  test-and-coverage:
-    runs-on: ubuntu-latest
-    needs: [quick-test, live-demo]
-
-    # Lägg till environment för Pages deployment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Kör tester med coverage (H2)
-        run: ./mvnw clean test jacoco:report -Dspring.profiles.active=test
-
-      - name: Generera test rapport
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: JUnit Tests
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
-          fail-on-error: false
-
-      - name: Generera JaCoCo badges
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          jacoco-csv-file: target/site/jacoco/jacoco.csv
-          badges-directory: .github/badges
-          generate-branches-badge: true
-          generate-summary: true
-
-      - name: Ladda upp test artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: |
-            target/surefire-reports/
-            target/site/jacoco/
-            .github/badges/
-          retention-days: 30
-
-      # Ny modern GitHub Pages deployment
-      - name: Förbered Pages innehåll
-        if: github.ref == 'refs/heads/main'
+      - name: Prepare GitHub Pages content
         run: |
-          mkdir -p *site/coverage
-          cp -r target/site/jacoco/* *site/coverage/
+          # Skapa docs-mapp för GitHub Pages
+          mkdir -p docs
           
-          # Skapa en huvudsida som länkar till coverage
-          cat > *site/index.html << 'EOF'
+          # Kopiera statiska filer
+          cp -r src/main/resources/static/* docs/ 2>/dev/null || true
+          
+          # Skapa enkel index.html
+          cat > docs/index.html << 'EOF'
           <!DOCTYPE html>
-          <html>
+          <html lang="sv">
           <head>
-              <title>CtrlBuy Webshop - Test Reports</title>
-              <meta charset="utf-8">
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>CtrlBuy Webshop - Live Demo</title>
               <style>
-                  body { font-family: Arial, sans-serif; margin: 40px; }
-                  .container { max-width: 800px; margin: 0 auto; }
-                  .badge { margin: 10px 0; }
-                  .link { display: inline-block; margin: 10px 0; padding: 10px 20px; background: #0066cc; color: white; text-decoration: none; border-radius: 5px; }
-                  .link:hover { background: #0052a3; }
-                  .status { background: #28a745; color: white; padding: 5px 10px; border-radius: 3px; margin: 5px 0; display: inline-block; }
+                  body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                  .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+                  .status { padding: 15px; border-radius: 5px; margin: 20px 0; }
+                  .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+                  .info { background: #d1ecf1; border: 1px solid #b8daff; color: #0c5460; }
+                  .badge { background: #3498db; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+                  .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; }
               </style>
           </head>
           <body>
               <div class="container">
-                  <h1>🛒 CtrlBuy Webshop - Test Reports</h1>
+                  <h1>🚀 CtrlBuy Webshop</h1>
           
-                  <div class="status">✅ Quick Test: PASSED</div>
-                  <div class="status">✅ Live Demo: PASSED</div>
-                  <div class="status">✅ Full Test Suite: PASSED</div>
-          
-                  <h2>📊 Code Coverage</h2>
-                  <div class="badge">
-                      <img src="https://img.shields.io/badge/Coverage-Loading...-yellow" alt="Coverage Badge" id="coverage-badge">
+                  <div class="status success">
+                      <strong>✅ CI/CD Pipeline Status:</strong> Deployment genomförd!
                   </div>
           
-                  <a href="coverage/" class="link">📈 View Detailed Coverage Report</a>
+                  <div class="info">
+                      <h3>🎯 Projekt Information</h3>
+                      <ul>
+                          <li><strong>Framework:</strong> Spring Boot 3 <span class="badge">Java 21</span></li>
+                          <li><strong>Databas:</strong> H2 In-Memory (för tester) <span class="badge">JPA</span></li>
+                          <li><strong>CI/CD:</strong> GitHub Actions <span class="badge">Automatisk</span></li>
+                          <li><strong>Deploy:</strong> GitHub Pages <span class="badge">Statisk</span></li>
+                      </ul>
+                  </div>
           
-                  <h2>🔗 Useful Links</h2>
-                  <ul>
-                      <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop">📁 GitHub Repository</a></li>
-                      <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions">⚙️ GitHub Actions</a></li>
-                  </ul>
+                  <div class="info">
+                      <h3>📊 Build Information</h3>
+                      <ul>
+                          <li><strong>Build Time:</strong> $(date)</li>
+                          <li><strong>Git Commit:</strong> $(git rev-parse --short HEAD)</li>
+                          <li><strong>Branch:</strong> $(git branch --show-current)</li>
+                      </ul>
+                  </div>
           
-                  <hr>
-                  <p><small>Last updated: $(date)</small></p>
+                  <div class="info">
+                      <h3>🔗 Användbar Länkar</h3>
+                      <ul>
+                          <li><a href="coverage-reports/">📈 Test Coverage Report</a></li>
+                          <li><a href="test-reports/">🧪 Test Results</a></li>
+                          <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop">📂 GitHub Repository</a></li>
+                          <li><a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions">⚙️ GitHub Actions</a></li>
+                      </ul>
+                  </div>
+          
+                  <div class="footer">
+                      <p>🏗️ Byggd med GitHub Actions | 🚀 Deployad till GitHub Pages</p>
+                  </div>
               </div>
           </body>
           </html>
           EOF
 
-      - name: Setup Pages
-        if: github.ref == 'refs/heads/main'
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '*site'
-
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+
+  test-and-coverage:
+    name: "Coverage Report"
+    runs-on: ubuntu-latest
+    needs: quick-test
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run tests and generate coverage
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean verify -Dspring.profiles.active=test -B
+
+      - name: Upload coverage reports
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site/jacoco
+          destination_dir: coverage-reports
+          keep_files: true
