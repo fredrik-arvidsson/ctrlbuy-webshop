@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Product.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.model</a> &gt; <span class="el_source">Product.java</span></div><h1>Product.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.model;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;products&quot;)  // Explicit tabellnamn
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;id&quot;)
+    private Long id;
+
+    @Column(name = &quot;name&quot;, nullable = false)
+    private String name;
+
+    @Column(name = &quot;category&quot;)
+    private String category;
+
+    @Column(name = &quot;price&quot;, nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = &quot;stock_quantity&quot;)  // Använd denna istället för stock
+    private Integer stockQuantity;
+
+    @Column(name = &quot;category_id&quot;)
+    private Integer categoryId;
+
+    @Column(name = &quot;manufacturer_id&quot;)
+    private Integer manufacturerId;
+
+    @Column(name = &quot;description&quot;, length = 1000)
+    private String description;
+
+    @Column(name = &quot;image_url&quot;)
+    private String imageUrl;
+
+<span class="fc" id="L40">    @Column(name = &quot;view_count&quot;, nullable = false)</span>
+<span class="fc" id="L41">    private Integer viewCount = 0;</span>
+
+    // ⭐ LÄGG TILL DESSA FÄLT som Thymeleaf templates förväntar sig
+    @Column(name = &quot;created_at&quot;)
+    private LocalDateTime createdAt;
+
+    @Column(name = &quot;updated_at&quot;)
+    private LocalDateTime updatedAt;
+
+    @Column(name = &quot;sale_price&quot;, precision = 10, scale = 2)
+    private BigDecimal salePrice;
+
+<span class="fc" id="L53">    @Column(name = &quot;is_featured&quot;)</span>
+<span class="fc" id="L54">    private Boolean featured = false;</span>
+
+<span class="fc" id="L56">    @Column(name = &quot;is_active&quot;)</span>
+<span class="fc" id="L57">    private Boolean active = true;</span>
+
+    // Default constructor
+<span class="fc" id="L60">    public Product() {</span>
+<span class="fc" id="L61">        this.viewCount = 0;</span>
+<span class="fc" id="L62">        this.featured = false;</span>
+<span class="fc" id="L63">        this.active = true;</span>
+<span class="fc" id="L64">        this.createdAt = LocalDateTime.now();</span>
+<span class="fc" id="L65">        this.updatedAt = LocalDateTime.now();</span>
+<span class="fc" id="L66">    }</span>
+
+    // Constructor
+    public Product(String name, String category, BigDecimal price, Integer stockQuantity, String description) {
+<span class="nc" id="L70">        this();  // Anropa default constructor för att sätta standardvärden</span>
+<span class="nc" id="L71">        this.name = name;</span>
+<span class="nc" id="L72">        this.category = category;</span>
+<span class="nc" id="L73">        this.price = price;</span>
+<span class="nc" id="L74">        this.stockQuantity = stockQuantity;</span>
+<span class="nc" id="L75">        this.description = description;</span>
+<span class="nc" id="L76">    }</span>
+
+    // ⭐ JPA Lifecycle Callbacks
+    @PrePersist
+    protected void onCreate() {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (createdAt == null) {</span>
+<span class="nc" id="L82">            createdAt = LocalDateTime.now();</span>
+        }
+<span class="nc" id="L84">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L85">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="nc" id="L89">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L90">    }</span>
+
+    // Getters and Setters
+    public Long getId() {
+<span class="fc" id="L94">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L98">        this.id = id;</span>
+<span class="fc" id="L99">    }</span>
+
+    public String getName() {
+<span class="fc" id="L102">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L106">        this.name = name;</span>
+<span class="fc" id="L107">    }</span>
+
+    public String getCategory() {
+<span class="fc" id="L110">        return category;</span>
+    }
+
+    public void setCategory(String category) {
+<span class="fc" id="L114">        this.category = category;</span>
+<span class="fc" id="L115">    }</span>
+
+    public BigDecimal getPrice() {
+<span class="fc" id="L118">        return price;</span>
+    }
+
+    public void setPrice(BigDecimal price) {
+<span class="fc" id="L122">        this.price = price;</span>
+<span class="fc" id="L123">    }</span>
+
+    public Integer getStockQuantity() {
+<span class="fc" id="L126">        return stockQuantity;</span>
+    }
+
+    public void setStockQuantity(Integer stockQuantity) {
+<span class="fc" id="L130">        this.stockQuantity = stockQuantity;</span>
+<span class="fc" id="L131">    }</span>
+
+    public Integer getCategoryId() {
+<span class="nc" id="L134">        return categoryId;</span>
+    }
+
+    public void setCategoryId(Integer categoryId) {
+<span class="nc" id="L138">        this.categoryId = categoryId;</span>
+<span class="nc" id="L139">    }</span>
+
+    public Integer getManufacturerId() {
+<span class="nc" id="L142">        return manufacturerId;</span>
+    }
+
+    public void setManufacturerId(Integer manufacturerId) {
+<span class="nc" id="L146">        this.manufacturerId = manufacturerId;</span>
+<span class="nc" id="L147">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L150">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="fc" id="L154">        this.description = description;</span>
+<span class="fc" id="L155">    }</span>
+
+    public String getImageUrl() {
+<span class="nc" id="L158">        return imageUrl;</span>
+    }
+
+    public void setImageUrl(String imageUrl) {
+<span class="nc" id="L162">        this.imageUrl = imageUrl;</span>
+<span class="nc" id="L163">    }</span>
+
+    public Integer getViewCount() {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        return viewCount != null ? viewCount : 0;</span>
+    }
+
+    public void setViewCount(Integer viewCount) {
+<span class="nc" id="L170">        this.viewCount = viewCount;</span>
+<span class="nc" id="L171">    }</span>
+
+    // ⭐ NYA GETTERS OCH SETTERS
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L175">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L179">        this.createdAt = createdAt;</span>
+<span class="nc" id="L180">    }</span>
+
+    public LocalDateTime getUpdatedAt() {
+<span class="nc" id="L183">        return updatedAt;</span>
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L187">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L188">    }</span>
+
+    public BigDecimal getSalePrice() {
+<span class="nc" id="L191">        return salePrice;</span>
+    }
+
+    public void setSalePrice(BigDecimal salePrice) {
+<span class="nc" id="L195">        this.salePrice = salePrice;</span>
+<span class="nc" id="L196">    }</span>
+
+    public Boolean getFeatured() {
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        return featured != null ? featured : false;</span>
+    }
+
+    public void setFeatured(Boolean featured) {
+<span class="nc" id="L203">        this.featured = featured;</span>
+<span class="nc" id="L204">    }</span>
+
+    public Boolean getActive() {
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        return active != null ? active : true;</span>
+    }
+
+    public void setActive(Boolean active) {
+<span class="nc" id="L211">        this.active = active;</span>
+<span class="nc" id="L212">    }</span>
+
+    // ⭐ UTILITY METHODS
+    public void incrementViewCount() {
+<span class="nc" id="L216">        this.viewCount = getViewCount() + 1;</span>
+<span class="nc" id="L217">    }</span>
+
+    public boolean isOnSale() {
+<span class="nc bnc" id="L220" title="All 4 branches missed.">        return salePrice != null &amp;&amp; salePrice.compareTo(BigDecimal.ZERO) &gt; 0;</span>
+    }
+
+    public boolean isInStock() {
+<span class="nc bnc" id="L224" title="All 4 branches missed.">        return stockQuantity != null &amp;&amp; stockQuantity &gt; 0;</span>
+    }
+
+    public boolean isLowStock() {
+<span class="nc bnc" id="L228" title="All 6 branches missed.">        return stockQuantity != null &amp;&amp; stockQuantity &gt; 0 &amp;&amp; stockQuantity &lt; 5;</span>
+    }
+
+    // ⭐ Convenience method för rea-procent
+    public BigDecimal getDiscountPercentage() {
+<span class="nc bnc" id="L233" title="All 6 branches missed.">        if (isOnSale() &amp;&amp; price != null &amp;&amp; price.compareTo(BigDecimal.ZERO) &gt; 0) {</span>
+<span class="nc" id="L234">            BigDecimal difference = price.subtract(salePrice);</span>
+<span class="nc" id="L235">            return difference.divide(price, 4, BigDecimal.ROUND_HALF_UP)</span>
+<span class="nc" id="L236">                    .multiply(new BigDecimal(&quot;100&quot;));</span>
+        }
+<span class="nc" id="L238">        return BigDecimal.ZERO;</span>
+    }
+
+    public BigDecimal getSavings() {
+<span class="nc bnc" id="L242" title="All 4 branches missed.">        if (isOnSale() &amp;&amp; price != null) {</span>
+<span class="nc" id="L243">            return price.subtract(salePrice);</span>
+        }
+<span class="nc" id="L245">        return BigDecimal.ZERO;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L250">        return &quot;Product{&quot; +</span>
+                &quot;id=&quot; + id +
+                &quot;, name='&quot; + name + '\'' +
+                &quot;, category='&quot; + category + '\'' +
+                &quot;, price=&quot; + price +
+                &quot;, stockQuantity=&quot; + stockQuantity +
+                &quot;, viewCount=&quot; + viewCount +
+                &quot;, createdAt=&quot; + createdAt +
+                &quot;, active=&quot; + active +
+                &quot;, description='&quot; + description + '\'' +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Användare | CtrlBuy</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+  <h1>🔧 Admin - Användarhantering</h1>
+
+  <!-- Success/Error meddelanden -->
+  <div id="alertContainer"></div>
+
+  <!-- Snabb borttagning via e-post -->
+  <div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+      <h5>🗑️ Snabb borttagning via e-post</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" action="/admin/users/delete-by-email" class="row g-3">
+        <div class="col-md-8">
+          <input type="email" class="form-control" name="email" placeholder="användarens@email.com" required>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Är du säker?')">
+            Ta bort användare
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alla användare -->
+  <div class="card">
+    <div class="card-header">
+      <h5>👥 Alla användare (<span th:text="${#lists.size(users)}">0</span>)</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Användarnamn</th>
+            <th>E-post</th>
+            <th>Namn</th>
+            <th>Aktiv</th>
+            <th>Verifierad</th>
+            <th>Roller</th>
+            <th>Åtgärder</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${users}">
+            <td th:text="${user.id}">1</td>
+            <td th:text="${user.username}">username</td>
+            <td>
+              <span th:text="${user.email}" th:id="'email-' + ${user.id}">email@example.com</span>
+              <button class="btn btn-sm btn-outline-primary ms-2"
+                      th:onclick="'editEmail(' + ${user.id} + ', \'' + ${user.email} + '\')'">
+                ✏️
+              </button>
+            </td>
+            <td>
+              <span th:text="${user.firstName + ' ' + user.lastName}">Namn</span>
+            </td>
+            <td>
+              <span th:if="${user.active}" class="badge bg-success">Aktiv</span>
+              <span th:unless="${user.active}" class="badge bg-danger">Inaktiv</span>
+            </td>
+            <td>
+              <span th:if="${user.emailVerified}" class="badge bg-success">✅ Verifierad</span>
+              <span th:unless="${user.emailVerified}" class="badge bg-warning">⏳ Ej verifierad</span>
+            </td>
+            <td>
+              <small th:text="${#strings.listJoin(user.roles, ', ')}">ROLE_USER</small>
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <!-- Ta bort -->
+                <form method="post" th:action="@{'/admin/users/delete/' + ${user.id}}" style="display: inline;">
+                  <button type="submit" class="btn btn-outline-danger btn-sm"
+                          onclick="return confirm('Ta bort användare?')">
+                    🗑️
+                  </button>
+                </form>
+
+                <!-- Toggle aktiv -->
+                <form method="post" th:action="@{'/admin/users/toggle-active/' + ${user.id}}" style="display: inline;">
+                  <button type="submit" class="btn btn-outline-warning btn-sm">
+                    <span th:if="${user.active}">⏸️</span>
+                    <span th:unless="${user.active}">▶️</span>
+                  </button>
+                </form>
+
+                <!-- Återställ verifiering -->
+                <form method="post" th:action="@{'/admin/users/reset-verification/' + ${user.id}}" style="display: inline;">
+                  <button type="submit" class="btn btn-outline-secondary btn-sm"
+                          th:if="${user.emailVerified}">
+                    🔄
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="/admin/dashboard" class="btn btn-secondary">← Tillbaka till Dashboard</a>
+  </div>
+</div>
+
+<!-- Email Edit Modal -->
+<div class="modal fade" id="emailEditModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">✏️ Redigera E-postadress</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="emailEditForm">
+          <div class="mb-3">
+            <label for="currentEmail" class="form-label">Nuvarande e-post:</label>
+            <input type="text" class="form-control" id="currentEmail" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="newEmail" class="form-label">Ny e-postadress:</label>
+            <input type="email" class="form-control" id="newEmail" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+        <button type="button" class="btn btn-primary" onclick="updateEmail()">💾 Spara</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let currentUserId = null;
+
+  function editEmail(userId, currentEmail) {
+    currentUserId = userId;
+    document.getElementById('currentEmail').value = currentEmail;
+    document.getElementById('newEmail').value = currentEmail;
+
+    const modal = new bootstrap.Modal(document.getElementById('emailEditModal'));
+    modal.show();
+  }
+
+  function updateEmail() {
+    const newEmail = document.getElementById('newEmail').value;
+
+    if (!newEmail || !validateEmail(newEmail)) {
+      showAlert('Ogiltigt email-format!', 'danger');
+      return;
+    }
+
+    fetch(`/admin/users/update-email/${currentUserId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `newEmail=${encodeURIComponent(newEmail)}`
+    })
+            .then(response => response.text())
+            .then(data => {
+              if (data.includes('uppdaterad')) {
+                // Uppdatera email i tabellen
+                document.getElementById(`email-${currentUserId}`).textContent = newEmail;
+                showAlert(data, 'success');
+
+                // Stäng modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('emailEditModal'));
+                modal.hide();
+              } else {
+                showAlert(data, 'danger');
+              }
+            })
+            .catch(error => {
+              showAlert('Fel vid uppdatering: ' + error.message, 'danger');
+            });
+  }
+
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  function showAlert(message, type) {
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    document.getElementById('alertContainer').innerHTML = alertHTML;
+
+    // Auto-hide efter 5 sekunder
+    setTimeout(() => {
+      const alert = document.querySelector('.alert');
+      if (alert) {
+        alert.remove();
+      }
+    }, 5000);
+  }
+</script>
+</body>
+</html>

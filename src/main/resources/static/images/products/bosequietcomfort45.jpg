@@ -1,0 +1,3663 @@
+<div class="d-none" data-page-type="error_page"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset=UTF-8>
+
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+    <title>
+        Sites-Bose_US-Site
+        | Bose
+    </title>
+
+
+<meta name="description" content="Bose" />
+<meta name="keywords" content="Bose" />
+
+
+
+
+
+
+
+
+<link rel="bif" type="image/png" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dw9fc631bf/images/favicons/favicon-196x196.png" sizes="196x196" />
+<link rel="bif" type="image/png" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwfd50c6b0/images/favicons/favicon-96x96.png" sizes="96x96" />
+<link rel="bif" type="image/png" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dw4c190b50/images/favicons/favicon-32x32.png" sizes="32x32" />
+<link rel="bif" type="image/png" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwb1f3734e/images/favicons/favicon-16x16.png" sizes="16x16" />
+<link rel="bif" type="image/png" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwc27df4a2/images/favicons/favicon-128.png" sizes="128x128" />
+<link rel="icon" type="image/vnd.microsoft.icon" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwc2e28142/images/favicons/favicon.ico">
+<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwc2e28142/images/favicons/favicon.ico">
+<link rel="apple-touch-icon" href="/on/demandware.static/Sites-Bose_US-Site/-/default/dwba17f3b2/images/apple-touch-icon.png">
+
+<link rel="stylesheet" href="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/css/global.css" />
+
+
+
+
+
+<script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({"environment":"production","siteID":"Bose_US","locale":"en_US","currency":"USD","language":"en_US","user_id":"","user_type":"Guest","customer_group":"","customer_type":"","partner":"","session_id":"YOfW-JgaCn678cYJHU6dyFyMql5L7gVUllE=","dwsid":null,"email":"","emailHash":"","customerNo":"Guest_afuoXaRUaByodisyNb7sUcefg9"});
+</script><script>window.gtmEnabled = true;</script>
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-K63WC3N');</script>
+<!-- End Google Tag Manager -->
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    // This function will modify dataLayer.push() to a modified version
+    // This will clear the previous ecommerce object if the event is on the List of events
+    const oldPush = window.dataLayer.push;
+    window.dataLayer.push = function() {
+        const states = [].slice.call(arguments, 0)
+        // List of events that will trigger the clearing of ecommerce object before pushing
+        const events = ['view_item', 'view_cart', 'add_to_cart', 'remove_from_cart', 'add_to_wishlist', 'begin_checkout', 'add_shipping_info', 'add_payment_info', 'purchase']
+        if ('event' in arguments[0] && events.includes(arguments[0].event)) {
+            window.dataLayer.push({ecommerce: null})
+        }
+        // Re-apply the push function to its original function
+        return oldPush.apply(window.dataLayer, states)
+    }
+    var dataLayers = [];
+    dataLayer.push({"event":"page_view","page_type":"error_page","page_name":"","page_category_id":"","website_language":"en_US","country_code":"US","user_id":"","user_type":"Guest","customer_group":"Consumer","customer_type":"Consumer","partner":"","dwsid":null});
+    for (var i = 0; i < dataLayers.length; i++) {
+        dataLayer.push(dataLayers[i]);
+    }
+</script>
+
+
+
+<script type="text/javascript"
+    src="//cdn.evgnet.com/beacon/bosecorporation/bose_us_prod/scripts/evergage.min.js"></script>
+
+    <!--BEGIN QUALTRICS WEBSITE FEEDBACK SNIPPET-->
+<script type='text/javascript'>
+(function(){var g=function(e,h,f,g){
+this.get=function(a){for(var a=a+"=",c=document.cookie.split(";"),b=0,e=c.length;b<e;b++){for(var d=c[b];" "==d.charAt(0);)d=d.substring(1,d.length);if(0==d.indexOf(a))return d.substring(a.length,d.length)}return null};
+this.set=function(a,c){var b="",b=new Date;b.setTime(b.getTime()+6048E5);b="; expires="+b.toGMTString();document.cookie=a+"="+c+b+"; path=/; "};
+this.check=function(){var a=this.get(f);if(a)a=a.split(":");else if(100!=e)"v"==h&&(e=Math.random()>=e/100?0:100),a=[h,e,0],this.set(f,a.join(":"));else return!0;var c=a[1];if(100==c)return!0;switch(a[0]){case "v":return!1;case "r":return c=a[2]%Math.floor(100/c),a[2]++,this.set(f,a.join(":")),!c}return!0};
+this.go=function(){if(this.check()){var a=document.createElement("script");a.type="text/javascript";a.src=g;document.body&&document.body.appendChild(a)}};
+this.start=function(){var t=this;"complete"!==document.readyState?window.addEventListener?window.addEventListener("load",function(){t.go()},!1):window.attachEvent&&window.attachEvent("onload",function(){t.go()}):t.go()};};
+try{(new g(100,"r","QSI_S_ZN_8HzINwseoTWPdIy", 'https://zn8hzinwseotwpdiy-bose.siteintercept.qualtrics.com/SIE/?Q_ZID=ZN_8HzINwseoTWPdIy')).start()}catch(i){}})();
+</script><div id='ZN_8HzINwseoTWPdIy'><!--DO NOT REMOVE-CONTENTS PLACED HERE--></div>
+<!--END WEBSITE FEEDBACK SNIPPET-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    <div class="content-asset"><!-- dwMarker="content" dwContentID="def2ad1f921bfe7a3b07a5aef3" -->
+        <script>
+  (function() {
+    function setHolidayLinkColor() {
+      const locale = window.dataLayer?.[0]?.locale;
+      const holidayString = locale === "fr_CA" ? "fêtes" : "holiday";
+ 
+      Array.from(document.querySelectorAll('.navbar-nav .nav-link__text')).some(link => {
+        if (link.textContent && link.textContent.toLowerCase().includes(holidayString)) {
+          link.style.setProperty("color", "#8A7200", "important");
+          return true; // Stops iteration once a match is found
+        }
+      });
+    }
+ 
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setHolidayLinkColor);
+    } else {
+      setHolidayLinkColor();
+    }
+  })();
+</script><script>
+	(() => {
+		let alertBar;
+		const firstDeadline = new Date('December 20, 2024 12:00:00 EST').getTime();
+		const secondDeadline = new Date('December 23, 2024 12:00:00 EST').getTime();
+
+		function init(elm) {
+			alertBar = elm;
+
+			if (Date.now() < secondDeadline) {
+				updateCountdown(); // Initial call to display countdown immediately
+				setInterval(() => { updateCountdown() }, 1000);
+			}
+		}
+
+		function updateCountdown() {
+			const now = Date.now();
+			const twoHours = 2 * 60 * 60 * 1000; // in milliseconds
+
+			// Show the first message until 2 hours before the first deadline
+			const targetDate = now < firstDeadline - twoHours ? firstDeadline : secondDeadline; 
+			const timeDiff = targetDate - now;
+
+			// Calculate time parts
+			const seconds = Math.floor((timeDiff / 1000) % 60);
+			const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+			const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+			const days = Math.floor((timeDiff / (1000 * 60 * 60 * 24)) % 7);
+			const weeks = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
+
+			const weeksText = weeks > 0 ? `<span>${weeks}w</span>:` : '';
+			const daysText = days > 0 ? `<span>${days}d</span>:` : '';
+			// const secondsText   = weeks == 0 && days  == 0 ? `:<span>${seconds}s</span>` : ''; // Use this to conditionally display seconds
+			const secondsText = `:<span>${seconds}s</span>`;
+			const firstMessage = '<span class="shippingMessage">Free 2-day shipping:</span><span class="deliveryMessage">Order by 12 PM EST, Dec 20 for delivery by Dec 24.</span>';
+			const secondMessage = '<span class="shippingMessage">Free 1-day shipping:</span><span class="deliveryMessage">Order by 12 PM EST, Dec 23 for delivery by Dec 24.</span>';
+			const message = now < firstDeadline - twoHours ? firstMessage : secondMessage;
+
+			// Display the countdown - I've excluded ${weeksText}
+			alertBar.innerHTML = `<div class="alert-banner__text text" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
+                              ${message}<span class="countdownText">${daysText}<span>${hours}h</span>:<span>${minutes}m</span>${secondsText}</span>
+                            </div>`;
+		}
+
+		function waitForElement(selector, callback) {
+			var check = setInterval(function () {
+				const elm = document.querySelector(selector);
+				if (elm) {
+					clearInterval(check);
+					callback(elm);
+				}
+			}, 100);
+		}
+
+		waitForElement('.alert-banner__container', init);
+	})();
+</script>
+<style type="text/css">.alert-banner__text.text .shippingMessage,
+	.alert-banner__text.text .deliveryMessage {
+		color: #fff;
+	}
+
+	.alert-banner__text.text .shippingMessage {
+		font-weight: 700;
+	}
+
+	.alert-banner__text.text .countdownText {
+		white-space: nowrap;
+		min-width: 100px;
+		font-weight: 500;
+	}
+
+	.alert-banner__text.text .countdownText span {
+		color: #00518a;
+		background: #9fedfe;
+		border-radius: 3px;
+		display: inline-block;
+		width: 4ch;
+		margin: 0 2px;
+	}
+
+	@media (max-width: 620px) {
+		.alert-banner__text.text {
+			flex-direction: column !important;
+			gap: 0 !important;
+		}
+
+		.alert-banner__text.text .countdownText {
+			margin: 4px 0 0;
+		}
+	}
+</style>
+    </div> <!-- End content-asset -->
+
+
+
+
+
+
+    
+        <link
+            rel="preconnect"
+            href="https://assets.bosecreative.com"
+            crossorigin
+        />
+    
+        <link
+            rel="preconnect"
+            href="https://analytics.google.com"
+            crossorigin
+        />
+    
+        <link
+            rel="preconnect"
+            href="https://cdn.evgnet.com"
+            crossorigin
+        />
+    
+        <link
+            rel="preconnect"
+            href="https://players.brightcove.net"
+            crossorigin
+        />
+    
+        <link
+            rel="preconnect"
+            href="https://edge.api.brightcove.com"
+            crossorigin
+        />
+    
+        <link
+            rel="preconnect"
+            href="https://bosecorporation.us-5.evergage.com"
+            crossorigin
+        />
+    
+
+
+<script type="text/javascript">//<!--
+/* <![CDATA[ (head-active_data.js) */
+var dw = (window.dw || {});
+dw.ac = {
+    _analytics: null,
+    _events: [],
+    _category: "",
+    _searchData: "",
+    _anact: "",
+    _anact_nohit_tag: "",
+    _analytics_enabled: "true",
+    _timeZone: "US/Eastern",
+    _capture: function(configs) {
+        if (Object.prototype.toString.call(configs) === "[object Array]") {
+            configs.forEach(captureObject);
+            return;
+        }
+        dw.ac._events.push(configs);
+    },
+	capture: function() { 
+		dw.ac._capture(arguments);
+		// send to CQ as well:
+		if (window.CQuotient) {
+			window.CQuotient.trackEventsFromAC(arguments);
+		}
+	},
+    EV_PRD_SEARCHHIT: "searchhit",
+    EV_PRD_DETAIL: "detail",
+    EV_PRD_RECOMMENDATION: "recommendation",
+    EV_PRD_SETPRODUCT: "setproduct",
+    applyContext: function(context) {
+        if (typeof context === "object" && context.hasOwnProperty("category")) {
+        	dw.ac._category = context.category;
+        }
+        if (typeof context === "object" && context.hasOwnProperty("searchData")) {
+        	dw.ac._searchData = context.searchData;
+        }
+    },
+    setDWAnalytics: function(analytics) {
+        dw.ac._analytics = analytics;
+    },
+    eventsIsEmpty: function() {
+        return 0 == dw.ac._events.length;
+    }
+};
+/* ]]> */
+// -->
+</script>
+<script type="text/javascript">//<!--
+/* <![CDATA[ (head-cquotient.js) */
+var CQuotient = window.CQuotient = {};
+CQuotient.clientId = 'bjkb-Bose_US';
+CQuotient.realm = 'BJKB';
+CQuotient.siteId = 'Bose_US';
+CQuotient.instanceType = 'prd';
+CQuotient.locale = 'en_US';
+CQuotient.fbPixelId = '__UNKNOWN__';
+CQuotient.activities = [];
+CQuotient.cqcid='';
+CQuotient.cquid='';
+CQuotient.cqeid='';
+CQuotient.cqlid='';
+CQuotient.apiHost='api.cquotient.com';
+/* Turn this on to test against Staging Einstein */
+/* CQuotient.useTest= true; */
+CQuotient.useTest = ('true' === 'false');
+CQuotient.initFromCookies = function () {
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+	  var c = ca[i];
+	  while (c.charAt(0)==' ') c = c.substring(1,c.length);
+	  if (c.indexOf('cqcid=') == 0) {
+		CQuotient.cqcid=c.substring('cqcid='.length,c.length);
+	  } else if (c.indexOf('cquid=') == 0) {
+		  var value = c.substring('cquid='.length,c.length);
+		  if (value) {
+		  	var split_value = value.split("|", 3);
+		  	if (split_value.length > 0) {
+			  CQuotient.cquid=split_value[0];
+		  	}
+		  	if (split_value.length > 1) {
+			  CQuotient.cqeid=split_value[1];
+		  	}
+		  	if (split_value.length > 2) {
+			  CQuotient.cqlid=split_value[2];
+		  	}
+		  }
+	  }
+	}
+}
+CQuotient.getCQCookieId = function () {
+	if(window.CQuotient.cqcid == '')
+		window.CQuotient.initFromCookies();
+	return window.CQuotient.cqcid;
+};
+CQuotient.getCQUserId = function () {
+	if(window.CQuotient.cquid == '')
+		window.CQuotient.initFromCookies();
+	return window.CQuotient.cquid;
+};
+CQuotient.getCQHashedEmail = function () {
+	if(window.CQuotient.cqeid == '')
+		window.CQuotient.initFromCookies();
+	return window.CQuotient.cqeid;
+};
+CQuotient.getCQHashedLogin = function () {
+	if(window.CQuotient.cqlid == '')
+		window.CQuotient.initFromCookies();
+	return window.CQuotient.cqlid;
+};
+CQuotient.trackEventsFromAC = function (/* Object or Array */ events) {
+try {
+	if (Object.prototype.toString.call(events) === "[object Array]") {
+		events.forEach(_trackASingleCQEvent);
+	} else {
+		CQuotient._trackASingleCQEvent(events);
+	}
+} catch(err) {}
+};
+CQuotient._trackASingleCQEvent = function ( /* Object */ event) {
+	if (event && event.id) {
+		if (event.type === dw.ac.EV_PRD_DETAIL) {
+			CQuotient.trackViewProduct( {id:'', alt_id: event.id, type: 'raw_sku'} );
+		} // not handling the other dw.ac.* events currently
+	}
+};
+CQuotient.trackViewProduct = function(/* Object */ cqParamData){
+	var cq_params = {};
+	cq_params.cookieId = CQuotient.getCQCookieId();
+	cq_params.userId = CQuotient.getCQUserId();
+	cq_params.emailId = CQuotient.getCQHashedEmail();
+	cq_params.loginId = CQuotient.getCQHashedLogin();
+	cq_params.product = cqParamData.product;
+	cq_params.realm = cqParamData.realm;
+	cq_params.siteId = cqParamData.siteId;
+	cq_params.instanceType = cqParamData.instanceType;
+	cq_params.locale = CQuotient.locale;
+	
+	if(CQuotient.sendActivity) {
+		CQuotient.sendActivity(CQuotient.clientId, 'viewProduct', cq_params);
+	} else {
+		CQuotient.activities.push({activityType: 'viewProduct', parameters: cq_params});
+	}
+};
+/* ]]> */
+// -->
+</script>
+
+
+
+
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K63WC3N"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<div class="page" data-action="RedirectURL-Start" data-querystring="" >
+
+<header class="main-header js-main-header">
+
+    
+    
+<a href="#maincontent" class="skip" aria-label="Skip to main content">Skip to main content</a>
+<a href="#" class="skip js-skip-to-chat" aria-label="Skip to Support Chat">Skip to Support Chat</a>
+<a href="#footercontent" class="skip" aria-label="Skip to footer content">Skip to footer content</a>
+<a href="/legal/accessibility" class="skip js-skip-to-accessibility" aria-label="Skip to Accessibility Statement">Skip to Accessibility Statement</a>
+
+    
+        
+	 
+
+
+	
+
+    
+    
+    <div class="color-theme graycountertenor-blackbass">
+        <div class="sr-only alert-banner-assistive-reader" aria-live="polite"></div>
+        <div id="alertBannerCarousel" class="alert-banner carousel slide slide-up multiple-alert outer-rail" data-ride="carousel" data-pause="false">
+            
+                <button type="button" class="carousel-pause-play alert-banner__control text" aria-label="Pause Banner Autorotation" data-controls-pause="Pause Banner Autorotation" data-controls-play="Start Banner Autorotation">
+                    <i class="bif bif-pause" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="carousel-prev alert-banner__control text" data-target="#alertBannerCarousel" data-slide="prev" aria-label="Previous Alert">
+                    <i class="bif bif-chevron-left" aria-hidden="true"></i>
+                </button>
+                <div class="alert-banner__container" aria-live="off">
+                    
+                        <div class="alert-banner__text carousel-item text active" role="region" aria-roledescription="Alert Message" data-interval="5000" tabindex="0">
+                            <p>FATHER’S DAY SALE: Explore limited-time deals that get dad dancing. Ends 6/15. <a href="/c/fathers-day-sale" target="_self">Shop</a></p>
+                        </div>
+                    
+                        <div class="alert-banner__text carousel-item text " role="region" aria-roledescription="Alert Message" data-interval="5000" tabindex="0">
+                            <p>COMING SOON: A fresh source of energizing sound. New SoundLink Plus Portable Speaker. <a href="/SLP-SPEAKERWIRELESS.html" target="_self">Preorder now</a>.<a href="/QC-HEADPHONEARN.html?dwvar_QC-HEADPHONEARN_color=PETAL+PINK&quantity=1" target="_self"></a><a href="/QCEARB24-HEADPHONEIN.html?dwvar_QCEARB24-HEADPHONEIN_color=PETAL+PINK&quantity=1" target="_self"></a><span style="color: rgb(0, 0, 0);"><u></u></span></p>
+                        </div>
+                    
+                        <div class="alert-banner__text carousel-item text " role="region" aria-roledescription="Alert Message" data-interval="5000" tabindex="0">
+                            <p>Bose × LISA Ultra Open Earbuds: Shop the exclusive collab before it’s gone. <a href="/ULT-HEADPHONEOPN-LISA.html" target="_self">Shop</a></p>
+                        </div>
+                    
+                </div>
+                <button type="button" class="carousel-next alert-banner__control text" data-target="#alertBannerCarousel" data-slide="next" aria-label="Next Alert">
+                    <i class="bif bif-chevon-right" aria-hidden="true"></i>
+                </button>
+            
+            <button type="button" class="close alert-banner__control text" aria-label="Close Alert Banner">
+                <i class="bif bif-close" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+
+
+ 
+	
+    
+    
+    <nav class="main-nav">
+        <div class="header">
+            <div class="navbar-header header__nav header__nav--default">
+                <div class="header__nav-wrapper outer-rail">
+                    <div class="header__nav__left">
+                        <div class="main-menu navbar-toggleable-sm menu-toggleable-left multilevel-dropdown"
+                                id="sg-navbar-collapse"
+                                data-experience-info="/on/demandware.store/Sites-Bose_US-Site/en_US/Support-ExperienceCloudRedirectInfo">
+                            <nav class="navbar navbar-expand-md bg-inverse col-12" aria-label="Bose Site Navigation">
+    <div class="close-menu clearfix d-lg-none js-first-level-close">
+        <div class="header-search__form--mobile-nav js-search-form js-mobile-nav-search">
+    <form
+        role="search"
+        action="/search"
+        data-type="header-form"
+        method="get"
+        name="simpleSearch">
+        
+            <div class="search-flyout-form__wrapper">
+                <input
+                    class="form-control search-field header-search"
+                    data-search=""
+                    type="text"
+                    name="q"
+                    placeholder="Search"
+                    data-component-location="mobile-nav"
+                    role="combobox"
+                    aria-describedby="search-assistive-text"
+                    aria-haspopup="listbox"
+                    aria-owns="search-results"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-activedescendant=""
+                    aria-controls="search-results"
+                    aria-label="Enter Keyword or Item No."
+                    autocomplete="off"
+                    value=""
+                />
+
+                <div class="header__icon header__icon--search-flyout">
+                    <button
+                        type="button"
+                        name="close-button"
+                        class="bif bif-close header__button-icon js-clear-search-button"
+                         aria-label="Close search field">
+                    </button>
+                    <span class="header__icon--separator"></span>
+                    <button
+                        type="submit"
+                        name="search-button"
+                        class="bif bif-search header__button-icon"
+                        aria-label="Submit search keywords">
+                    </button>
+                </div>
+                
+                <div class="header__icon d-none">
+                    <button
+                        type="button"
+                        name="close-button"
+                        class="close-button bif bif-close header__button-icon"
+                        aria-label="Close search field">
+                    </button>
+                </div>
+                
+                <input
+                    type="hidden"
+                    value="en_US"
+                    name="lang"
+                />
+        </div>
+    </form>
+
+    <div class="d-md-none search-flyout-form__cancel d-none" data-component-location="mobile-nav">
+        <div class='search-button__cancel'>
+            <a href="#"
+                class="close-button"
+                data-component-location="mobile-nav">
+                Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+
+        <div class="close-menu-container">
+            <button
+                type="button"
+                class="close-button bif-close"
+                aria-label="Close Menu">
+            </button>
+        </div>
+        
+        <div class="back pull-left">
+            <button
+                role="button"
+                aria-label="Back to previous menu">
+                <span class="bif-chevron-left"></span>
+                <span id="js-menu-subcategory-name" class="menu-subcategory-name">Back</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="header-search__dropdown" data-component-location="mobile-nav">
+        <div class="site-search header__site-search">
+    <div class="site-search-form d-none">
+
+        
+
+        <div class="site-search-input-wrapper">
+            
+            <div
+                class="suggestions-wrapper"
+                data-url="/on/demandware.store/Sites-Bose_US-Site/en_US/SearchServices-GetSuggestions?folderID=searchconfiguration&amp;q=">
+            </div>
+            <input
+                type="hidden"
+                value="en_US"
+                name="lang"
+            >
+        </div>
+    </div>
+</div>
+    </div>
+
+    
+	 
+
+
+	
+
+    
+    <!-- CMS: Header (Megamenu) -->
+
+<div class="menu-group menu">
+    <ul role="menubar" class="nav navbar-nav menu_list" aria-label="Bose" data-menubar-item-expanded="false">
+        
+            
+                <li role="presentation" class="menu__item-global dropdown animated">
+                    <a role="menuitem"
+                        href="#"
+                        class="menu__link js-menu-link nav-link "
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        data-toggle="dropdown"
+                        id="Shop"
+                        tabindex="0"
+                        title="Shop">
+                        <div class="nav-link__text-container">
+                            <span class="nav-link__text">Shop</span>
+                            <span class="bif-chevon-right"/>
+                        </div>
+                    </a>
+                    
+                        
+
+
+<div class="dropdown-menu">
+    <div class="container-fluid h-100">
+        <div class="row h-100 megamenu-container">
+            <div class="col-12 col-md-6 d-flex flex-column dropdown-menu__section megamenu">
+                <div class="row h-100 nav-menu-category-container">
+                    <div class="col-sm-12 col-md-6 dropdown-menu__category">
+                        <div class="dropdown-menu__section--offset-left">
+                            <!-- Primary Navigation -->
+                            <div class="row w-100">
+                                
+                                <div class="col-12 pr-0">
+                                    <ul role="menu" class="dropdown-menu__primary pl-0" aria-label="Shop" tabindex="-1">
+                                        
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/new-arrivals"
+                                                        data-original-href="/c/new-arrivals"
+                                                        target="_self"
+                                                        data-subcategory="Shop-0"
+                                                        tabindex="-1"
+                                                        title="New &amp; Exclusive"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        New &amp; Exclusive
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/headphones"
+                                                        data-original-href="/c/headphones"
+                                                        target="_self"
+                                                        data-subcategory="Shop-1"
+                                                        tabindex="-1"
+                                                        title="Headphones"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        Headphones
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/earbuds"
+                                                        data-original-href="/c/earbuds"
+                                                        target="_self"
+                                                        data-subcategory="Shop-2"
+                                                        tabindex="-1"
+                                                        title="Earbuds"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        Earbuds
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/speakers"
+                                                        data-original-href="/c/speakers"
+                                                        target="_self"
+                                                        data-subcategory="Shop-3"
+                                                        tabindex="-1"
+                                                        title="Speakers"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        Speakers
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/home-theater"
+                                                        data-original-href="/c/home-theater"
+                                                        target="_self"
+                                                        data-subcategory="Shop-4"
+                                                        tabindex="-1"
+                                                        title="Home Theater"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        Home Theater
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                        
+                                            
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem"
+                                                        href="/c/portable-pa"
+                                                        data-original-href="/c/portable-pa"
+                                                        data-subcategory="Shop-5"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Portable PA"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated  subcategory">
+                                                        Portable PA
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem"
+                                                        href="/c/aviation-headsets"
+                                                        data-original-href="/c/aviation-headsets"
+                                                        data-subcategory="Shop-6"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Aviation Headsets"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated  subcategory">
+                                                        Aviation Headsets
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem"
+                                                        href="/c/fathers-day-sale"
+                                                        data-original-href="/c/fathers-day-sale"
+                                                        data-subcategory="Shop-7"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Father's Day Sale"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated  ">
+                                                        Father's Day Sale
+                                                        
+                                                    </a>
+                                                </li>
+                                            
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Secondary Navigation -->
+                            
+                                <div class="row w-100">
+                                    
+                                    <div class="col menu-group__secondary">
+                                        <ul role="menu" class="dropdown-menu__secondary" aria-label="Shop" tabindex="-1">
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/ULT-HEADPHONEOPN-LISA.html"
+                                                        data-original-href="/ULT-HEADPHONEOPN-LISA.html"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Bose &times; LISA"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Bose &times; LISA
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/lisas-faves"
+                                                        data-original-href="/lisas-faves"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="LISA's Faves"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        LISA's Faves
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/c/refurbished"
+                                                        data-original-href="/c/refurbished"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Refurbished"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Refurbished
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/c/accessories"
+                                                        data-original-href="/c/accessories"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Accessories"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Accessories
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/c/sets"
+                                                        data-original-href="/c/sets"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Sets"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Sets
+                                                    </a>
+                                                </li>
+                                            
+                                            
+                                        </ul>
+                                    </div>
+                                </div>
+                            
+                        </div>
+                    </div>
+                    <ul role="menu" class="col-sm-12 col-md-5 col-lg-6 dropdown-menu__subcategory js-dropdown-menu__subcategory">
+                        <li role="presentation" class="close-menu__subcategory d-md-none js-third-level-close">
+                            <div class="back__category pull-left">
+                                <button
+                                    role="button"
+                                    class="button-hide__subcategory js-hide-button__subcategory"
+                                    aria-label="Back to previous menu">
+                                    <span class="bif-chevron-left"></span>
+                                    <span class="js-menu-subcategory__name menu-subcategory-name__subcat">Back</span>
+                                </button>
+                            </div>
+                            <div class="close-menu__subcategory-container">
+                                <button
+                                    role="button"
+                                    class="bif-close close-button__subcategory js-close-button__subcategory"
+                                    aria-label="Close Menu">
+                                </button>
+                            </div>
+                        </li>
+
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-0">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="New &amp; Exclusive" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All New &amp; Exclusive" class="animated js-subcategory-link all-subcategory" href="/c/new-arrivals">
+                                                    All New &amp; Exclusive
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Exclusive Drops" class="animated js-subcategory-link " href="/c/exclusives">
+                                                    Exclusive Drops
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Bose &times; LISA" class="animated js-subcategory-link " href="/ULT-HEADPHONEOPN-LISA.html">
+                                                    Bose &times; LISA
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="LISA's Faves" class="animated js-subcategory-link " href="/lisas-faves">
+                                                    LISA's Faves
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Petal Pink and Deep Plum Collection" class="animated js-subcategory-link " href="/c/pink-and-plum-collection">
+                                                    Petal Pink and Deep Plum Collection
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Chilled Lilac Collection" class="animated js-subcategory-link " href="/c/chilled-lilac-collection">
+                                                    Chilled Lilac Collection
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Lunar Blue Collection" class="animated js-subcategory-link " href="/c/lunar-blue-collection">
+                                                    Lunar Blue Collection
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Sandstone Collection" class="animated js-subcategory-link " href="/c/sandstone-collection">
+                                                    Sandstone Collection
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-1">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Headphones" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Headphones" class="animated js-subcategory-link all-subcategory" href="/c/headphones">
+                                                    All Headphones
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Noise Cancelling Headphones" class="animated js-subcategory-link " href="/c/headphones/noise-cancelling">
+                                                    Noise Cancelling Headphones
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Spatial Audio Headphones" class="animated js-subcategory-link " href="/c/headphones/spatial-audio">
+                                                    Spatial Audio Headphones
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Headphone Accessories" class="animated js-subcategory-link " href="/c/headphones/accessories">
+                                                    Headphone Accessories
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Headphone Sets" class="animated js-subcategory-link " href="/c/headphones/sets">
+                                                    Headphone Sets
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-2">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Earbuds" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Earbuds" class="animated js-subcategory-link all-subcategory" href="/c/earbuds">
+                                                    All Earbuds
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="In Ear Earbuds" class="animated js-subcategory-link " href="/c/earbuds/in">
+                                                    In Ear Earbuds
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Open Ear Earbuds" class="animated js-subcategory-link " href="/c/earbuds/open">
+                                                    Open Ear Earbuds
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Noise Cancelling Earbuds" class="animated js-subcategory-link " href="/c/earbuds/noise-cancelling">
+                                                    Noise Cancelling Earbuds
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Earbud Accessories" class="animated js-subcategory-link " href="/c/earbuds/accessories">
+                                                    Earbud Accessories
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Earbuds Sets" class="animated js-subcategory-link " href="/c/earbuds/sets">
+                                                    Earbuds Sets
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-3">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Speakers" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Speakers" class="animated js-subcategory-link all-subcategory" href="/c/speakers">
+                                                    All Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Bluetooth Speakers" class="animated js-subcategory-link " href="/c/speakers/portable">
+                                                    Bluetooth Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Home Audio Speakers" class="animated js-subcategory-link " href="/c/speakers/home-speakers">
+                                                    Home Audio Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Outdoor Speakers" class="animated js-subcategory-link " href="/c/speakers/outdoors">
+                                                    Outdoor Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Waterproof Speakers" class="animated js-subcategory-link " href="/c/speakers/waterproof">
+                                                    Waterproof Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Party Speakers" class="animated js-subcategory-link " href="/c/speakers/party">
+                                                    Party Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Stereo Speakers" class="animated js-subcategory-link " href="/c/speakers/stereo">
+                                                    Stereo Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Amplifiers" class="animated js-subcategory-link " href="/p/MUAMP-AMPLIFIER.html">
+                                                    Amplifiers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Speaker Accessories" class="animated js-subcategory-link " href="/c/speakers/accessories">
+                                                    Speaker Accessories
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Speaker Sets" class="animated js-subcategory-link " href="/c/speakers/sets">
+                                                    Speaker Sets
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-4">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Home Theater" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Home Theater" class="animated js-subcategory-link all-subcategory" href="/c/home-theater">
+                                                    All Home Theater
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Soundbars" class="animated js-subcategory-link " href="/c/home-theater/soundbars">
+                                                    Soundbars
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Subwoofers" class="animated js-subcategory-link " href="/c/home-theater/bass-modules">
+                                                    Subwoofers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Surround Sound Speakers" class="animated js-subcategory-link " href="/c/home-theater/surround-speakers">
+                                                    Surround Sound Speakers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Dolby Atmos Systems" class="animated js-subcategory-link " href="/c/home-theater/dolby-atmos">
+                                                    Dolby Atmos Systems
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Home Theater Accessories" class="animated js-subcategory-link " href="/c/home-theater/accessories">
+                                                    Home Theater Accessories
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Home Theater Sets" class="animated js-subcategory-link " href="/c/home-theater/sets">
+                                                    Home Theater Sets
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-5">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Portable PA" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Portable PA" class="animated js-subcategory-link all-subcategory" href="/c/portable-pa">
+                                                    All Portable PA
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Line Array Systems" class="animated js-subcategory-link " href="/c/portable-pa/array-systems">
+                                                    Line Array Systems
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="PA Subwoofers" class="animated js-subcategory-link " href="/c/portable-pa/sub-woofers">
+                                                    PA Subwoofers
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Mixing Boards" class="animated js-subcategory-link " href="/c/portable-pa/mixers">
+                                                    Mixing Boards
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Portable PA Accessories" class="animated js-subcategory-link " href="/c/portable-pa/accessories">
+                                                    Portable PA Accessories
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Portable PA Sets" class="animated js-subcategory-link " href="/c/portable-pa/sets">
+                                                    Portable PA Sets
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Shop-6">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="Aviation Headsets" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="All Aviation Headsets" class="animated js-subcategory-link all-subcategory" href="/c/aviation-headsets">
+                                                    All Aviation Headsets
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Aviation Headset Accessories" class="animated js-subcategory-link " href="/c/aviation-headsets/accessories">
+                                                    Aviation Headset Accessories
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+<!-- Section Link -->
+                
+                
+                    
+                        <a title="SHOP" href="/SLP-SPEAKERWIRELESS.html?dwvar_SLP-SPEAKERWIRELESS_color=BLUE+DUSK&amp;quantity=1" target="_self" tabindex="-1">
+                            <div class="mobile-card-container">
+                                <img src="https://assets.bosecreative.com/m/564e70aeb0b3e50f/webimage-SLP-BlueDusk_SF_ShopNavFlyout_Mobile_640x360.png" class="mobile-card__img" alt="" />
+                                
+                                    <div class="mobile-card-content">
+                                        <p class="mobile-card__eyebrow" style="color:White;">NEW SOUNDLINK PLUS</p>
+                                        <h3 class="mobile-card__heading" style="color:White;">Energizing sound incoming</h3>
+                                    </div>
+                                
+                            </div>
+                        </a>
+                    
+                
+            </div>
+            <!-- Cards -->
+            
+                <div class="col-6 d-none d-md-block dropdown-menu__section megamenu">
+                    <div class="d-flex flex-column overflow-hidden h-100">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+
+
+
+    
+    
+        
+            
+        
+    
+
+
+
+
+
+
+
+<div data-cid="blt5b6ed611f8504cf5" class="editorial-card js-editorial-card editorial-card--editorialcard color-theme card split-view 
+ blue-major section 
+" data-card-url="/SLP-SPEAKERWIRELESS.html?dwvar_SLP-SPEAKERWIRELESS_color=BLUE+DUSK&amp;quantity=1"> 
+    
+    
+    
+    
+        
+        <div class="editorial-card__image-container" gradient-is-enabled="false" mobile-gradient="" desktop-gradient="">
+            
+
+
+
+
+
+
+
+
+
+    
+    <div class="js-lazy-load-image__placeholder" style="--desktop-ratio: 1;background-image: url('https://assets.bosecreative.com/transform/172585ed-16d8-412e-870a-181655387144/SLP-BlueDusk_SF_ShopNavFlyout_Desktop_2_1440x1420?io=width:1,height:1,transform:fill');">
+    
+        <picture
+            class="js-n-image-responsive editorial-card__picture"
+            style="--desktop-ratio: 1"
+        >
+            
+                <source srcset="https://assets.bosecreative.com/transform/172585ed-16d8-412e-870a-181655387144/SLP-BlueDusk_SF_ShopNavFlyout_Desktop_2_1440x1420?format=avif&amp;quality=95&amp;io=width:1280,height:1280,transform:fill" media="(min-width: 768px)"
+                width="1280"
+                height="1280">
+            
+
+            <img
+                class="editorial-card__image"
+                alt=""
+                src="" loading="lazy"
+                
+            >
+        </picture>
+    
+    </div>
+    
+
+        </div>
+    
+
+    
+        <div class="editorial-card__card-content editorial-card__card-content--bottom-left  ">
+            
+                <div class="editorial-card__header">
+    
+        <div class="editorial-card__eyebrow">
+            <p class="text"></p>
+        </div>
+    
+    
+        <div class="editorial-card__heading">
+            
+                <h2 class="editorial-card__heading--small text">Energizing sound incoming</h2>
+            
+        </div>
+     
+</div>
+            
+
+            
+                <div class="editorial-card__content">
+    
+        <div class="editorial-card__subheading">
+            <p class="text">New SoundLink Plus Portable Speaker </p>
+        </div>
+    
+
+    
+</div>
+            
+            
+            
+                <div class="editorial-card__footer">
+    
+        <div class="editorial-card__ctas">
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/SLP-SPEAKERWIRELESS.html?dwvar_SLP-SPEAKERWIRELESS_color=BLUE+DUSK&amp;quantity=1" class="btn btn-md btn-secondary editorial-card__cta editorial-card__cta--primary js-cta-primary btn--fill btn--label">
+                            <span class="btn__text">PREORDER</span>
+                        </a>
+                    
+                
+            
+        </div>
+    
+    
+</div>
+            
+        </div>
+    
+</div>
+
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+                    
+                </li>
+            
+        
+            
+                <li role="presentation" class="menu__item-global dropdown animated">
+                    <a role="menuitem"
+                        href="#"
+                        class="menu__link js-menu-link nav-link "
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        data-toggle="dropdown"
+                        id="Explore"
+                        tabindex="-1"
+                        title="Explore">
+                        <div class="nav-link__text-container">
+                            <span class="nav-link__text">Explore</span>
+                            <span class="bif-chevon-right"/>
+                        </div>
+                    </a>
+                    
+                        
+
+
+<div class="dropdown-menu">
+    <div class="container-fluid h-100">
+        <div class="row h-100 megamenu-container">
+            <div class="col-12 col-md-6 d-flex flex-column dropdown-menu__section megamenu">
+                <div class="row h-100 nav-menu-category-container">
+                    <div class="col-sm-12 col-md-6 dropdown-menu__category">
+                        <div class="dropdown-menu__section--offset-left">
+                            <!-- Primary Navigation -->
+                            <div class="row w-100">
+                                
+                                <div class="col-12 pr-0">
+                                    <ul role="menu" class="dropdown-menu__primary pl-0" aria-label="Explore" tabindex="-1">
+                                        
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/explore/music-at-home"
+                                                        data-original-href="/explore/music-at-home"
+                                                        target="_self"
+                                                        data-subcategory="Explore-0"
+                                                        tabindex="-1"
+                                                        title="Home"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        Home
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/explore/work"
+                                                        data-original-href="/explore/work"
+                                                        target="_self"
+                                                        data-subcategory="Explore-1"
+                                                        tabindex="-1"
+                                                        title="Work"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        Work
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/explore/music"
+                                                        data-original-href="/explore/music"
+                                                        target="_self"
+                                                        data-subcategory="Explore-2"
+                                                        tabindex="-1"
+                                                        title="On the Go"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        On the Go
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/explore/music-while-active"
+                                                        data-original-href="/explore/music-while-active"
+                                                        target="_self"
+                                                        data-subcategory="Explore-3"
+                                                        tabindex="-1"
+                                                        title="Fitness"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        Fitness
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/explore/tv-film"
+                                                        data-original-href="/explore/tv-film"
+                                                        target="_self"
+                                                        data-subcategory="Explore-4"
+                                                        tabindex="-1"
+                                                        title="TV &amp; Movies"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        TV &amp; Movies
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Secondary Navigation -->
+                            
+                                <div class="row w-100">
+                                    
+                                    <div class="col menu-group__secondary">
+                                        <ul role="menu" class="dropdown-menu__secondary" aria-label="Explore" tabindex="-1">
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/stories/collabs"
+                                                        data-original-href="/stories/collabs"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Collabs"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Collabs
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/stories/turn-the-dial-volume-two"
+                                                        data-original-href="/stories/turn-the-dial-volume-two"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Turn The Dial: Laufey"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Turn The Dial: Laufey
+                                                    </a>
+                                                </li>
+                                            
+                                                <li role="presentation" class="dropdown-menu__secondary-navigation">
+                                                    <a role="menuitem"
+                                                        href="/stories"
+                                                        data-original-href="/stories"
+                                                        target="_self"
+                                                        tabindex="-1"
+                                                        title="Bose Stories"
+                                                        class="dropdown-menu__secondary-link animated ">
+                                                        Bose Stories
+                                                    </a>
+                                                </li>
+                                            
+                                            
+                                        </ul>
+                                    </div>
+                                </div>
+                            
+                        </div>
+                    </div>
+                    <ul role="menu" class="col-sm-12 col-md-5 col-lg-6 dropdown-menu__subcategory js-dropdown-menu__subcategory">
+                        <li role="presentation" class="close-menu__subcategory d-md-none js-third-level-close">
+                            <div class="back__category pull-left">
+                                <button
+                                    role="button"
+                                    class="button-hide__subcategory js-hide-button__subcategory"
+                                    aria-label="Back to previous menu">
+                                    <span class="bif-chevron-left"></span>
+                                    <span class="js-menu-subcategory__name menu-subcategory-name__subcat">Back</span>
+                                </button>
+                            </div>
+                            <div class="close-menu__subcategory-container">
+                                <button
+                                    role="button"
+                                    class="bif-close close-button__subcategory js-close-button__subcategory"
+                                    aria-label="Close Menu">
+                                </button>
+                            </div>
+                        </li>
+
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+<!-- Section Link -->
+                
+                
+                    
+                        <a title="VIEW GIFT GUIDE" href="/fathers-day-gift-guide" target="_self" tabindex="-1">
+                            <div class="mobile-card-container">
+                                <img src="https://assets.bosecreative.com/m/7e97120cd6da7b05/webimage-QCHLE26-TwilightBlue_CM_FathersDay_GiftGuide_Nav_Mobile_343x180.png" class="mobile-card__img" alt="" />
+                                
+                                    <div class="mobile-card-content">
+                                        <p class="mobile-card__eyebrow" style="color:White;"></p>
+                                        <h3 class="mobile-card__heading" style="color:White;">Father&rsquo;s Day gift guide</h3>
+                                    </div>
+                                
+                            </div>
+                        </a>
+                    
+                
+            </div>
+            <!-- Cards -->
+            
+                <div class="col-6 d-none d-md-block dropdown-menu__section megamenu">
+                    <div class="d-flex flex-column overflow-hidden h-100">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+
+
+
+    
+    
+        
+            
+        
+    
+        
+    
+
+
+
+
+
+
+
+<div data-cid="blta84fb8f0c65cb4df" class="editorial-card js-editorial-card editorial-card--editorialcard color-theme card split-view 
+ blue-flat section 
+" data-card-url="/c/fathers-day-sale"> 
+    
+    
+    
+    
+        
+        <div class="editorial-card__image-container" gradient-is-enabled="true" mobile-gradient="background: linear-gradient(0deg, rgba(19, 19, 23, 0) 0%, rgba(19, 19, 23, 0) 0%);" desktop-gradient="background: linear-gradient(12deg, rgba(19, 19, 23, 0.6) 0%, rgba(19, 19, 23, 0) 52%);">
+            
+
+
+
+
+
+
+
+
+
+    
+    <div class="js-lazy-load-image__placeholder" style="--desktop-ratio: 1;background-image: url('https://assets.bosecreative.com/transform/3409ffeb-1b2f-4dd3-a889-56be16fea759/QCHLE26-TwilightBlue_CM_FathersDay_GiftGuide_Nav_Desktop_720x711?io=width:1,height:1,transform:fill');">
+    
+        <picture
+            class="js-n-image-responsive editorial-card__picture"
+            style="--desktop-ratio: 1"
+        >
+            
+                <source srcset="https://assets.bosecreative.com/transform/3409ffeb-1b2f-4dd3-a889-56be16fea759/QCHLE26-TwilightBlue_CM_FathersDay_GiftGuide_Nav_Desktop_720x711?io=transform:extend,height:1602,width:1440,background:FFFFFF&amp;io=transform:crop,height:1512,width:1440,path:square,gravity:top&amp;quality=95" media="(min-width: 768px)"
+                width="1280"
+                height="1280">
+            
+
+            <img
+                class="editorial-card__image"
+                alt="Man wearing Twilight Blue Bose QuietComfort Headphones in a home office."
+                src="" loading="lazy"
+                
+            >
+        </picture>
+    
+    </div>
+    
+
+        </div>
+    
+
+    
+        <div class="editorial-card__card-content editorial-card__card-content--bottom-left  ">
+            
+                <div class="editorial-card__header">
+    
+        <div class="editorial-card__eyebrow">
+            <p class="text">FATHER&rsquo;S DAY GIFT GUIDE</p>
+        </div>
+    
+    
+        <div class="editorial-card__heading">
+            
+                <h2 class="editorial-card__heading--small text">Gifts to thank dad with</h2>
+            
+        </div>
+     
+</div>
+            
+
+            
+                <div class="editorial-card__content">
+    
+        <div class="editorial-card__subheading">
+            <p class="text">Shop a selection of can&rsquo;t-miss gifts that fit all of dad&rsquo;s audio needs.</p>
+        </div>
+    
+
+    
+</div>
+            
+            
+            
+                <div class="editorial-card__footer">
+    
+        <div class="editorial-card__ctas">
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/c/fathers-day-sale" class="btn btn-md btn-secondary editorial-card__cta editorial-card__cta--primary js-cta-primary btn--fill btn--label">
+                            <span class="btn__text">SHOP SALE</span>
+                        </a>
+                    
+                
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/fathers-day-gift-guide" class="btn btn-md btn-tertiary btn-with-icon editorial-card__cta editorial-card__cta--tertiary js-cta-tertiary text">
+                            <span class="btn__text">VIEW GIFT GUIDE&nbsp;<i class="bif bif-chevon-right" aria-hidden="true"></i></span>
+                        </a>
+                    
+                
+            
+        </div>
+    
+    
+</div>
+            
+        </div>
+    
+</div>
+
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+                    
+                </li>
+            
+        
+            
+                <li role="presentation" class="menu__item-global dropdown animated">
+                    <a role="menuitem"
+                        href="#"
+                        class="menu__link js-menu-link nav-link "
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        data-toggle="dropdown"
+                        id="Support"
+                        tabindex="-1"
+                        title="Support">
+                        <div class="nav-link__text-container">
+                            <span class="nav-link__text">Support</span>
+                            <span class="bif-chevon-right"/>
+                        </div>
+                    </a>
+                    
+                        
+
+
+<div class="dropdown-menu">
+    <div class="container-fluid h-100">
+        <div class="row h-100 megamenu-container">
+            <div class="col-12 col-md-6 d-flex flex-column dropdown-menu__section megamenu">
+                <div class="row h-100 nav-menu-category-container">
+                    <div class="col-sm-12 col-md-6 dropdown-menu__category">
+                        <div class="dropdown-menu__section--offset-left">
+                            <!-- Primary Navigation -->
+                            <div class="row w-100">
+                                
+                                <div class="col-12 pr-0">
+                                    <ul role="menu" class="dropdown-menu__primary pl-0" aria-label="Support" tabindex="-1">
+                                        
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="https://support.bose.com/s/?language=en_US"
+                                                        data-original-href="https://support.bose.com/s/?language=en_US"
+                                                        target="_self"
+                                                        data-subcategory="Support-0"
+                                                        tabindex="-1"
+                                                        title="Help Center"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        experience-link-js
+                                                        
+                                                        " >    
+                                                        Help Center
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/trackorder"
+                                                        data-original-href="/trackorder"
+                                                        target="_self"
+                                                        data-subcategory="Support-1"
+                                                        tabindex="-1"
+                                                        title="My Orders"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        My Orders
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/product-registration"
+                                                        data-original-href="/product-registration"
+                                                        target="_self"
+                                                        data-subcategory="Support-2"
+                                                        tabindex="-1"
+                                                        title="My Products"
+                                                        aria-haspopup="true"
+                                                        
+                                                            aria-expanded="false"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        subcategory" >    
+                                                        My Products
+                                                        
+                                                            <span class="bif-chevon-right"/>
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="https://support.bose.com/s/get-help-landing-page?language=en_US"
+                                                        data-original-href="https://support.bose.com/s/get-help-landing-page?language=en_US"
+                                                        target="_self"
+                                                        data-subcategory="Support-3"
+                                                        tabindex="-1"
+                                                        title="Contact Us"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        experience-link-js
+                                                        
+                                                        " >    
+                                                        Contact Us
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Secondary Navigation -->
+                            
+                        </div>
+                    </div>
+                    <ul role="menu" class="col-sm-12 col-md-5 col-lg-6 dropdown-menu__subcategory js-dropdown-menu__subcategory">
+                        <li role="presentation" class="close-menu__subcategory d-md-none js-third-level-close">
+                            <div class="back__category pull-left">
+                                <button
+                                    role="button"
+                                    class="button-hide__subcategory js-hide-button__subcategory"
+                                    aria-label="Back to previous menu">
+                                    <span class="bif-chevron-left"></span>
+                                    <span class="js-menu-subcategory__name menu-subcategory-name__subcat">Back</span>
+                                </button>
+                            </div>
+                            <div class="close-menu__subcategory-container">
+                                <button
+                                    role="button"
+                                    class="bif-close close-button__subcategory js-close-button__subcategory"
+                                    aria-label="Close Menu">
+                                </button>
+                            </div>
+                        </li>
+
+                        
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Support-1">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="My Orders" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Sign In / My Bose" class="animated js-subcategory-link " href="/account">
+                                                    Sign In / My Bose
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Track My Order" class="animated js-subcategory-link " href="/trackorder">
+                                                    Track My Order
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Returns &amp; Exchanges" class="animated js-subcategory-link " href="/returns">
+                                                    Returns &amp; Exchanges
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                                <li role="presentation" class="dropdown-menu__section-subcategory js-subcategory-item" data-subcategory="Support-2">
+                                    <ul role="menu" class="dropdown-menu__section-subcategory--list" aria-label="My Products" tabindex="-1">
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Troubleshooting" class="animated js-subcategory-link " href="https://support.bose.com/s/guided-trouble-shooter-splash-page?language=en_US">
+                                                    Troubleshooting
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Register My Product" class="animated js-subcategory-link " href="/product-registration">
+                                                    Register My Product
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Trade In Program" class="animated js-subcategory-link " href="/trade-up">
+                                                    Trade In Program
+                                                </a>
+                                            </li>
+                                        
+                                            <li role="presentation" class="dropdown-menu__section-subcategory--list__item">
+                                                <a role="menuitem" tabindex="-1" title="Repair &amp; Replacement" class="animated js-subcategory-link " href="https://support.bose.com/s/repair-and-replacement-request?language=en_US">
+                                                    Repair &amp; Replacement
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                </li>
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+<!-- Section Link -->
+                
+                
+            </div>
+            <!-- Cards -->
+            
+                <div class="col-6 d-none d-md-block dropdown-menu__section megamenu">
+                    <div class="d-flex flex-column overflow-hidden h-100">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+
+
+
+    
+    
+        
+            
+        
+    
+
+
+
+
+
+
+
+<div data-cid="bltc61e1568842ffa1b" class="editorial-card js-editorial-card editorial-card--editorialcard color-theme card split-view 
+ blackbass-whitesoprano section 
+" data-card-url="/trade-in"> 
+    
+    
+    
+    
+        
+        <div class="editorial-card__image-container" gradient-is-enabled="false" mobile-gradient="" desktop-gradient="">
+            
+
+
+
+
+
+
+
+
+
+    
+    <div class="js-lazy-load-image__placeholder" style="--desktop-ratio: 1;background-image: url('https://assets.bosecreative.com/transform/7d78cae6-40f7-4d81-82d0-f3c86a3e5596/Nav_Flyout_Desktop?io=width:1,height:1,transform:fill');">
+    
+        <picture
+            class="js-n-image-responsive editorial-card__picture"
+            style="--desktop-ratio: 1"
+        >
+            
+                <source srcset="https://assets.bosecreative.com/transform/7d78cae6-40f7-4d81-82d0-f3c86a3e5596/Nav_Flyout_Desktop?io=transform:crop,height:1920,width:1920,path:square&amp;io=overlay:image,opacity:80,angle:0,gravity:center,asset:1da8224a-98c7-41e1-a4a0-0194fcf55b45&amp;quality=95" media="(min-width: 768px)"
+                width="1280"
+                height="1280">
+            
+
+            <img
+                class="editorial-card__image"
+                alt="Bose Bluetooth speaker family, including SoundLink Max, SoundLink Flex, and SoundLink Micro Speakers"
+                src="" loading="lazy"
+                
+            >
+        </picture>
+    
+    </div>
+    
+
+        </div>
+    
+
+    
+        <div class="editorial-card__card-content editorial-card__card-content--bottom-left  ">
+            
+                <div class="editorial-card__header">
+    
+        <div class="editorial-card__eyebrow">
+            <p class="text"></p>
+        </div>
+    
+    
+        <div class="editorial-card__heading">
+            
+                <h2 class="editorial-card__heading--small text">Trade in and trade up</h2>
+            
+        </div>
+     
+</div>
+            
+
+            
+                <div class="editorial-card__content">
+    
+        <div class="editorial-card__subheading">
+            <p class="text">Get up to $300 toward our latest innovations when trading in.</p>
+        </div>
+    
+
+    
+</div>
+            
+            
+            
+                <div class="editorial-card__footer">
+    
+        <div class="editorial-card__ctas">
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/trade-in" class="btn btn-md btn-secondary editorial-card__cta editorial-card__cta--primary js-cta-primary btn--fill btn--label">
+                            <span class="btn__text">Learn more</span>
+                        </a>
+                    
+                
+            
+        </div>
+    
+    
+</div>
+            
+        </div>
+    
+</div>
+
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+                    
+                </li>
+            
+        
+            
+                <li role="presentation" class="menu__item-global dropdown animated">
+                    <a role="menuitem"
+                        href="#"
+                        class="menu__link js-menu-link nav-link pr-md-0"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        data-toggle="dropdown"
+                        id="Father's Day"
+                        tabindex="-1"
+                        title="Father's Day">
+                        <div class="nav-link__text-container">
+                            <span class="nav-link__text">Father's Day</span>
+                            <span class="bif-chevon-right"/>
+                        </div>
+                    </a>
+                    
+                        
+
+
+<div class="dropdown-menu">
+    <div class="container-fluid h-100">
+        <div class="row h-100 megamenu-container">
+            <div class="col-12 col-md-6 d-flex flex-column dropdown-menu__section megamenu">
+                <div class="row h-100 nav-menu-category-container">
+                    <div class="col-sm-12 col-md-6 dropdown-menu__category">
+                        <div class="dropdown-menu__section--offset-left">
+                            <!-- Primary Navigation -->
+                            <div class="row w-100">
+                                
+                                <div class="col-12 pr-0">
+                                    <ul role="menu" class="dropdown-menu__primary pl-0" aria-label="Father's Day" tabindex="-1">
+                                        
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/c/fathers-day-sale"
+                                                        data-original-href="/c/fathers-day-sale"
+                                                        target="_self"
+                                                        data-subcategory="Father's Day-0"
+                                                        tabindex="-1"
+                                                        title="Sale"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        Sale
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                                <li role="presentation" class="dropdown-item">
+                                                    <a role="menuitem" href="/fathers-day-gift-guide"
+                                                        data-original-href="/fathers-day-gift-guide"
+                                                        target="_self"
+                                                        data-subcategory="Father's Day-1"
+                                                        tabindex="-1"
+                                                        title="Gift Guide"
+                                                        aria-haspopup="true"
+                                                        
+                                                        class="dropdown-link js-dropdown-link animated
+                                                        
+                                                        
+                                                        " >    
+                                                        Gift Guide
+                                                        
+                                                    </a>
+                                                </li>
+                                        
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Secondary Navigation -->
+                            
+                        </div>
+                    </div>
+                    <ul role="menu" class="col-sm-12 col-md-5 col-lg-6 dropdown-menu__subcategory js-dropdown-menu__subcategory">
+                        <li role="presentation" class="close-menu__subcategory d-md-none js-third-level-close">
+                            <div class="back__category pull-left">
+                                <button
+                                    role="button"
+                                    class="button-hide__subcategory js-hide-button__subcategory"
+                                    aria-label="Back to previous menu">
+                                    <span class="bif-chevron-left"></span>
+                                    <span class="js-menu-subcategory__name menu-subcategory-name__subcat">Back</span>
+                                </button>
+                            </div>
+                            <div class="close-menu__subcategory-container">
+                                <button
+                                    role="button"
+                                    class="bif-close close-button__subcategory js-close-button__subcategory"
+                                    aria-label="Close Menu">
+                                </button>
+                            </div>
+                        </li>
+
+                        
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+<!-- Section Link -->
+                
+                
+                    
+                        <a title="SHOP" href="/c/fathers-day-sale" target="_self" tabindex="-1">
+                            <div class="mobile-card-container">
+                                <img src="https://assets.bosecreative.com/m/6a38be665e55cd34/webimage-UOEB24-Black_CM_FathersDay_Nav_Mobile_343x180.png" class="mobile-card__img" alt="" />
+                                
+                                    <div class="mobile-card-content">
+                                        <p class="mobile-card__eyebrow" style="color:White;"></p>
+                                        <h3 class="mobile-card__heading" style="color:White;">Father&rsquo;s Day Sale</h3>
+                                    </div>
+                                
+                            </div>
+                        </a>
+                    
+                
+            </div>
+            <!-- Cards -->
+            
+                <div class="col-6 d-none d-md-block dropdown-menu__section megamenu">
+                    <div class="d-flex flex-column overflow-hidden h-100">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+
+
+
+    
+    
+        
+            
+        
+    
+        
+    
+
+
+
+
+
+
+
+<div data-cid="bltcab56500824b5462" class="editorial-card js-editorial-card editorial-card--editorialcard color-theme card split-view 
+ blue-flat section 
+" data-card-url="/c/fathers-day-sale"> 
+    
+    
+    
+    
+        
+        <div class="editorial-card__image-container" gradient-is-enabled="true" mobile-gradient="background: linear-gradient(0deg, rgba(19, 19, 23, 0) 0%, rgba(19, 19, 23, 0) 0%);" desktop-gradient="background: linear-gradient(12deg, rgba(19, 19, 23, 0.7) 0%, rgba(19, 19, 23, 0) 56%);">
+            
+
+
+
+
+
+
+
+
+
+    
+    <div class="js-lazy-load-image__placeholder" style="--desktop-ratio: 1;background-image: url('https://assets.bosecreative.com/transform/b458b417-5f72-43e9-baf8-dda821179896/UOEB24-Black_CM_FathersDay_Nav_Desktop_720x711?io=width:1,height:1,transform:fill');">
+    
+        <picture
+            class="js-n-image-responsive editorial-card__picture"
+            style="--desktop-ratio: 1"
+        >
+            
+                <source srcset="https://assets.bosecreative.com/transform/b458b417-5f72-43e9-baf8-dda821179896/UOEB24-Black_CM_FathersDay_Nav_Desktop_720x711?io=transform:extend,height:1602,width:1440,background:FFFFFF&amp;io=transform:crop,height:1512,width:1440,path:square,gravity:top&amp;format=avif&amp;quality=95" media="(min-width: 768px)"
+                width="1280"
+                height="1280">
+            
+
+            <img
+                class="editorial-card__image"
+                alt="Man wearing Bose Ultra Open Earbuds."
+                src="" loading="lazy"
+                
+            >
+        </picture>
+    
+    </div>
+    
+
+        </div>
+    
+
+    
+        <div class="editorial-card__card-content editorial-card__card-content--bottom-left  ">
+            
+                <div class="editorial-card__header">
+    
+        <div class="editorial-card__eyebrow">
+            <p class="text">FATHER&rsquo;S DAY SALE</p>
+        </div>
+    
+    
+        <div class="editorial-card__heading">
+            
+                <h2 class="editorial-card__heading--small text">Dad-approved audio deals</h2>
+            
+        </div>
+     
+</div>
+            
+
+            
+                <div class="editorial-card__content">
+    
+        <div class="editorial-card__subheading">
+            <p class="text">Save up to 25% on select products with limited-time deals for dad.</p>
+        </div>
+    
+
+    
+</div>
+            
+            
+            
+                <div class="editorial-card__footer">
+    
+        <div class="editorial-card__ctas">
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/c/fathers-day-sale" class="btn btn-md btn-secondary editorial-card__cta editorial-card__cta--primary js-cta-primary btn--fill btn--label">
+                            <span class="btn__text">SHOP</span>
+                        </a>
+                    
+                
+            
+                
+                    
+                    
+                        
+                        
+                    
+
+                    
+                    
+                        <a target="_self" href="/fathers-day-gift-guide" class="btn btn-md btn-tertiary btn-with-icon editorial-card__cta editorial-card__cta--tertiary js-cta-tertiary text">
+                            <span class="btn__text">VIEW GIFT GUIDE&nbsp;<i class="bif bif-chevon-right" aria-hidden="true"></i></span>
+                        </a>
+                    
+                
+            
+        </div>
+    
+    
+</div>
+            
+        </div>
+    
+</div>
+
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+                    
+                </li>
+            
+        
+        
+    <li class="nav-item d-md-none" role="presentation">
+        <a role="menuitem" href="/login?oauthProvider=Azure-AD-B2C"
+            title="Sign In/Join my Bose"
+            aria-label="Sign In/Join my Bose" class="nav-link"
+            tabindex="-1">
+            <span class="user-message">Sign In/Join my Bose</span>
+        </a>
+    </li>
+    <li class="nav-item d-md-none" role="presentation">
+        <a role="menuitem" href="/wishlist" 
+            class="nav-link" 
+            tabindex="-1"
+            title="Wishlist">
+            <span class="user-message">Wishlist</span>
+        </a>
+    </li>
+    <li class="nav-item d-md-none" role="presentation">
+        <a role="menuitem" href="https://support.bose.com/s/get-help-landing-page?language=en_US"
+            class="nav-link" 
+            tabindex="-1"
+            title="Contact Us">
+            Contact Us</a>
+    </li>
+    <li class="nav-item d-md-none" role="presentation">
+        <a role="menuitem" href="/orders"
+            class="nav-link" 
+            tabindex="-1"
+            title="Where Is My Order?">
+            Where Is My Order?</a>
+    </li>
+
+
+    </ul>
+</div>
+<div class="menu-editorial-card d-block d-md-none">
+    
+
+
+
+    
+        <a title="SHOP" href="/c/pink-and-plum-collection" target="_self">
+            <div class="mobile-card-container">
+                <img src="https://assets.bosecreative.com/m/19e10721693717d2/webimage-QCHLE26_QCEBLE26-PetalPink_SF_ShopNavFlyout_Mobile.png" class="mobile-card__img" alt="" />
+                <div class="mobile-card-content">
+                    <p class="mobile-card__eyebrow" style="color:White;">NEW COLOR DROPS</p>
+                    <h3 class="mobile-card__heading" style="color:White;">Limited-edition Petal Pink</h3>
+                </div>
+            </div>
+        </a>
+    
+
+
+</div>
+
+
+ 
+	
+</nav>
+
+                        </div>
+                        <button
+                            class="navbar-toggler header__nav__toggler d-md-none"
+                            type="button"
+                            aria-controls="sg-navbar-collapse"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                            <i class="bif bif-hamburger-menu header__icon header__icon--hamburger" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <a
+                        class="logo logo--header"
+                        href="/home"
+                        title="Bose Home">
+                    <img
+                        class="logo__img"
+                        src="/on/demandware.static/Sites-Bose_US-Site/-/default/dw980111b2/images/logo.svg"
+                        alt="Bose" />
+                    </a>
+                    <div class="header-search__form js-search-form" data-component-location="main-nav">
+    <form
+        role="search"
+        action="/search"
+        data-type="header-form"
+        method="get"
+        name="simpleSearch">
+        
+            <div class="search-flyout-form__wrapper">
+                <input
+                    class="form-control search-field header-search"
+                    data-search=""
+                    type="text"
+                    name="q"
+                    placeholder="Search"
+                    data-component-location="main-nav"
+                    role="combobox"
+                    aria-describedby="search-assistive-text"
+                    aria-haspopup="listbox"
+                    aria-owns="search-results"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-activedescendant=""
+                    aria-controls="search-results"
+                    aria-label="Enter Keyword or Item No."
+                    autocomplete="off"
+                    value=""
+                />
+
+                <div class="header__icon header__icon--search-flyout">
+                    <button
+                        type="button"
+                        name="close-button"
+                        class="bif bif-close header__button-icon js-clear-search-button"
+                         aria-label="Close search field">
+                    </button>
+                    <span class="header__icon--separator"></span>
+                    <button
+                        type="submit"
+                        name="search-button"
+                        class="bif bif-search header__button-icon"
+                        aria-label="Submit search keywords">
+                    </button>
+                </div>
+                
+                <div class="header__icon d-none">
+                    <button
+                        type="button"
+                        name="close-button"
+                        class="close-button bif bif-close header__button-icon"
+                        aria-label="Close search field">
+                    </button>
+                </div>
+                
+                <input
+                    type="hidden"
+                    value="en_US"
+                    name="lang"
+                />
+        </div>
+    </form>
+
+    <div class="d-md-none search-flyout-form__cancel d-none" data-component-location="main-nav">
+        <div class='search-button__cancel'>
+            <a href="#"
+                class="close-button"
+                data-component-location="main-nav">
+                Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+                    <div class="header__nav__right">
+                        <div class="search header__icon header__nav__right__icon show">
+                            <button
+                                type="button"
+                                name="search"
+                                class="header__icon header__nav__right__icon header__button-icon"
+                                data-label-open="Open search field"
+                                data-label-close="Close search field"
+                                data-component-location="main-nav"
+                                aria-label="Open search field">
+                                <i class="bif bif-search header__icon--search" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        
+    <a
+        class="header__icon d-none d-md-flex header__nav__right__icon header__profile"
+        href="/login?oauthProvider=Azure-AD-B2C"
+        title="Sign In/Join my Bose"
+        data-user-loggedin="false"
+        aria-label="Sign In/Join my Bose">
+        <i class="bif bif-profile header__icon--profile" aria-hidden="true"></i>
+    </a>
+    <a
+        class="header__icon d-none d-md-flex header__nav__right__icon"
+        href="/wishlist"
+        title="Wishlist"
+        aria-label="Wishlist">
+        <i class="bif bif-love header__icon--wishlist" aria-hidden="true"></i>
+    </a>
+    <div class="minicart" data-action-url="/on/demandware.store/Sites-Bose_US-Site/en_US/Cart-MiniCartShow">
+        
+<div class="minicart-total header__icon header__nav__right__icon header__icon--shopping-cart">
+    <a
+        class="minicart-link  "
+        href="/cart"
+        data-empty-minicart-count="Cart 0 Items"
+        title="Cart 0 Items"
+        aria-label="Cart 0 Items">
+        <i class="bif bif-cart-filled1" aria-hidden="true"></i>
+        <i class="bif bif-shopping-cart" aria-hidden="true"></i>
+    </a>
+</div>
+
+    </div>
+
+
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    
+	 
+
+
+	
+
+    
+    <div class="inpage-navbar-wrapper js-inpage-navbar-wrapper" data-url="/on/demandware.store/Sites-Bose_US-Site/en_US/Content-Renderinpagenav?uid=blt6cbd09e7adc1c887&amp;type=in_page_navbar">
+</div>
+
+ 
+	
+
+    <div class="header-search__dropdown" data-component-location="main-nav">
+        <div class="site-search header__site-search">
+    <div class="site-search-form d-none">
+
+        
+
+        <div class="site-search-input-wrapper">
+            
+            <div
+                class="suggestions-wrapper"
+                data-url="/on/demandware.store/Sites-Bose_US-Site/en_US/SearchServices-GetSuggestions?folderID=searchconfiguration&amp;q=">
+            </div>
+            <input
+                type="hidden"
+                value="en_US"
+                name="lang"
+            >
+        </div>
+    </div>
+</div>
+    </div>
+</header>
+
+<div role="main" id="maincontent">
+
+    <div class="errorStyle">
+    <!-- CMS: Main-->
+    <div class="errorStyle errorStyle__main">
+        
+            404
+        
+    </div>
+
+    <!-- CMS: Sub-->
+    <div class="errorStyle errorStyle__sub">
+        <div class="row">
+            <div class="col-12">
+                (That means we can't find the page you are looking for.)
+            </div>
+        </div>
+    </div>
+
+    <!-- CMS: Description -->
+    <div class="errorStyle errorStyle__description">
+        <div class="row">
+            <div class="col-12">
+                The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Try searching to find something specific or go to our homepage.
+                
+            </div>
+        </div>
+    </div>
+
+    
+        <center>
+            <a class="btn btn-show-more btn-primary js-go-back" href="/home">
+                bose homepage
+            </a>
+        </center>
+    
+</div>
+
+
+    <div class="js-email-signupcard" data-emailsignuptype="Default" data-colortheme="whitesoprano-blackbass"
+        data-email-signup="" data-email-signup-confimation=""></div>
+
+</div>
+
+
+
+<footer id="footercontent" class="footer--spacious container--mb-lg" aria-label="Sign up to receive Bose emails and communications." role="contentinfo">
+    <div class="search-result-breadcrumbs" id="page-breadcrumbs">
+        
+        
+                
+
+
+    <script type="application/ld+json">
+        {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList"
+}
+    </script>
+
+
+
+<nav aria-hidden='true'>
+    <ol class="breadcrumb">
+        
+    </ol>
+</nav>
+            </iselse>
+        
+    </div>
+    
+    <!-- Notify-me MODAL -->
+    <!-- Notify-Me Modal -->
+<div
+    id="notify-me-modal"
+    class="modal modal--notify-me fade common-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-hidden="true"
+    aria-labelledby="notify-me-modal"
+>
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content position-relative">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Notify me when available
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="bif bif-close" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <form
+                class="notify-me-form" novalidate
+                name="notify-me-form"
+                data-action="/on/demandware.store/Sites-Bose_US-Site/en_US/Notification-Submit"
+            >
+            
+                <div class="modal-body text-left">
+                    <div class="notifyMe-detail"><p class="notify-para-text">Enter your email address to receive an alert when this product is available.</p></div>
+                    <input
+                        type="email"
+                        id="notify-me-form-email"
+                        class="form-control required notify-me-form__email"
+                        name="notify-me-form-email"
+                        placeholder="* Email"
+                        received-msg="Email sent"
+                        pattern="^[\w.%+-]+@[\w.-]+\.[\w]{2,6}$"
+                        required
+                        aria-required="true"
+                        aria-describedby="notify-me-form-email-error"
+                        value=""
+                        data-pid-notify=""
+                    />
+                    <div class="invalid-feedback" id="notify-me-form-email-error">
+                        Please enter a valid email address.
+                    </div>
+                    <div class="notify-me__option ">
+                        <input 
+                            type="checkbox" 
+                            id="optinNotifyMe"
+                            aria-checked="false"
+                            aria-labelledby="optinNotifyMeLabel"
+                        />
+                        <label for="optinNotifyMe" id="optinNotifyMe">
+                            Sign up to get Bose emails & communications for exclusive first looks at promotions, new products, and more. <a target="self" class="notify-me_option--policy" href="/legal/privacy-policy">Private Policy</a>
+                        </label> 
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input
+                        type="submit"
+                        class="btn btn-block btn-primary notify-me-form__submit"
+                        value="Submit request"
+                    />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    
+        
+	 
+
+
+	
+
+    
+    <div class="container email-signup-container d-none container--mb-lg">
+    <div class="row">
+        <div class="col-lg-12 footer__newsletter-container whitesoprano-blackbass has-color-theme js-footer-emailsignup" data-color-themes="whitesoprano-blackbass">
+            <!-- CMS: Footer Newsletter -->
+            <div class="footer-newsletter text">
+                <div class="email-signup-step1"><div class="email-signup-card">
+    <div class="container">
+        <div class="row footer__email-signup">
+            <section class="col px-0 footer__email-signup-section">
+                <h2 id="sign-up-header" class="footer__email-signup-title">Get 10% off your first purchase*</h2>
+                <p class="footer__email-signup-subheading">Three steps to savings:</p>
+                <div class="footer__email-signup-message"><ol>
+  <li><span>Sign up to receive Bose emails and communications below</span></li>
+  <li><span>Become a My Bose member</span></li>
+  <li><span>Receive an email with your 10% coupon</span></li>
+</ol></div>
+            </section>
+        </div>
+        <div class="row ">
+            <section class="col footer__email-signup-form px-0">
+                <form id="js-form-newsletter" action="/on/demandware.store/Sites-Bose_US-Site/en_US/Account-Newsletter" class="newsletter-form" novalidate>
+                    <div class="form-group row form-holders step1">
+                        <div class="input-holder col-xs-8 col-sm-9 col-md-10">
+                            <input 
+                                type="email" 
+                                class="form-control newsletter-email" 
+                                id="newsletterEmail" 
+                                placeholder=" "
+                                aria-errormessage="newsletter-email-error"
+                                pattern="^[\w.%+-]+@[\w.-]+\.[\w]{2,7}$"
+                                required
+                                label="Email"
+                            >
+                            <label class="form-control-label" for="newsletterEmail">Email address</label>
+                            <div class="invalid-feedback" id="newsletter-email-error" role="alert" aria-live="polite">
+                                The email address is invalid
+                            </div>
+                        </div>
+                        <div class="button-holder col-xs-4 col-sm-3 col-md-2">
+                            <button type="submit" class="btn btn-secondary btn-with-icon newsletter-btn js-btn-newsletter" name="send-email" value="send-email" aria-label="Sign up for Bose emails">
+                                <span class="btn__text">SIGN UP</span>
+                                <i class="bif bif-long-arrow-right text" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="footnote-holder col-md-12 column--px">
+                            <span><p><strong>*The coupon code will be sent via email and can be used for a maximum discount of $100. Other exclusions may apply. Please see email for full terms and conditions of this offer. </strong></p></span>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+</div>
+                <div class="newsletter-success-msg js-footer-emailsignup-confirmation"><div class="email-signup-card email-signup-confirmation js-email-signup-confirmation d-none">
+    <div class="container">
+        <div class="row footer__email-signup">
+            <div class="col px-0">
+                <div class="footer__email-signup-title">Thanks for signing up!</div>
+                <div class="footer__email-signup-subheading signup-success">You are signed up for Bose marketing communications! </div>
+                <div class="footer__email-signup-message signup-success"><p>Next step: become a My Bose member to enjoy all our perks, starting with your 10% gift! </p></div>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col footer__email-signup-form px-0">
+                <div class="form-group row form-holders step2 justify-content-center">
+                    <div class="button-holder col-md-4 px-0">
+                        <a href="/login?oauthProvider=Azure-AD-B2C" target="_blank">
+                            <button type="button" class="btn btn-secondary btn-with-icon newsletter-btn" name="join-email" value="join-email">
+                                <span class="btn__text">Join My Bose</span>
+                                <i class="bif bif-long-arrow-right text" aria-hidden="true"></i>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="footnote-holder col-md-12 column--px">
+                        <span><span></span>If you don’t receive the email with your coupon code within 24 hours after creating a My Bose account, please contact <a href="https://support.bose.com/s/get-help-landing-page" target="_self">support</a>. Enjoy shopping with your exclusive discount on Bose.com!<p></p></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+                <div class="newsletter-error-msg">We are experiencing issues at this moment. Please try again later.</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 footer-navigation-container-wrapper">
+
+            <div class="footer-breadcrumbs-container"></div>
+            <div class="footer-navigation-container">
+                <!-- CMS: Footer Navigation -->
+                
+    <div class="accordion container--mb-lg footer-navigation-accordion" id="footerNavAccordion">
+        
+            <div class="footer-navigation">
+                <h5 class="footer-navigation__title">
+                    <button class="btn footer-navigation__trigger-mobile js-footer-navigation" id="footerAccordionHeading-0" aria-label="Customer Care" aria-expanded="false" aria-controls="footerAccordionCollapse-0">
+                        Customer Care
+                        <i class="bif bif-plus" aria-hidden="true"></i>
+                        <i class="bif bif-minus" aria-hidden="true"></i>
+                    </button>
+                    <span class="footer-navigation__trigger-desktop">Customer Care</span>
+                </h5>
+                <ul id="footerAccordionCollapse-0" class="footer-navigation__body panel" aria-labelledby="footerAccordionHeading-0">
+                    
+                        <li>
+                            <a href="https://support.bose.com/s/guided-trouble-shooter-splash-page?language=en_US" target="_self" class="footer-navigation__item">Troubleshooting</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://support.bose.com/s/guided-trouble-shooter-splash-page?language=en_US" target="_self" class="footer-navigation__item">Repair &amp; Replacement</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/trackorder" target="_self" class="footer-navigation__item">Order Tracking</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/my-account" target="_self" class="footer-navigation__item">Sign In or Join My Bose</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/my-bose-account-perks" target="_self" class="footer-navigation__item">My Bose Perks</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/product-registration" target="_self" class="footer-navigation__item">Register Your Product</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/bosecare" target="_self" class="footer-navigation__item">BoseCare</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://support.bose.com/s/get-help-landing-page?language=en_US" target="_self" class="footer-navigation__item">Contact Us</a>
+                        </li>
+                    
+                </ul>
+            </div>
+        
+            <div class="footer-navigation">
+                <h5 class="footer-navigation__title">
+                    <button class="btn footer-navigation__trigger-mobile js-footer-navigation" id="footerAccordionHeading-1" aria-label="Our company" aria-expanded="false" aria-controls="footerAccordionCollapse-1">
+                        Our company
+                        <i class="bif bif-plus" aria-hidden="true"></i>
+                        <i class="bif bif-minus" aria-hidden="true"></i>
+                    </button>
+                    <span class="footer-navigation__trigger-desktop">Our company</span>
+                </h5>
+                <ul id="footerAccordionCollapse-1" class="footer-navigation__body panel" aria-labelledby="footerAccordionHeading-1">
+                    
+                        <li>
+                            <a href="/about" target="_self" class="footer-navigation__item">About Us</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/stores?showMap=true" target="_self" class="footer-navigation__item">Find a Store</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/esg" target="_self" class="footer-navigation__item">ESG</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/about/careers" target="_self" class="footer-navigation__item">Careers</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/pressroom" target="_self" class="footer-navigation__item">Press Room</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/stories" target="_self" class="footer-navigation__item">Stories</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/partnerships-and-licensing" target="_self" class="footer-navigation__item">Partnerships &amp; Licensing</a>
+                        </li>
+                    
+                </ul>
+            </div>
+        
+            <div class="footer-navigation">
+                <h5 class="footer-navigation__title">
+                    <button class="btn footer-navigation__trigger-mobile js-footer-navigation" id="footerAccordionHeading-2" aria-label="Offers" aria-expanded="false" aria-controls="footerAccordionCollapse-2">
+                        Offers
+                        <i class="bif bif-plus" aria-hidden="true"></i>
+                        <i class="bif bif-minus" aria-hidden="true"></i>
+                    </button>
+                    <span class="footer-navigation__trigger-desktop">Offers</span>
+                </h5>
+                <ul id="footerAccordionCollapse-2" class="footer-navigation__body panel" aria-labelledby="footerAccordionHeading-2">
+                    
+                        <li>
+                            <a href="/gift-cards" target="_self" class="footer-navigation__item">Gift Cards</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/idme-group-discounts-program" target="_self" class="footer-navigation__item">ID.me Group Program</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/corporate-gifting" target="_self" class="footer-navigation__item">Corporate Gifting</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/partner-employee-discount-program" target="_self" class="footer-navigation__item">Partner &amp; Employee Program </a>
+                        </li>
+                    
+                        <li>
+                            <a href="/c/refurbished" target="_self" class="footer-navigation__item">Certified Refurbished</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/trade-up" target="_self" class="footer-navigation__item">Trade Up</a>
+                        </li>
+                    
+                </ul>
+            </div>
+        
+            <div class="footer-navigation">
+                <h5 class="footer-navigation__title">
+                    <button class="btn footer-navigation__trigger-mobile js-footer-navigation" id="footerAccordionHeading-3" aria-label="Additional Links" aria-expanded="false" aria-controls="footerAccordionCollapse-3">
+                        Additional Links
+                        <i class="bif bif-plus" aria-hidden="true"></i>
+                        <i class="bif bif-minus" aria-hidden="true"></i>
+                    </button>
+                    <span class="footer-navigation__trigger-desktop">Additional Links</span>
+                </h5>
+                <ul id="footerAccordionCollapse-3" class="footer-navigation__body panel" aria-labelledby="footerAccordionHeading-3">
+                    
+                        <li>
+                            <a href="https://automotive.bose.com/?utm_source=bose.com&amp;utm_medium=referral&amp;utm_content=footer-link" target="_blank" class="footer-navigation__item">Automotive</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://reseller.bose.com/en_us/landingpage.html" target="_blank" class="footer-navigation__item">Reseller Portal</a>
+                        </li>
+                    
+                </ul>
+            </div>
+        
+    </div>
+
+
+
+                <div class="d-md-none footer-country-selector-wrap">
+                    
+    <div class="footer-country-selector" tabindex="0">
+        <a href="https://global.bose.com/"
+            title="United States"
+            aria-label="United States">
+            United States
+        </a>
+        | English
+    </div>
+
+
+                </div>
+
+                <!-- CMS: Bose Apps -->
+                
+
+
+    <div class="footer-apps">
+        
+            
+                <a href="/apps/bose-app" target="_blank" class="footer-apps__link">
+                    
+                        <i class="bif bif-bose-music-app" aria-hidden="true">
+                            
+                                <span class="path1"></span><span class="path2"></span>
+                            
+                        </i>
+                    
+                    
+                        <span class="footer-apps__link-title">Bose app</span>
+                    
+                </a>
+            
+        
+            
+                <a href="/apps/bose-connect" target="_blank" class="footer-apps__link">
+                    
+                        <i class="bif bif-bose-connect-app" aria-hidden="true">
+                            
+                        </i>
+                    
+                    
+                        <span class="footer-apps__link-title">Bose Connect App</span>
+                    
+                </a>
+            
+        
+            
+                <a href="/apps/bose-QC-earbuds-app" target="_blank" class="footer-apps__link">
+                    
+                        <i class="bif bif-bose-qce-app" aria-hidden="true">
+                            
+                                <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span>
+                            
+                        </i>
+                    
+                    
+                        <span class="footer-apps__link-title">Bose QCE App</span>
+                    
+                </a>
+            
+        
+    </div>
+
+
+            </div>
+
+            <!-- CMS: Social Icons -->
+            
+                <div class="footer-social-icons row">
+                    <div class="col col-md-9">
+                        
+    <div class="footer-socials">
+        
+            <a href="https://www.instagram.com/bose/" target="_blank" class="footer-socials__link" aria-label="Bose Instagram">
+                <i class="bif bif-instagram" aria-hidden="true"></i>
+            </a>
+        
+            <a href="https://x.com/bose" target="_blank" class="footer-socials__link" aria-label="Bose X">
+                <i class="bif bif-x" aria-hidden="true"></i>
+            </a>
+        
+            <a href="https://www.facebook.com/Bose/" target="_blank" class="footer-socials__link" aria-label="Bose Facebook">
+                <i class="bif bif-facebook" aria-hidden="true"></i>
+            </a>
+        
+            <a href="https://www.youtube.com/user/bose" target="_blank" class="footer-socials__link" aria-label="Bose Youtube">
+                <i class="bif bif-youtube" aria-hidden="true"></i>
+            </a>
+        
+            <a href="https://tiktok.com/@bose" target="_blank" class="footer-socials__link" aria-label="TikTok">
+                <i class="bif bif-tiktok" aria-hidden="true"></i>
+            </a>
+        
+    </div>
+
+
+                    </div>
+                    <div class="col col-md-3 footer-country-selector-wrap">
+                        
+    <div class="footer-country-selector" tabindex="0">
+        <a href="https://global.bose.com/"
+            title="United States"
+            aria-label="United States">
+            United States
+        </a>
+        | English
+    </div>
+
+
+                    </div>
+                </div>
+            
+
+            <div class="row">
+                <!-- CMS: Legal Information -->
+                
+                    <div class="col-md-12 text-md-left text-center footer-copyright-wrapper">
+                        <div class="footer-copyright">
+    
+        <span class="footer-copyright__company-name">&copy; Bose Corporation 2025</span>
+    
+    
+        <a target="_self" href="/sitemap" class="footer-copyright__links">
+            Sitemap
+        </a>
+    
+        <a target="_self" href="/legal" class="footer-copyright__links">
+            Legal
+        </a>
+    
+        <a target="_self" href="/legal/privacy-policy" class="footer-copyright__links">
+            Privacy Policy
+        </a>
+    
+        <a target="_self" href="/legal/accessibility" class="footer-copyright__links">
+            Accessibility
+        </a>
+    
+        <a target="_parent" href="https://assets.bosecreative.com/m/627de2500b7bb6fa/original/California_Privacy_Notice_of_Collection_Oct_2024_v3.pdf" class="footer-copyright__links">
+            CA Notice of Collection
+        </a>
+    
+        <a target="_self" href="#onetrust_pop-up" class="footer-copyright__links">
+            Your privacy choices
+        </a>
+    
+        <a target="_self" href="/legal/cookies-notice" class="footer-copyright__links">
+            Cookies Notice
+        </a>
+    
+        <a target="_self" href="/legal/terms-of-sale" class="footer-copyright__links">
+            Terms of Sale
+        </a>
+    
+        <a target="_self" href="/legal/terms-of-use" class="footer-copyright__links">
+            Terms of Use
+        </a>
+    
+        <a target="_blank" href="https://assets.bosecreative.com/m/641ecf570ef355d5/original/Bose_Modern_Slavery_Statement-Fiscal_Year_2025.pdf" class="footer-copyright__links">
+            CA Supply Chains Act
+        </a>
+    
+</div>
+
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="float-toast-message" data-toasterrormessage="Uh-oh. Something went wrong. Please refresh and try again."></div>
+</div>
+
+
+ 
+	
+    
+     
+
+
+
+
+
+
+
+<script src="https://edqprofservus.blob.core.windows.net/assets/edq-v1.1.1.js" integrity="sha512-L23hwvucqXSQX9r/bCvFq92VmCXUJqPfpvjwlP0AxFUtLR304o1U1RcGrgfiv0S83bt7s+T+0m82JFEIyPAH3g==" crossorigin="anonymous"></script>
+
+
+
+<link rel="stylesheet" type="text/css" href="https://edqprofservus.blob.core.windows.net/assets/1.6.3/global-intuitive-unicorn.css" />
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" type="text/css" href="https://edqprofservus.blob.core.windows.net/assets/1.6.3/pro-web.css" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/edqUtils.js"></script>
+<script type="text/javascript">
+vDefaultCountry = 'USA';
+edqEmailEnable = true;
+edqPhoneEnable = false;
+edqValidatePhone = false;
+edqValidateEmail = true;
+edqAuthorizationToken = '82a3cb7d-e38f-467d-b80c-758f19269e5c';
+edqDataSetCode = 'null';
+edqDataSetUsage = false;
+edqProWebCallbackValidation = true;
+edqCustomCallbackName = 'null';
+pageCheckoutStage = 'null';
+edqGlobalIntuitiveUseCurrentLocation = true;
+window.EdqDemandware.sfra.sfraUtilsConfiguration();
+window.EdqDemandware.sfra.setUtilsConfig({
+"defaultCountry":vDefaultCountry,
+"emailEnable":edqEmailEnable,
+"phoneEnable":edqPhoneEnable,
+"validatePhone":edqValidatePhone,
+"validateEmail":edqValidateEmail,
+"authorizationToken":edqAuthorizationToken,
+"dataSetCode":edqDataSetCode,
+"dataSetUsage":edqDataSetUsage,
+"proWebCallbackValidation":edqProWebCallbackValidation,
+"customCallbackName":edqCustomCallbackName
+});
+</script>
+
+
+
+</footer>
+
+
+</div>
+<div class="error-messaging"></div>
+<div class="modal-background"></div>
+<div class="modal-content-holder">
+</div>
+
+
+
+<!--[if lt IE 10]>
+<script>//common/scripts.isml</script>
+<script defer type="text/javascript" src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/main.js"></script>
+
+    <script defer type="text/javascript" src="https://www.bose.com/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/pdpSummary.js"
+        
+        >
+    </script>
+
+
+
+
+
+<script defer="defer" src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/nonCriticalCheckoutScripts.js"></script>
+
+<![endif]-->
+
+
+
+<script>
+(function () {
+document.addEventListener('ftr:tokenReady', function(evt) {
+var token = evt.detail;
+console.log(token);
+if (token != null) {
+var postInfo = {
+ftrToken : token
+};
+jQuery.ajax({
+type: "POST",
+url: "/on/demandware.store/Sites-Bose_US-Site/en_US/ForterValidate-UpdateForterInfo",
+data: postInfo,
+success: function(data) {}
+});
+}
+});
+})()
+</script>
+<script type="text/javascript" id="b4fbcb118aa4">
+(function () {
+var merchantConfig = {
+csp: false
+};
+var siteId = "b4fbcb118aa4";
+function t(t,n){for(var e=t.split(""),r=0;r<e.length;++r)e[r]=String.fromCharCode(e[r].charCodeAt(0)+n);return e.join("")}function n(n){return t(n,-S).replace(/%SN%/g,siteId)}function e(){var t="no"+"op"+"fn",n="g"+"a",e="n"+"ame";return window[n]&&window[n][e]===t}function r(){return!(!navigator.brave||"function"!=typeof navigator.brave.isBrave)}function o(){return document.currentScript&&document.currentScript.src}function i(t){try{B.ex=t,e()&&-1===B.ex.indexOf(R.uB)&&(B.ex+=R.uB),r()&&-1===B.ex.indexOf(R.uBr)&&(B.ex+=R.uBr),o()&&-1===B.ex.indexOf(R.nIL)&&(B.ex+=R.nIL),window.ftr__snp_cwc||(B.ex+=R.s),F(B)}catch(t){}}function c(t,n){function e(o){try{o.blockedURI===t&&(n(),document.removeEventListener(r,e))}catch(t){document.removeEventListener(r,e)}}var r="securitypolicyviolation";document.addEventListener(r,e),setTimeout(function(){document.removeEventListener(r,e)},2*60*1e3)}function a(t,n,e,r){var o=!1;t="https://"+t,c(t,function(){r(!0),o=!0});var i=document.createElement("script");i.onerror=function(){if(!o)try{r(!1),o=!0}catch(t){}},i.onload=e,i.type="text/javascript",i.id="ftr__script",i.async=!0,i.src=t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(i,a)}function u(t,n,e,r){var o=!1,i=new XMLHttpRequest;if(c("https:"+t,function(){e(new Error("CSP Violation"),!0),o=!0}),"withCredentials"in i)i.open("GET",t,!0);else{if("undefined"==typeof XDomainRequest)return;i=new XDomainRequest,i.open("GET",t)}Object.keys(r).forEach(function(t){i.setRequestHeader(t,r[t])}),i.onload=function(){"function"==typeof n&&n(i)},i.onerror=function(t){if("function"==typeof e&&!o)try{e(t,!1),o=!0}catch(t){}},i.onprogress=function(){},i.ontimeout=function(){"function"==typeof e&&e("tim"+"eo"+"ut",!1)},setTimeout(function(){i.send()},0)}function d(t,siteId,n){function e(t){var n=t.toString(16);return n.length%2?"0"+n:n}function r(t){if(t<=0)return"";for(var n="0123456789abcdef",e="",r=0;r<t;r++)e+=n[Math.floor(Math.random()*n.length)];return e}function o(t){for(var n="",r=0;r<t.length;r++)n+=e(t.charCodeAt(r));return n}function i(t){for(var n=t.split(""),e=0;e<n.length;++e)n[e]=String.fromCharCode(255^n[e].charCodeAt(0));return n.join("")}n=n?"1":"0";var c=[];return c.push(t),c.push(siteId),c.push(n),function(t){var n=40,e="";return t.length<n/2&&(e=","+r(n/2-t.length-1)),o(i(t+e))}(c.join(","))}function f(){function t(){C&&(Q(R.dUAL),setTimeout(s,E,R.dUAL))}function n(t,n){i(n?R.uAS+R.uF+R.cP:R.uAS+R.uF)}window.ftr__fdad(t,n)}function s(t){try{var n=t===R.uDF?q:C;if(!n)return;a(n,void 0,function(){try{X(),i(t+R.uS)}catch(t){}},function(n){try{X(),B.td=1*new Date-B.ts,i(n?t+R.uF+R.cP:t+R.uF),t===R.uDF&&f()}catch(t){i(R.eUoe)}})}catch(n){i(t+R.eTlu)}}var h="22g6otrwjeq6qsu1forxgiurqw1qhw2vwdwxv",v="fort",w="erTo",l="ken";window.ftr__config={m:merchantConfig,s:"15",si:siteId};var m=!1,p=v+w+l,g=10,_={write:function(t,n,e,r){void 0===r&&(r=!0);var o,i;if(e?(o=new Date,o.setTime(o.getTime()+24*e*60*60*1e3),i="; expires="+o.toGMTString()):i="",!r)return void(document.cookie=escape(t)+"="+escape(n)+i+"; path=/");for(var c=1,a=document.domain.split("."),u=g,d=!0;d&&a.length>=c&&u>0;){var f=a.slice(-c).join(".");document.cookie=escape(t)+"="+escape(n)+i+"; path=/; domain="+f;var s=_.read(t);null!=s&&s==n||(f="."+f,document.cookie=escape(t)+"="+escape(n)+i+"; path=/; domain="+f),d=-1===document.cookie.indexOf(t+"="+n),c++,u--}},read:function(t){var n=null;try{for(var e=escape(t)+"=",r=document.cookie.split(";"),o=32,i=0;i<r.length;i++){for(var c=r[i];c.charCodeAt(0)===o;)c=c.substring(1,c.length);0===c.indexOf(e)&&(n=unescape(c.substring(e.length,c.length)))}}finally{return n}}},y=window.ftr__config.s;y+="ck";var T=function(t){if(document.head){var n=function(){var n=document.createElement("link");return n.setAttribute("rel","pre"+"con"+"nect"),n.setAttribute("cros"+"sori"+"gin","anonymous"),n.onload=function(){document.head.removeChild(n)},n.onerror=function(t){document.head.removeChild(n)},n.setAttribute("href",t),document.head.appendChild(n),n}();setTimeout(function(){document.head.removeChild(n)},3e3)}},S=3,x=n(h||"22g6otrwjeq6qsu1forxgiurqw1qhw2vwdwxv"),A=t("[0Uhtxhvw0LG",-S),L=t("[0Fruuhodwlrq0LG",-S),k=t("Li0Qrqh0Pdwfk",-S),C,U="fgq71iruwhu1frp",q=n("(VQ(1"+U+"2vq2(VQ(2vfulsw1mv"),D=n("(VQ(1"+U+"2vqV2(VQ(2vfulsw1mv"),E=10;window.ftr__startScriptLoad=1*new Date;var b=function(t){var n="ft"+"r:tok"+"enR"+"eady";window.ftr__tt&&clearTimeout(window.ftr__tt),window.ftr__tt=setTimeout(function(){try{delete window.ftr__tt,t+="_tt";var e=document.createEvent("Event");e.initEvent(n,!1,!1),e.detail=t,document.dispatchEvent(e)}catch(t){}},1e3)},F=function(t){var n=function(t){return t||""},e=n(t.id)+"_"+n(t.ts)+"_"+n(t.td)+"_"+n(t.ex)+"_"+n(y);_.write(p,e,400,!0),b(e),window.ftr__gt=e},I=function(){var t=_.read(p)||"",n=t.split("_"),e=function(t){return n[t]||void 0};return{id:e(0),ts:e(1),td:e(2),ex:e(3),vr:e(4)}},V=function(){for(var t={},n="fgu",e=[],r=0;r<256;r++)e[r]=(r<16?"0":"")+r.toString(16);var o=function(t,n,r,o,i){var c=i?"-":"";return e[255&t]+e[t>>8&255]+e[t>>16&255]+e[t>>24&255]+c+e[255&n]+e[n>>8&255]+c+e[n>>16&15|64]+e[n>>24&255]+c+e[63&r|128]+e[r>>8&255]+c+e[r>>16&255]+e[r>>24&255]+e[255&o]+e[o>>8&255]+e[o>>16&255]+e[o>>24&255]},i=function(){if(window.Uint32Array&&window.crypto&&window.crypto.getRandomValues){var t=new window.Uint32Array(4);return window.crypto.getRandomValues(t),{d0:t[0],d1:t[1],d2:t[2],d3:t[3]}}return{d0:4294967296*Math.random()>>>0,d1:4294967296*Math.random()>>>0,d2:4294967296*Math.random()>>>0,d3:4294967296*Math.random()>>>0}},c=function(){var t="",n=function(t,n){for(var e="",r=t;r>0;--r)e+=n.charAt(1e3*Math.random()%n.length);return e};return t+=n(2,"0123456789"),t+=n(1,"123456789"),t+=n(8,"0123456789")};return t.safeGenerateNoDash=function(){try{var t=i();return o(t.d0,t.d1,t.d2,t.d3,!1)}catch(t){try{return n+c()}catch(t){}}},t.isValidNumericalToken=function(t){return t&&t.toString().length<=11&&t.length>=9&&parseInt(t,10).toString().length<=11&&parseInt(t,10).toString().length>=9},t.isValidUUIDToken=function(t){return t&&32===t.toString().length&&/^[a-z0-9]+$/.test(t)},t.isValidFGUToken=function(t){return 0==t.indexOf(n)&&t.length>=12},t}(),R={uDF:"UDF",dUAL:"dUAL",uAS:"UAS",mLd:"1",eTlu:"2",eUoe:"3",uS:"4",uF:"9",tmos:["T5","T10","T15","T30","T60"],tmosSecs:[5,10,15,30,60],bIR:"43",uB:"u",uBr:"b",cP:"c",nIL:"i",s:"s"};try{var B=I();try{B.id&&(V.isValidNumericalToken(B.id)||V.isValidUUIDToken(B.id)||V.isValidFGUToken(B.id))?window.ftr__ncd=!1:(B.id=V.safeGenerateNoDash(),window.ftr__ncd=!0),B.ts=window.ftr__startScriptLoad,F(B),window.ftr__snp_cwc=!!_.read(p),window.ftr__snp_cwc||(q=D);for(var G="for"+"ter"+".co"+"m",M="ht"+"tps://c"+"dn9."+G,O="ht"+"tps://"+B.id+"-"+siteId+".cd"+"n."+G,j="http"+"s://cd"+"n3."+G,N=[M,O,j],H=0;H<N.length;H++)T(N[H]);var P=new Array(R.tmosSecs.length),Q=function(t){for(var n=0;n<R.tmosSecs.length;n++)P[n]=setTimeout(i,1e3*R.tmosSecs[n],t+R.tmos[n])},X=function(){for(var t=0;t<R.tmosSecs.length;t++)clearTimeout(P[t])};window.ftr__fdad=function(n,e){if(!m){m=!0;var r={};r[k]=d(window.ftr__config.s,siteId,window.ftr__config.m.csp),u(x,function(e){try{var r=e.getAllResponseHeaders().toLowerCase();if(r.indexOf(L.toLowerCase())>=0){var o=e.getResponseHeader(L);window.ftr__altd2=t(atob(o),-S-1)}if(r.indexOf(A.toLowerCase())<0)return;var i=e.getResponseHeader(A),c=t(atob(i),-S-1);if(c){var a=c.split(":");if(a&&2===a.length){for(var u=a[0],d=a[1],f="",s=0,h=0;s<20;++s)f+=s%3>0&&h<12?siteId.charAt(h++):B.id.charAt(s);var v=d.split(",");if(v.length>1){var w=v[0],l=v[1];C=u+"/"+w+"."+f+"."+l}}}n()}catch(t){}},function(t,n){e&&e(t,n)},r)}},Q(R.uDF),setTimeout(s,E,R.uDF)}catch(t){i(R.mLd)}}catch(t){}})();
+</script>
+
+
+
+
+
+
+
+
+<span class="api-true  tracking-consent"
+    data-caOnline="false"
+    data-url="/on/demandware.store/Sites-Bose_US-Site/en_US/ConsentTracking-GetContent?cid=tracking_hint"
+    data-reject="/on/demandware.store/Sites-Bose_US-Site/en_US/ConsentTracking-SetSession?consent=false"
+    data-accept="/on/demandware.store/Sites-Bose_US-Site/en_US/ConsentTracking-SetSession?consent=true"
+    data-acceptText="Yes"
+    data-rejectText="No"
+    data-heading="Tracking Consent"
+    ></span>
+
+
+<!--[if gt IE 9]><!-->
+<script>//common/scripts.isml</script>
+<script defer type="text/javascript" src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/main.js"></script>
+
+    <script defer type="text/javascript" src="https://www.bose.com/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/pdpSummary.js"
+        
+        >
+    </script>
+
+
+
+
+
+<script defer="defer" src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/js/nonCriticalCheckoutScripts.js"></script>
+
+<!--<![endif]-->
+<!-- Demandware Analytics code 1.0 (body_end-analytics-tracking-asynch.js) -->
+<script type="text/javascript">//<!--
+/* <![CDATA[ */
+function trackPage() {
+    try{
+        var trackingUrl = "https://www.bose.com/on/demandware.store/Sites-Bose_US-Site/en_US/__Analytics-Start";
+        var dwAnalytics = dw.__dwAnalytics.getTracker(trackingUrl);
+        if (typeof dw.ac == "undefined") {
+            dwAnalytics.trackPageView();
+        } else {
+            dw.ac.setDWAnalytics(dwAnalytics);
+        }
+    }catch(err) {};
+}
+/* ]]> */
+// -->
+</script>
+<script type="text/javascript" src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/internal/jscript/dwanalytics-22.2.js" async="async" onload="trackPage()"></script>
+<!-- Demandware Active Data (body_end-active_data.js) -->
+<script src="/on/demandware.static/Sites-Bose_US-Site/-/en_US/v1749857354513/internal/jscript/dwac-21.7.js" type="text/javascript" async="async"></script><!-- CQuotient Activity Tracking (body_end-cquotient.js) -->
+<script src="https://cdn.cquotient.com/js/v2/gretel.min.js" type="text/javascript" async="async"></script>
+</body>
+</html>

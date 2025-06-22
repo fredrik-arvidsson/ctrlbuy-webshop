@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CtrlBuy - E-handelsplattform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .navbar {
+            background: #4CAF50;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            margin: 2rem auto;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section h2 {
+            color: #4CAF50;
+            margin-bottom: 1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .admin-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .admin-btn {
+            background: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-info {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .login-container,
+            .main-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <div class="logo">
+        <span style="background: linear-gradient(45deg, #4CAF50, #45a049); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Ctrl</span>
+        <span>+BUY</span>
+    </div>
+    <div class="tagline">SOLUTIONS</div>
+</header>
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="nav-link" onclick="showHome()">Hem</a>
+        <a href="#" class="nav-link" onclick="showProducts()">Produkter</a>
+        <a href="#" class="nav-link">Om oss</a>
+        <a href="#" class="nav-link">Kontakt</a>
+        <a href="#" class="nav-link">Support</a>
+        <a href="#" class="nav-link">🛒 Varukorg</a>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Login Section -->
+    <div id="loginSection" class="login-container">
+        <h2>Logga in</h2>
+
+        <div id="loginError" class="alert alert-error hidden">
+            Felaktigt användarnamn eller lösenord.
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Användarnamn eller E-post:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Lösenord:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn">Logga in</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="#" onclick="showRegister()" style="color: #007bff; text-decoration: none;">Registrera nytt konto</a>
+            <br><br>
+            <a href="#" style="color: #6c757d; text-decoration: none;">Glömt lösenord?</a>
+        </div>
+    </div>
+
+    <!-- Register Section -->
+    <div id="registerSection" class="login-container hidden">
+        <h2>Registrera nytt konto</h2>
+
+        <div id="registerError" class="alert alert-error hidden"></div>
+        <div id="registerSuccess" class="alert alert-success hidden"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="regFirstName">Förnamn:</label>
+                <input type="text" id="regFirstName" name="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regLastName">Efternamn:</label>
+                <input type="text" id="regLastName" name="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regUsername">Användarnamn:</label>
+                <input type="text" id="regUsername" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">E-post:</label>
+                <input type="email" id="regEmail" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">Lösenord:</label>
+                <input type="password" id="regPassword" name="password" required>
+            </div>
+
+            <button type="submit" class="btn">Registrera</button>
+            <button type="button" class="btn btn-secondary" onclick="showLogin()">Tillbaka till inloggning</button>
+        </form>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content hidden">
+        <!-- User Info -->
+        <div id="userInfo" class="user-info"></div>
+
+        <!-- Home Section -->
+        <div id="homeSection">
+            <div class="welcome-section">
+                <h1>Välkommen till CtrlBuy</h1>
+                <p>Din kompletta e-handelsplattform för teknikprodukter</p>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobiler & Surfplattor</h3>
+                    <p>Senaste modellerna från Apple, Samsung och andra ledande märken</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>Datorer & Laptops</h3>
+                    <p>Kraftfulla datorer för arbete, gaming och kreativt skapande</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎧</div>
+                    <h3>Tillbehör</h3>
+                    <p>Högkvalitativa tillbehör som kompletterar dina enheter</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 3rem 0;">
+                <button class="btn" onclick="showProducts()" style="font-size: 1.2rem; padding: 1.5rem 3rem;">
+                    🛍️ Börja handla
+                </button>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="productsSection" class="hidden">
+            <h2>Våra Produkter</h2>
+            <div id="productGrid" class="product-grid"></div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <h3>🔧 Administratörspanel</h3>
+            <p>Superadmin-behörigheter aktiverade</p>
+
+            <div class="admin-actions">
+                <div class="admin-btn" onclick="alert('Användarhantering - Implementeras')">
+                    👥 Hantera användare
+                </div>
+                <div class="admin-btn" onclick="alert('Produkthantering - Implementeras')">
+                    📦 Hantera produkter
+                </div>
+                <div class="admin-btn" onclick="alert('Beställningar - Implementeras')">
+                    📋 Visa beställningar
+                </div>
+                <div class="admin-btn" onclick="alert('Systemstatistik - Implementeras')">
+                    📊 Systemstatistik
+                </div>
+                <div class="admin-btn" onclick="alert('Inställningar - Implementeras')">
+                    ⚙️ Systeminställningar
+                </div>
+                <div class="admin-btn" onclick="alert('Databas - Implementeras')">
+                    🗄️ Databashantering
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mock database - CLEAN START
+    let users = [
+        {
+            id: 1,
+            username: 'superadmin',
+            email: 'superadmin@ctrlbuy.se',
+            password: 'ctrl2025',
+            firstName: 'Super',
+            lastName: 'Admin',
+            role: 'superadmin',
+            permissions: ['all', 'users', 'products', 'orders', 'settings', 'database'],
+            created: new Date().toISOString()
+        }
+    ];
+
+    let products = [
+        {
+            id: 1,
+            name: 'iPhone 15 Pro',
+            price: 12999,
+            description: 'Senaste iPhone med A17 Pro chip',
+            image: 'https://via.placeholder.com/300x300?text=iPhone+15+Pro',
+            category: 'Mobiler',
+            stock: 50
+        },
+        {
+            id: 2,
+            name: 'Samsung Galaxy S24',
+            price: 10999,
+            description: 'Flaggskepps Android-telefon',
+            image: 'https://via.placeholder.com/300x300?text=Samsung+S24',
+            category: 'Mobiler',
+            stock: 30
+        },
+        {
+            id: 3,
+            name: 'MacBook Air M3',
+            price: 15999,
+            description: 'Kraftfull laptop för alla behov',
+            image: 'https://via.placeholder.com/300x300?text=MacBook+Air',
+            category: 'Datorer',
+            stock: 20
+        }
+    ];
+
+    let currentUser = null;
+
+    // Login functionality
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Find user
+        const user = users.find(u =>
+            (u.username === username || u.email === username) && u.password === password
+        );
+
+        if (user) {
+            currentUser = user;
+            showMainContent();
+            updateUserInfo();
+
+            // Show admin panel for superadmin
+            if (user.role === 'superadmin') {
+                document.getElementById('adminPanel').classList.remove('hidden');
+            }
+        } else {
+            document.getElementById('loginError').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loginError').classList.add('hidden');
+            }, 3000);
+        }
+    });
+
+    // Register functionality
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const newUser = {
+            id: users.length + 1,
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            role: 'user',
+            permissions: ['shop'],
+            created: new Date().toISOString()
+        };
+
+        // Check if username or email already exists
+        const existingUser = users.find(u =>
+            u.username === newUser.username || u.email === newUser.email
+        );
+
+        if (existingUser) {
+            showRegisterError('Användarnamn eller e-post finns redan.');
+            return;
+        }
+
+        users.push(newUser);
+        showRegisterSuccess('Konto skapat! Du kan nu logga in.');
+
+        setTimeout(() => {
+            showLogin();
+        }, 2000);
+    });
+
+    function showRegisterError(message) {
+        const errorDiv = document.getElementById('registerError');
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+
+        setTimeout(() => {
+            errorDiv.classList.add('hidden');
+        }, 5000);
+    }
+
+    function showRegisterSuccess(message) {
+        const successDiv = document.getElementById('registerSuccess');
+        successDiv.textContent = message;
+        successDiv.classList.remove('hidden');
+
+        setTimeout(() => {
+            successDiv.classList.add('hidden');
+        }, 5000);
+    }
+
+    function showLogin() {
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('registerSection').classList.add('hidden');
+        document.getElementById('mainContent').classList.add('hidden');
+    }
+
+    function showRegister() {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('registerSection').classList.remove('hidden');
+        document.getElementById('mainContent').classList.add('hidden');
+    }
+
+    function showMainContent() {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('registerSection').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        showHome();
+    }
+
+    function showHome() {
+        document.getElementById('homeSection').classList.remove('hidden');
+        document.getElementById('productsSection').classList.add('hidden');
+    }
+
+    function showProducts() {
+        document.getElementById('homeSection').classList.add('hidden');
+        document.getElementById('productsSection').classList.remove('hidden');
+        loadProducts();
+    }
+
+    function updateUserInfo() {
+        if (currentUser) {
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `
+                    <strong>Inloggad som:</strong> ${currentUser.firstName} ${currentUser.lastName}
+                    <span style="color: #4CAF50; font-weight: bold;">(${currentUser.role})</span>
+                    <button class="logout-btn" onclick="logout()">Logga ut</button>
+                `;
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('adminPanel').classList.add('hidden');
+        showLogin();
+
+        // Clear forms
+        document.getElementById('loginForm').reset();
+        document.getElementById('registerForm').reset();
+    }
+
+    function loadProducts() {
+        const productGrid = document.getElementById('productGrid');
+        productGrid.innerHTML = '';
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">${product.price.toLocaleString('sv-SE')} kr</div>
+                    <p style="color: #666; margin-bottom: 1rem;">${product.description}</p>
+                    <button class="btn" onclick="addToCart(${product.id})">Lägg i varukorg</button>
+                `;
+            productGrid.appendChild(productCard);
+        });
+    }
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        if (product) {
+            alert(`${product.name} har lagts till i varukorgen!`);
+        }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        showLogin();
+    });
+</script>
+</body>
+</html>

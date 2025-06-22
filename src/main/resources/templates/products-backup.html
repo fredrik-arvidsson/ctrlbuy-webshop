@@ -1,0 +1,144 @@
+package com.ctrlbuy.webshop.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "products")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Product {
+
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@Column(nullable = false, length = 255)
+@NotBlank(message = "Produktnamn får inte vara tomt")
+@Size(min = 2, max = 255, message = "Produktnamn måste vara mellan 2-255 tecken")
+private String name;
+
+@Column(length = 2000) // Utökat för längre beskrivningar
+@Size(max = 2000, message = "Beskrivning får max vara 2000 tecken")
+private String description;
+
+@Column(nullable = false, precision = 10, scale = 2)
+@NotNull(message = "Pris måste anges")
+@DecimalMin(value = "0.0", inclusive = false, message = "Pris måste vara större än 0")
+@DecimalMax(value = "99999999.99", message = "Pris får max vara 99,999,999.99")
+private BigDecimal price;
+
+@Column(name = "image_url", length = 500)
+@Size(max = 500, message = "Bild-URL får max vara 500 tecken")
+private String imageUrl;
+
+@Column(name = "stock_quantity", nullable = false)
+@NotNull(message = "Lagersaldo måste anges")
+@Min(value = 0, message = "Lagersaldo kan inte vara negativt")
+@Max(value = 999999, message = "Lagersaldo får max vara 999,999")
+private Integer stockQuantity = 0;
+
+@Column(length = 100)
+@Size(max = 100, message = "Kategori får max vara 100 tecken")
+private String category;
+
+@Column(name = "view_count")
+@Min(value = 0, message = "Antal visningar kan inte vara negativt")
+private Integer viewCount = 0;
+
+@Column(name = "created_at", updatable = false) // Förhindra uppdatering av created_at
+private LocalDateTime createdAt;
+
+@Column(name = "updated_at")
+private LocalDateTime updatedAt;
+
+// Ny: Aktiv/inaktiv status
+@Column(name = "is_active")
+private Boolean isActive = true;
+
+// Ny: Rabatterad priser
+@Column(name = "sale_price", precision = 10, scale = 2)
+@DecimalMin(value = "0.0", message = "Rabatterat pris måste vara större än 0")
+private BigDecimal salePrice;
+
+// Lifecycle callbacks
+@PrePersist
+protected void onCreate() {
+LocalDateTime now = LocalDateTime.now();
+if (createdAt == null) {
+createdAt = now;
+}
+if (updatedAt == null) {
+updatedAt = now;
+}
+if (viewCount == null) {
+viewCount = 0;
+}
+if (stockQuantity == null) {
+stockQuantity = 0;
+}
+if (isActive == null) {
+isActive = true;
+}
+}
+
+@PreUpdate
+protected void onUpdate() {
+updatedAt = LocalDateTime.now();
+}
+
+// Business logic metoder
+public Integer getViewCount() {
+return viewCount != null ? viewCount : 0;
+}
+
+public void incrementViewCount() {
+this.viewCount = getViewCount() + 1;
+}
+
+public Boolean getIsActive() {
+return isActive != null ? isActive : true;
+}
+
+public boolean isInStock() {
+return stockQuantity != null && stockQuantity > 0;
+}
+
+public boolean isOnSale() {
+return salePrice != null &&
+salePrice.compareTo(BigDecimal.ZERO) > 0 &&
+salePrice.compareTo(price) < 0;
+}
+
+public BigDecimal getEffectivePrice() {
+return isOnSale() ? salePrice : price;
+}
+
+public BigDecimal getDiscountPercentage() {
+if (!isOnSale()) {
+return BigDecimal.ZERO;
+}
+BigDecimal discount = price.subtract(salePrice);
+return discount.divide(price, 2, BigDecimal.ROUND_HALF_UP)
+.multiply(new BigDecimal("100"));
+}
+
+// Convenience metoder för kategorier
+public boolean isInCategory(String categoryName) {
+return category != null && category.equalsIgnoreCase(categoryName);
+}
+
+// toString utan Lombok för bättre kontroll
+@Override
+public String toString() {
+return String.format("Product{id=%d, name='%s', price=%s, category='%s', inStock=%s}",
+id, name, getEffectivePrice(), category, isInStock());
+}
+}

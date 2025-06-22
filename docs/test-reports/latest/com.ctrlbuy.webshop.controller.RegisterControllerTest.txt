@@ -1,0 +1,49 @@
+-------------------------------------------------------------------------------
+Test set: com.ctrlbuy.webshop.controller.RegisterControllerTest
+-------------------------------------------------------------------------------
+Tests run: 15, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.573 s <<< FAILURE! -- in com.ctrlbuy.webshop.controller.RegisterControllerTest
+com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithExistingUsername_ShouldAddErrorAndReturnRegisterView -- Time elapsed: 0.041 s <<< FAILURE!
+org.mockito.exceptions.verification.NeverWantedButInvoked: 
+
+userService.registerNewUserWithToken(<any>);
+Never wanted here:
+-> at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+But invoked here:
+-> at com.ctrlbuy.webshop.controller.RegisterController.registerUser(RegisterController.java:55) with arguments: [RegisterRequest{firstName='John', lastName='Doe', username='johndoe', email='test@example.com', acceptTerms=false, passwordSet=true, confirmPasswordSet=true}]
+
+	at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+	at com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithExistingUsername_ShouldAddErrorAndReturnRegisterView(RegisterControllerTest.java:135)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithPasswordMismatch_ShouldAddErrorAndReturnRegisterView -- Time elapsed: 0.006 s <<< FAILURE!
+org.mockito.exceptions.verification.NeverWantedButInvoked: 
+
+userService.registerNewUserWithToken(<any>);
+Never wanted here:
+-> at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+But invoked here:
+-> at com.ctrlbuy.webshop.controller.RegisterController.registerUser(RegisterController.java:55) with arguments: [RegisterRequest{firstName='John', lastName='Doe', username='johndoe', email='test@example.com', acceptTerms=false, passwordSet=true, confirmPasswordSet=true}]
+
+	at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+	at com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithPasswordMismatch_ShouldAddErrorAndReturnRegisterView(RegisterControllerTest.java:117)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithExistingEmail_ShouldAddErrorAndReturnRegisterView -- Time elapsed: 0.006 s <<< FAILURE!
+org.mockito.exceptions.verification.NeverWantedButInvoked: 
+
+userService.registerNewUserWithToken(<any>);
+Never wanted here:
+-> at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+But invoked here:
+-> at com.ctrlbuy.webshop.controller.RegisterController.registerUser(RegisterController.java:55) with arguments: [RegisterRequest{firstName='John', lastName='Doe', username='johndoe', email='test@example.com', acceptTerms=false, passwordSet=true, confirmPasswordSet=true}]
+
+	at com.ctrlbuy.webshop.service.UserService.registerNewUserWithToken(UserService.java:245)
+	at com.ctrlbuy.webshop.controller.RegisterControllerTest.registerUser_WithExistingEmail_ShouldAddErrorAndReturnRegisterView(RegisterControllerTest.java:153)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

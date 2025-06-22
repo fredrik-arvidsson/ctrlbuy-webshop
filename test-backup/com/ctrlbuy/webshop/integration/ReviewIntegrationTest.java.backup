@@ -1,0 +1,407 @@
+package com.ctrlbuy.webshop.integration;
+
+import com.ctrlbuy.webshop.entity.Review;
+import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.repository.ReviewRepository;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
+import com.ctrlbuy.webshop.service.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
+@Transactional
+@DisplayName("Review Integration Tests")
+class ReviewIntegrationTest {
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private MockMvc mockMvc;
+    private User testUser;
+    private Product testProduct;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+
+        // Clean database
+        reviewRepository.deleteAll();
+
+        // Setup test user
+        testUser = new User();
+        testUser.setEmail("test@example.com");
+        testUser.setUsername("testuser");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setPassword("password123");
+        testUser.setEmailVerified(true);
+        testUser.setActive(true);
+        testUser.setCreatedAt(LocalDateTime.now());
+        testUser = userRepository.save(testUser);
+
+        // Setup test product
+        testProduct = new Product();
+        testProduct.setName("Test Product");
+        testProduct.setDescription("A test product");
+        testProduct.setPrice(99.99);
+        testProduct.setStock(10);
+        testProduct.setActive(true);
+        // Note: You'll need to save the product using your ProductService or repository
+        // testProduct = productService.save(testProduct);
+    }
+
+    @Test
+    @DisplayName("Should display product reviews page")
+    @WithMockUser(username = "testuser")
+    void shouldDisplayProductReviewsPage() throws Exception {
+        // Given - create a review first
+        Review review = new Review();
+        review.setUser(testUser);
+        review.setProduct(testProduct);
+        review.setRating(5);
+        review.setTitle("Great product!");
+        review.setReviewText("This is an excellent product. Highly recommended!");
+        review.setCreatedAt(LocalDateTime.now());
+        reviewRepository.save(review);
+
+        // When & Then
+        mockMvc.perform(get("/reviews/product/{productId}", testProduct.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reviews/product-reviews"))
+                .andExpect(model().attributeExists("product"))
+                .andExpect(model().attributeExists("reviews"))
+                .andExpect(model().attributeExists("stats"))
+                .andExpect(model().attributeExists("hasUserReviewed"))
+                .andExpect(model().attributeExists("currentPage"));
+    }
+
+    @Test
+    @DisplayName("Should redirect to products when product not found")
+    void shouldRedirectWhenProductNotFound() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/reviews/product/{productId}", 999L))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/products"));
+    }
+
+    @Test
+    @DisplayName("Should show write review form for authenticated user")
+    @WithMockUser(username = "test@example.com")
+    void shouldShowWriteReviewFormForAuthenticatedUser() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/reviews/write/{productId}", testProduct.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reviews/write-review"))
+                .andExpect(model().attributeExists("product"));
+    }
+
+    @Test
+    @DisplayName("Should redirect to login for unauthenticated user trying to write review")
+    void shouldRedirectToLoginForUnauthenticatedUser() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/reviews/write/{productId}", testProduct.getId()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login**"));
+    }
+
+    @Test
+    @DisplayName("Should submit review successfully")
+    @WithMockUser(username = "test@example.com")
+    void shouldSubmitReviewSuccessfully() throws Exception {
+        // When & Then
+        mockMvc.perform(post("/reviews/write/{productId}", testProduct.getId())
+                        .with(csrf())
+                        .param("rating", "5")
+                        .param("title", "Excellent product!")
+                        .param("reviewText", "This product exceeded my expectations."))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/product/" + testProduct.getId()));
+
+        // Verify review was saved
+        var reviews = reviewRepository.findByUserOrderByCreatedAtDesc(testUser);
+        assertThat(reviews).hasSize(1);
+        assertThat(reviews.get(0).getRating()).isEqualTo(5);
+        assertThat(reviews.get(0).getTitle()).isEqualTo("Excellent product!");
+        assertThat(reviews.get(0).getReviewText()).isEqualTo("This product exceeded my expectations.");
+    }
+
+    @Test
+    @DisplayName("Should reject invalid rating when submitting review")
+    @WithMockUser(username = "test@example.com")
+    void shouldRejectInvalidRating() throws Exception {
+        // When & Then
+        mockMvc.perform(post("/reviews/write/{productId}", testProduct.getId())
+                        .with(csrf())
+                        .param("rating", "6") // Invalid rating
+                        .param("title", "Good product")
+                        .param("reviewText", "Nice product"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/write/" + testProduct.getId()));
+
+        // Verify no review was saved
+        var reviews = reviewRepository.findByUserOrderByCreatedAtDesc(testUser);
+        assertThat(reviews).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should reject empty title when submitting review")
+    @WithMockUser(username = "test@example.com")
+    void shouldRejectEmptyTitle() throws Exception {
+        // When & Then
+        mockMvc.perform(post("/reviews/write/{productId}", testProduct.getId())
+                        .with(csrf())
+                        .param("rating", "5")
+                        .param("title", "") // Empty title
+                        .param("reviewText", "Nice product"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/write/" + testProduct.getId()));
+
+        // Verify no review was saved
+        var reviews = reviewRepository.findByUserOrderByCreatedAtDesc(testUser);
+        assertThat(reviews).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should reject too long title")
+    @WithMockUser(username = "test@example.com")
+    void shouldRejectTooLongTitle() throws Exception {
+        // When & Then
+        mockMvc.perform(post("/reviews/write/{productId}", testProduct.getId())
+                        .with(csrf())
+                        .param("rating", "5")
+                        .param("title", "A".repeat(101)) // Too long title
+                        .param("reviewText", "Nice product"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/write/" + testProduct.getId()));
+
+        // Verify no review was saved
+        var reviews = reviewRepository.findByUserOrderByCreatedAtDesc(testUser);
+        assertThat(reviews).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should show user's reviews")
+    @WithMockUser(username = "test@example.com")
+    void shouldShowUsersReviews() throws Exception {
+        // Given - create a review first
+        Review review = new Review();
+        review.setUser(testUser);
+        review.setProduct(testProduct);
+        review.setRating(4);
+        review.setTitle("Good product");
+        review.setReviewText("Pretty good product overall.");
+        review.setCreatedAt(LocalDateTime.now());
+        reviewRepository.save(review);
+
+        // When & Then
+        mockMvc.perform(get("/reviews/my-reviews"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reviews/my-reviews"))
+                .andExpect(model().attributeExists("reviews"))
+                .andExpect(model().attributeExists("user"));
+    }
+
+    @Test
+    @DisplayName("Should delete review successfully")
+    @WithMockUser(username = "test@example.com")
+    void shouldDeleteReviewSuccessfully() throws Exception {
+        // Given - create a review first
+        Review review = new Review();
+        review.setUser(testUser);
+        review.setProduct(testProduct);
+        review.setRating(3);
+        review.setTitle("Average product");
+        review.setReviewText("It's okay.");
+        review.setCreatedAt(LocalDateTime.now());
+        review = reviewRepository.save(review);
+
+        // When & Then
+        mockMvc.perform(post("/reviews/delete/{reviewId}", review.getId())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/product/" + testProduct.getId()));
+
+        // Verify review was deleted
+        assertThat(reviewRepository.findById(review.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should not allow deletion of other user's review")
+    @WithMockUser(username = "other@example.com")
+    void shouldNotAllowDeletionOfOtherUsersReview() throws Exception {
+        // Given - create another user and a review by the original user
+        User otherUser = new User();
+        otherUser.setEmail("other@example.com");
+        otherUser.setUsername("otheruser");
+        otherUser.setFirstName("Other");
+        otherUser.setLastName("User");
+        otherUser.setPassword("password123");
+        otherUser.setEmailVerified(true);
+        otherUser.setActive(true);
+        otherUser.setCreatedAt(LocalDateTime.now());
+        otherUser = userRepository.save(otherUser);
+
+        Review review = new Review();
+        review.setUser(testUser); // Review by testUser
+        review.setProduct(testProduct);
+        review.setRating(3);
+        review.setTitle("Average product");
+        review.setReviewText("It's okay.");
+        review.setCreatedAt(LocalDateTime.now());
+        review = reviewRepository.save(review);
+
+        // When & Then - otherUser tries to delete testUser's review
+        mockMvc.perform(post("/reviews/delete/{reviewId}", review.getId())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/my-reviews"));
+
+        // Verify review was NOT deleted
+        assertThat(reviewRepository.findById(review.getId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("Should prevent duplicate reviews from same user")
+    @WithMockUser(username = "test@example.com")
+    void shouldPreventDuplicateReviews() throws Exception {
+        // Given - create a review first
+        Review review = new Review();
+        review.setUser(testUser);
+        review.setProduct(testProduct);
+        review.setRating(5);
+        review.setTitle("First review");
+        review.setReviewText("This is my first review.");
+        review.setCreatedAt(LocalDateTime.now());
+        reviewRepository.save(review);
+
+        // When & Then - try to submit another review for the same product
+        mockMvc.perform(post("/reviews/write/{productId}", testProduct.getId())
+                        .with(csrf())
+                        .param("rating", "4")
+                        .param("title", "Second review")
+                        .param("reviewText", "This is my second review."))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reviews/product/" + testProduct.getId()));
+
+        // Verify only one review exists
+        var reviews = reviewRepository.findByUserOrderByCreatedAtDesc(testUser);
+        assertThat(reviews).hasSize(1);
+        assertThat(reviews.get(0).getTitle()).isEqualTo("First review"); // Original review remains
+    }
+
+    @Test
+    @DisplayName("Should handle pagination correctly")
+    @WithMockUser(username = "testuser")
+    void shouldHandlePaginationCorrectly() throws Exception {
+        // Given - create multiple reviews
+        for (int i = 1; i <= 15; i++) {
+            User user = new User();
+            user.setEmail("user" + i + "@example.com");
+            user.setUsername("user" + i);
+            user.setFirstName("User");
+            user.setLastName("" + i);
+            user.setPassword("password123");
+            user.setEmailVerified(true);
+            user.setActive(true);
+            user.setCreatedAt(LocalDateTime.now());
+            user = userRepository.save(user);
+
+            Review review = new Review();
+            review.setUser(user);
+            review.setProduct(testProduct);
+            review.setRating(i % 5 + 1);
+            review.setTitle("Review " + i);
+            review.setReviewText("This is review number " + i);
+            review.setCreatedAt(LocalDateTime.now().minusDays(i));
+            reviewRepository.save(review);
+        }
+
+        // When & Then - test first page
+        mockMvc.perform(get("/reviews/product/{productId}", testProduct.getId())
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentPage", 0));
+
+        // When & Then - test second page
+        mockMvc.perform(get("/reviews/product/{productId}", testProduct.getId())
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentPage", 1));
+    }
+
+    @Test
+    @DisplayName("Should calculate review statistics correctly")
+    @WithMockUser(username = "testuser")
+    void shouldCalculateReviewStatisticsCorrectly() throws Exception {
+        // Given - create reviews with different ratings
+        int[] ratings = {5, 4, 5, 3, 4, 5, 2, 4};
+        for (int i = 0; i < ratings.length; i++) {
+            User user = new User();
+            user.setEmail("reviewer" + i + "@example.com");
+            user.setUsername("reviewer" + i);
+            user.setFirstName("Reviewer");
+            user.setLastName("" + i);
+            user.setPassword("password123");
+            user.setEmailVerified(true);
+            user.setActive(true);
+            user.setCreatedAt(LocalDateTime.now());
+            user = userRepository.save(user);
+
+            Review review = new Review();
+            review.setUser(user);
+            review.setProduct(testProduct);
+            review.setRating(ratings[i]);
+            review.setTitle("Review " + i);
+            review.setReviewText("This is review number " + i);
+            review.setCreatedAt(LocalDateTime.now().minusHours(i));
+            reviewRepository.save(review);
+        }
+
+        // Calculate expected average: (5+4+5+3+4+5+2+4)/8 = 32/8 = 4.0
+        double expectedAverage = 4.0;
+
+        // When & Then
+        mockMvc.perform(get("/reviews/product/{productId}", testProduct.getId()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("stats"));
+        // Note: You might want to add more specific assertions about the stats values
+    }
+}

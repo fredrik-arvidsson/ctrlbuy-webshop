@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifiera din email - CtrlBuy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .verify-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        .verify-btn:hover {
+            transform: translateY(-2px);
+        }
+        .alternative {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .alternative p {
+            margin: 0 0 10px 0;
+        }
+        .url-text {
+            word-break: break-all;
+            color: #667eea;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .company-name {
+            color: #667eea;
+            font-weight: 600;
+        }
+        .icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="icon">📧</div>
+        <h1>Verifiera din email</h1>
+    </div>
+
+    <div class="content">
+        <div class="greeting">
+            Hej <span th:text="${firstName}">Användare</span>! 👋
+        </div>
+
+        <div class="message">
+            <p><strong>Välkommen till <span class="company-name" th:text="${companyName}">CtrlBuy</span>!</strong></p>
+
+            <p>Tack för att du registrerade dig hos oss. För att slutföra din registrering och aktivera ditt konto behöver du verifiera din email-adress.</p>
+
+            <p>Klicka på knappen nedan för att verifiera din email:</p>
+        </div>
+
+        <div class="btn-container">
+            <a th:href="${verificationUrl}" class="verify-btn">
+                ✅ Verifiera min email
+            </a>
+        </div>
+
+        <div class="alternative">
+            <p><strong>Fungerar inte knappen?</strong></p>
+            <p>Kopiera och klistra in följande länk i din webbläsare:</p>
+            <div class="url-text" th:text="${verificationUrl}">
+                http://localhost:8080/verify-email?token=example
+            </div>
+        </div>
+
+        <div class="message">
+            <p><strong>⏰ Viktig information:</strong></p>
+            <ul>
+                <li>Verifieringslänken är giltig i 24 timmar</li>
+                <li>Om länken har gått ut kan du begära en ny på vår inloggningssida</li>
+                <li>Du kan inte logga in förrän din email är verifierad</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Detta mail skickades till: <strong th:text="${email}">user@example.com</strong></p>
+        <p>Om du inte registrerade dig hos <span th:text="${companyName}">CtrlBuy</span>, kan du bortse från detta mail.</p>
+        <p>&copy; <span th:text="${currentYear}">2025</span> <span th:text="${companyName}">CtrlBuy</span>. Alla rättigheter förbehållna.</p>
+    </div>
+</div>
+</body>
+</html>

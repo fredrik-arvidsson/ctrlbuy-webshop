@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integritetspolicy - CTRL+BUY SOLUTIONS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Header - SAMMA som andra sidor */
+    .header-container {
+      background: #000000;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      width: 100%;
+      height: 250px;
+      background: #000000;
+      border-radius: 0;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 20vw;
+      height: 250px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: none;
+    }
+
+    .top-nav {
+      background-color: #28a745;
+      padding: 15px 0;
+    }
+
+    .top-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+    }
+
+    .top-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .login-status {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+
+    .terms-content {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      color: #007bff;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .last-updated {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #007bff;
+    }
+
+    .terms-table {
+      background: #f8f9fa;
+      border-radius: 5px;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header med logotyp -->
+<header class="header-container">
+  <div class="logo-icon">
+    <img th:src="@{/images/logo.png}" alt="CtrlBuy Logo">
+    <div class="logo-text">
+      <h1>CTRL+BUY</h1>
+      <p>SOLUTIONS</p>
+    </div>
+  </div>
+</header>
+
+<!-- Grön navigation -->
+<div class="top-nav text-center">
+  <a th:href="@{/}">Hem</a>
+  <a th:href="@{/produkter}">Produkter</a>
+  <a th:href="@{/about}">Om oss</a>
+  <a th:href="@{/kontakt}">Kontakt</a>
+  <a th:href="@{/support}">Support</a>
+  <a th:href="@{/varukorg}">
+    <i class="fas fa-shopping-cart"></i> Varukorg
+  </a>
+</div>
+
+<!-- Inloggningsstatusmeddelande -->
+<div class="container mt-3" sec:authorize="isAuthenticated()">
+  <div class="login-status">
+    <div class="row">
+      <div class="col-md-9">
+        Du är inloggad som: <span sec:authentication="name">user</span>
+      </div>
+      <div class="col-md-3 text-right">
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="logout-btn">Logga ut</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container my-5">
+  <div class="row">
+    <div class="col-12">
+      <div class="terms-content">
+        <h1 class="text-center mb-4">
+          <i class="fas fa-shield-alt text-primary me-2"></i>
+          Integritetspolicy
+        </h1>
+
+        <div class="last-updated mb-4">
+          <strong>Senast uppdaterad:</strong> 2 juni 2025<br>
+          <strong>GDPR-kompatibel:</strong> Ja, enligt EU:s dataskyddsförordning
+        </div>
+
+        <h2 class="section-title">1. Inledning</h2>
+        <p>CTRL+BUY SOLUTIONS ("vi", "oss", "vår") respekterar din integritet och är engagerade i att skydda dina personuppgifter. Denna integritetspolicy förklarar hur vi samlar in, använder och skyddar din information när du använder vår tjänst.</p>
+
+        <h2 class="section-title">2. Personuppgiftsansvarig</h2>
+        <div class="terms-table">
+          <p><strong>CTRL+BUY SOLUTIONS</strong><br>
+            E-post: privacy@ctrlbuy.se<br>
+            Telefon: 08-123 45 67<br>
+            Dataskyddsombud: privacy@ctrlbuy.se</p>
+        </div>
+
+        <h2 class="section-title">3. Vilka personuppgifter samlar vi in?</h2>
+
+        <h4>Kontaktuppgifter:</h4>
+        <ul>
+          <li>Namn (för- och efternamn)</li>
+          <li>E-postadress</li>
+          <li>Telefonnummer</li>
+          <li>Leveransadress och faktureringsadress</li>
+        </ul>
+
+        <h4>Beställningsuppgifter:</h4>
+        <ul>
+          <li>Beställningshistorik</li>
+          <li>Betalningsinformation (ej kortnummer, endast transaktionsreferenser)</li>
+          <li>Leveransinformation</li>
+        </ul>
+
+        <h4>Teknisk information:</h4>
+        <ul>
+          <li>IP-adress</li>
+          <li>Webbläsartyp och version</li>
+          <li>Besöksstatistik via cookies</li>
+        </ul>
+
+        <h2 class="section-title">4. Varför samlar vi in dina uppgifter?</h2>
+
+        <h4>Rättslig grund enligt GDPR:</h4>
+        <ul>
+          <li><strong>Fullgöra avtal:</strong> För att behandla dina beställningar</li>
+          <li><strong>Berättigat intresse:</strong> För att förbättra vår tjänst och kundtjänst</li>
+          <li><strong>Samtycke:</strong> För marknadsföring (endast om du givit samtycke)</li>
+          <li><strong>Rättslig förpliktelse:</strong> För bokföring och skatteregleringar</li>
+        </ul>
+
+        <h4>Specifika ändamål:</h4>
+        <ul>
+          <li>Behandla och leverera dina beställningar</li>
+          <li>Hantera betalningar och fakturering</li>
+          <li>Tillhandahålla kundtjänst</li>
+          <li>Förhindra bedrägerier</li>
+          <li>Förbättra vår webbplats och tjänster</li>
+          <li>Skicka orderbekräftelser och leveransuppdateringar</li>
+        </ul>
+
+        <h2 class="section-title">5. Hur länge sparar vi dina uppgifter?</h2>
+        <div class="terms-table">
+          <ul>
+            <li><strong>Kontaktuppgifter:</strong> Så länge du har ett aktivt konto</li>
+            <li><strong>Beställningshistorik:</strong> 3 år för att hantera garantier och returer</li>
+            <li><strong>Bokföringsuppgifter:</strong> 7 år (enligt bokföringslagen)</li>
+            <li><strong>Marknadsföringssamtycke:</strong> Tills du återkallar samtycket</li>
+            <li><strong>Teknisk data:</strong> 2 år för webbanalys</li>
+          </ul>
+        </div>
+
+        <h2 class="section-title">6. Vem delar vi dina uppgifter med?</h2>
+
+        <h4>Vi delar dina uppgifter med:</h4>
+        <ul>
+          <li><strong>Leveransföretag:</strong> För att leverera dina beställningar</li>
+          <li><strong>Betalningsleverantörer:</strong> För att behandla betalningar säkert</li>
+          <li><strong>IT-leverantörer:</strong> För drift och underhåll av vår plattform</li>
+          <li><strong>Myndigheter:</strong> Vid rättslig förpliktelse</li>
+        </ul>
+
+        <h4>Vi säljer ALDRIG dina personuppgifter till tredje part!</h4>
+
+        <h2 class="section-title">7. Överföringar utanför EU/EES</h2>
+        <p>Vi strävar efter att hålla all databehandling inom EU/EES. Om överföring sker till tredje land använder vi lämpliga skyddsåtgärder enligt GDPR, såsom standardavtalsklausuler.</p>
+
+        <h2 class="section-title">8. Dina rättigheter enligt GDPR</h2>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h5><i class="fas fa-eye text-primary"></i> Rätt till tillgång</h5>
+            <p>Du har rätt att få veta vilka uppgifter vi har om dig.</p>
+          </div>
+          <div class="col-md-6">
+            <h5><i class="fas fa-edit text-primary"></i> Rätt till rättelse</h5>
+            <p>Du kan begära att felaktiga uppgifter rättas.</p>
+          </div>
+          <div class="col-md-6">
+            <h5><i class="fas fa-trash text-primary"></i> Rätt till radering</h5>
+            <p>Du kan begära att vi raderar dina uppgifter.</p>
+          </div>
+          <div class="col-md-6">
+            <h5><i class="fas fa-ban text-primary"></i> Rätt till begränsning</h5>
+            <p>Du kan begära att behandlingen begränsas.</p>
+          </div>
+          <div class="col-md-6">
+            <h5><i class="fas fa-download text-primary"></i> Dataportabilitet</h5>
+            <p>Du kan få ut dina data i ett strukturerat format.</p>
+          </div>
+          <div class="col-md-6">
+            <h5><i class="fas fa-times text-primary"></i> Rätt att invända</h5>
+            <p>Du kan invända mot viss behandling av dina uppgifter.</p>
+          </div>
+        </div>
+
+        <h2 class="section-title">9. Cookies</h2>
+        <p>Vi använder cookies för att:</p>
+        <ul>
+          <li>Komma ihåg dina val och inställningar</li>
+          <li>Analysera hur vår webbplats används</li>
+          <li>Förbättra användarupplevelsen</li>
+        </ul>
+        <p>Du kan ändra dina cookie-inställningar i din webbläsare.</p>
+
+        <h2 class="section-title">10. Säkerhet</h2>
+        <p>Vi vidtar lämpliga tekniska och organisatoriska säkerhetsåtgärder för att skydda dina personuppgifter:</p>
+        <ul>
+          <li>SSL-kryptering för all dataöverföring</li>
+          <li>Säkra servrar och databaser</li>
+          <li>Begränsad åtkomst på behovsbasis</li>
+          <li>Regelbundna säkerhetsuppdateringar</li>
+        </ul>
+
+        <h2 class="section-title">11. Ändringar av integritetspolicyn</h2>
+        <p>Vi kan uppdatera denna policy vid behov. Väsentliga ändringar meddelas via e-post eller på vår webbplats.</p>
+
+        <h2 class="section-title">12. Kontakta oss</h2>
+        <div class="bg-light p-3 rounded">
+          <p>Har du frågor om din integritet eller vill utöva dina rättigheter?</p>
+          <p><strong>Kontakta oss:</strong><br>
+            E-post: privacy@ctrlbuy.se<br>
+            Telefon: 08-123 45 67<br>
+            Du har också rätt att lämna klagomål till Integritetsskyddsmyndigheten (IMY).</p>
+        </div>
+
+        <div class="text-center mt-4">
+          <a th:href="@{/checkout}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Tillbaka till checkout
+          </a>
+          <a th:href="@{/terms}" class="btn btn-outline-primary ml-2">
+            <i class="fas fa-file-contract me-2"></i>
+            Läs användarvillkor
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

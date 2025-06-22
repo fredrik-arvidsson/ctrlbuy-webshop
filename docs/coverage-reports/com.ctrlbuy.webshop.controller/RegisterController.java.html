@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">RegisterController.java</span></div><h1>RegisterController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.dto.RegisterRequest;
+import com.ctrlbuy.webshop.dto.RegistrationResult;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.EmailService;
+import com.ctrlbuy.webshop.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
+
+@Controller
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
+<span class="fc" id="L20">@Slf4j</span>
+public class RegisterController {
+
+    private final UserService userService;
+    private final EmailService emailService;
+
+    @GetMapping(&quot;/register&quot;)
+    public String showRegisterForm(Model model) {
+<span class="fc" id="L28">        model.addAttribute(&quot;registerRequest&quot;, new RegisterRequest());</span>
+<span class="fc" id="L29">        return &quot;register&quot;;</span>
+    }
+
+    @PostMapping(&quot;/register&quot;)
+    public String registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
+                               BindingResult bindingResult,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+
+<span class="fc" id="L38">        log.info(&quot;Registreringsförsök för email: {}&quot;, registerRequest.getEmail());</span>
+
+        // Kör egen validering
+<span class="fc" id="L41">        validateRegistration(registerRequest, bindingResult);</span>
+
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (bindingResult.hasErrors()) {</span>
+<span class="fc" id="L44">            log.warn(&quot;Valideringsfel vid registrering: {}&quot;, bindingResult.getAllErrors());</span>
+
+            // Logga specifika fel för debugging
+<span class="fc" id="L47">            bindingResult.getAllErrors().forEach(error -&gt;</span>
+<span class="fc" id="L48">                    log.debug(&quot;Valideringsfel: {}&quot;, error.getDefaultMessage()));</span>
+
+<span class="fc" id="L50">            return &quot;register&quot;;</span>
+        }
+
+        try {
+            // Registrera användare och få tillbaka User object + token
+<span class="fc" id="L55">            RegistrationResult registrationResult = userService.registerNewUserWithToken(registerRequest);</span>
+<span class="fc" id="L56">            User newUser = registrationResult.getUser();</span>
+<span class="fc" id="L57">            String verificationToken = registrationResult.getToken();</span>
+
+<span class="fc" id="L59">            log.info(&quot;Användare skapad framgångsrikt: {}&quot;, newUser.getUsername());</span>
+
+            // Skicka verifieringsmail
+            try {
+<span class="fc" id="L63">                emailService.sendVerificationEmail(newUser, verificationToken);</span>
+<span class="fc" id="L64">                log.info(&quot;Verifieringsmail skickat till: {}&quot;, newUser.getEmail());</span>
+<span class="nc" id="L65">            } catch (Exception emailError) {</span>
+<span class="nc" id="L66">                log.error(&quot;Kunde inte skicka verifieringsmail till {}: {}&quot;, newUser.getEmail(), emailError.getMessage());</span>
+<span class="nc" id="L67">                model.addAttribute(&quot;error&quot;, &quot;Kontot skapades men verifieringsmailen kunde inte skickas. Kontakta support.&quot;);</span>
+<span class="nc" id="L68">                return &quot;register&quot;;</span>
+<span class="fc" id="L69">            }</span>
+
+            // Redirect med framgångsmeddelande
+<span class="fc" id="L72">            redirectAttributes.addFlashAttribute(&quot;success&quot;,</span>
+<span class="fc" id="L73">                    &quot;Registrering lyckades! Kontrollera din e-post (&quot; + newUser.getEmail() + &quot;) för att verifiera ditt konto.&quot;);</span>
+
+<span class="fc" id="L75">            return &quot;redirect:/login&quot;;</span>
+
+<span class="nc" id="L77">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L78">            log.error(&quot;Fel vid registrering: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L79">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="nc" id="L80">            return &quot;register&quot;;</span>
+<span class="nc" id="L81">        } catch (Exception e) {</span>
+<span class="nc" id="L82">            log.error(&quot;Oväntat fel vid registrering: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L83">            model.addAttribute(&quot;error&quot;, &quot;Ett oväntat fel inträffade. Försök igen senare.&quot;);</span>
+<span class="nc" id="L84">            return &quot;register&quot;;</span>
+        }
+    }
+
+    /**
+     * Validerar registreringsdata
+     */
+    private void validateRegistration(RegisterRequest registerRequest, BindingResult bindingResult) {
+        // Validera lösenordsmatchning
+<span class="pc bpc" id="L93" title="2 of 4 branches missed.">        if (registerRequest.getPassword() != null &amp;&amp; registerRequest.getConfirmPassword() != null) {</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {</span>
+<span class="fc" id="L95">                bindingResult.rejectValue(&quot;confirmPassword&quot;, &quot;password.mismatch&quot;,</span>
+                        &quot;Lösenorden matchar inte. Kontrollera att du har skrivit samma lösenord i båda fälten.&quot;);
+            }
+        }
+
+        // Kontrollera om användarnamn redan finns
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (registerRequest.getUsername() != null &amp;&amp;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">                userService.existsByUsernameIncludingInactive(registerRequest.getUsername())) {</span>
+<span class="fc" id="L103">            bindingResult.rejectValue(&quot;username&quot;, &quot;username.exists&quot;,</span>
+                    &quot;Detta användarnamn är redan upptaget. Välj ett annat användarnamn.&quot;);
+        }
+
+        // Kontrollera om e-post redan finns
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (registerRequest.getEmail() != null &amp;&amp;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                userService.existsByEmailIncludingInactive(registerRequest.getEmail())) {</span>
+<span class="fc" id="L110">            bindingResult.rejectValue(&quot;email&quot;, &quot;email.exists&quot;,</span>
+                    &quot;Denna e-postadress är redan registrerad. Om du har glömt ditt lösenord kan du återställa det här.&quot;);
+        }
+<span class="fc" id="L113">    }</span>
+
+    @GetMapping(&quot;/verify-email&quot;)
+    public String verifyEmail(@RequestParam(&quot;token&quot;) String token, Model model) {
+        try {
+<span class="fc" id="L118">            log.info(&quot;E-postverifiering påbörjad för token: {}&quot;, token.substring(0, 8) + &quot;...&quot;);</span>
+
+<span class="fc" id="L120">            boolean verified = userService.verifyEmail(token);</span>
+
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (verified) {</span>
+<span class="fc" id="L123">                log.info(&quot;E-postverifiering lyckades för token: {}&quot;, token.substring(0, 8) + &quot;...&quot;);</span>
+<span class="fc" id="L124">                model.addAttribute(&quot;message&quot;, &quot;Ditt konto har bekräftats! Du kan nu logga in.&quot;);</span>
+<span class="fc" id="L125">                model.addAttribute(&quot;messageType&quot;, &quot;success&quot;);</span>
+<span class="fc" id="L126">                model.addAttribute(&quot;showLoginButton&quot;, true);</span>
+<span class="fc" id="L127">                return &quot;verification-result&quot;;</span>
+            } else {
+<span class="fc" id="L129">                log.warn(&quot;E-postverifiering misslyckades för token: {}&quot;, token.substring(0, 8) + &quot;...&quot;);</span>
+<span class="fc" id="L130">                model.addAttribute(&quot;message&quot;, &quot;Ogiltigt eller utgånget verifieringstoken.&quot;);</span>
+<span class="fc" id="L131">                model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="fc" id="L132">                model.addAttribute(&quot;showResendButton&quot;, true);</span>
+<span class="fc" id="L133">                return &quot;verification-result&quot;;</span>
+            }
+
+<span class="nc" id="L136">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L137">            log.error(&quot;Fel vid e-postverifiering: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L138">            model.addAttribute(&quot;message&quot;, &quot;Ogiltigt eller utgånget verifieringstoken.&quot;);</span>
+<span class="nc" id="L139">            model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="nc" id="L140">            model.addAttribute(&quot;showResendButton&quot;, true);</span>
+<span class="nc" id="L141">            return &quot;verification-result&quot;;</span>
+<span class="nc" id="L142">        } catch (Exception e) {</span>
+<span class="nc" id="L143">            log.error(&quot;Oväntat fel vid e-postverifiering: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L144">            model.addAttribute(&quot;message&quot;, &quot;Ett tekniskt fel inträffade. Försök igen senare.&quot;);</span>
+<span class="nc" id="L145">            model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="nc" id="L146">            return &quot;verification-result&quot;;</span>
+        }
+    }
+
+    @GetMapping(&quot;/resend-verification&quot;)
+    public String showResendForm(Model model) {
+<span class="fc" id="L152">        model.addAttribute(&quot;title&quot;, &quot;Skicka verifieringsmail igen&quot;);</span>
+<span class="fc" id="L153">        return &quot;resend-verification&quot;;</span>
+    }
+
+    @PostMapping(&quot;/resend-verification&quot;)
+    public String resendVerification(@RequestParam(&quot;email&quot;) String email, Model model) {
+        try {
+<span class="fc" id="L159">            log.info(&quot;Begäran om att skicka om verifieringsmail för: {}&quot;, email);</span>
+
+            // Validera email-format
+<span class="pc bpc" id="L162" title="3 of 6 branches missed.">            if (email == null || email.trim().isEmpty() || !email.matches(&quot;^[A-Za-z0-9+_.-]+@(.+)$&quot;)) {</span>
+<span class="nc" id="L163">                model.addAttribute(&quot;error&quot;, &quot;Ange en giltig e-postadress.&quot;);</span>
+<span class="nc" id="L164">                model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="nc" id="L165">                return &quot;resend-verification&quot;;</span>
+            }
+
+            // Kontrollera om användaren finns
+<span class="fc bfc" id="L169" title="All 2 branches covered.">            if (!userService.existsByEmailIncludingInactive(email)) {</span>
+<span class="fc" id="L170">                model.addAttribute(&quot;error&quot;, &quot;E-postadressen hittades inte i vårt system.&quot;);</span>
+<span class="fc" id="L171">                model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="fc" id="L172">                return &quot;resend-verification&quot;;</span>
+            }
+
+            // Skapa nytt verifieringstoken
+<span class="fc" id="L176">            String newToken = userService.createNewVerificationToken(email);</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">            if (newToken != null) {</span>
+<span class="fc" id="L178">                log.info(&quot;Nytt verifieringstoken skapat för: {}&quot;, email);</span>
+<span class="fc" id="L179">                model.addAttribute(&quot;message&quot;,</span>
+                        &quot;Nytt verifieringsmail har skickats till &quot; + email + &quot;. Kontrollera din e-post.&quot;);
+<span class="fc" id="L181">                model.addAttribute(&quot;messageType&quot;, &quot;success&quot;);</span>
+            } else {
+<span class="nc" id="L183">                model.addAttribute(&quot;error&quot;,</span>
+                        &quot;Kunde inte skicka verifieringsmail. Kontot kan redan vara verifierat eller inaktiverat.&quot;);
+<span class="nc" id="L185">                model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+            }
+
+<span class="nc" id="L188">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L189">            log.error(&quot;Fel vid omsändning av verifieringsmail för {}: {}&quot;, email, e.getMessage());</span>
+<span class="nc" id="L190">            model.addAttribute(&quot;error&quot;, e.getMessage());</span>
+<span class="nc" id="L191">            model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="nc" id="L192">        } catch (Exception e) {</span>
+<span class="nc" id="L193">            log.error(&quot;Oväntat fel vid omsändning av verifieringsmail för {}: {}&quot;, email, e.getMessage(), e);</span>
+<span class="nc" id="L194">            model.addAttribute(&quot;error&quot;, &quot;Ett tekniskt fel inträffade. Försök igen senare.&quot;);</span>
+<span class="nc" id="L195">            model.addAttribute(&quot;messageType&quot;, &quot;error&quot;);</span>
+<span class="pc" id="L196">        }</span>
+
+<span class="fc" id="L198">        return &quot;resend-verification&quot;;</span>
+    }
+
+    /**
+     * API-endpoint för att kontrollera om användarnamn är tillgängligt
+     */
+    @GetMapping(&quot;/api/check-username&quot;)
+    @ResponseBody
+    public boolean checkUsernameAvailability(@RequestParam(&quot;username&quot;) String username) {
+<span class="pc bpc" id="L207" title="2 of 4 branches missed.">        if (username == null || username.trim().length() &lt; 3) {</span>
+<span class="nc" id="L208">            return false;</span>
+        }
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        return !userService.existsByUsernameIncludingInactive(username.trim());</span>
+    }
+
+    /**
+     * API-endpoint för att kontrollera om e-post är tillgänglig
+     */
+    @GetMapping(&quot;/api/check-email&quot;)
+    @ResponseBody
+    public boolean checkEmailAvailability(@RequestParam(&quot;email&quot;) String email) {
+<span class="pc bpc" id="L219" title="3 of 6 branches missed.">        if (email == null || email.trim().isEmpty() || !email.matches(&quot;^[A-Za-z0-9+_.-]+@(.+)$&quot;)) {</span>
+<span class="nc" id="L220">            return false;</span>
+        }
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        return !userService.existsByEmailIncludingInactive(email.trim());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

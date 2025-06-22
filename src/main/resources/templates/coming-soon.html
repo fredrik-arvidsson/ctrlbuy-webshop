@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle ?: 'Kommer snart - CtrlBuy'}">Kommer snart - CtrlBuy</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .coming-soon-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .coming-soon-icon {
+            font-size: 6rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .coming-soon-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .coming-soon-subtitle {
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .coming-soon-message {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .feature-preview {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .feature-preview h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .feature-preview p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+
+        .progress-indicator {
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 75%;
+            border-radius: 4px;
+            animation: progress 3s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 65%; }
+            50% { width: 85%; }
+            100% { width: 75%; }
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-info h5 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .user-info p {
+            margin: 0;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .coming-soon-container {
+                padding: 40px 30px;
+            }
+
+            .coming-soon-title {
+                font-size: 2rem;
+            }
+
+            .coming-soon-icon {
+                font-size: 4rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="coming-soon-container">
+    <!-- Dynamic Icon based on feature -->
+    <div class="coming-soon-icon">
+        <i th:class="'fas fa-' + (${icon} ?: 'tools')"></i>
+    </div>
+
+    <!-- Dynamic Title -->
+    <h1 class="coming-soon-title" th:text="${feature ?: 'Funktion'} + ' kommer snart!'">Funktion kommer snart!</h1>
+
+    <p class="coming-soon-subtitle">Vi arbetar hårt för att ge dig den bästa upplevelsen</p>
+
+    <!-- Feature Preview Box -->
+    <div class="feature-preview">
+        <h4><i class="fas fa-rocket me-2"></i>Vad du kan förvänta dig:</h4>
+        <p th:text="${message ?: 'Denna funktion är under utveckling och kommer snart att vara tillgänglig.'}">
+            Denna funktion är under utveckling och kommer snart att vara tillgänglig.
+        </p>
+    </div>
+
+    <!-- User Info (if logged in) -->
+    <div class="user-info" th:if="${user != null}">
+        <h5><i class="fas fa-user me-2"></i>Hej <span th:text="${user.fullName}">Användare</span>!</h5>
+        <p>Vi kommer att meddela dig när denna funktion är redo. Tack för ditt tålamod!</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <p><strong>Utvecklingsframsteg:</strong></p>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <small class="text-muted">~75% färdigt</small>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a th:href="${returnUrl ?: '/min-profil'}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            Tillbaka till profil
+        </a>
+
+        <a href="/produkter" class="btn btn-outline">
+            <i class="fas fa-shopping-bag"></i>
+            Utforska produkter
+        </a>
+
+        <a href="/support" class="btn btn-outline">
+            <i class="fas fa-headset"></i>
+            Kontakta support
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #999; font-size: 0.9rem;">
+            <i class="fas fa-heart" style="color: #e25555;"></i>
+            Tack för att du använder CtrlBuy
+        </p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - CtrlBuy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Hem</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/orders}">Mina beställningar</a></li>
+            <li class="breadcrumb-item active">Order</li>
+        </ol>
+    </nav>
+
+    <!-- Order Info -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Order <span th:text="${order.orderNumber}">-</span></h4>
+            <span class="badge bg-info" th:text="${order.status}">Status</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Orderdatum:</strong><br>
+                    <span th:text="${order.orderDate}">-</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Totalsumma:</strong><br>
+                    <span class="text-success h5"><span th:text="${order.totalAmount}">0</span> kr</span>
+                </div>
+                <div class="col-md-4" th:if="${order.paymentMethod}">
+                    <strong>Betalningsmetod:</strong><br>
+                    <span th:text="${order.paymentMethod}">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Items -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Beställda produkter</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${order.orderItems}">
+                        <table class="table" th:if="${not #lists.isEmpty(order.orderItems)}">
+                            <thead>
+                            <tr>
+                                <th>Produkt</th>
+                                <th>Pris</th>
+                                <th>Antal</th>
+                                <th>Totalt</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${order.orderItems}">
+                                <td th:text="${item.productName}">Produkt</td>
+                                <td><span th:text="${item.price}">0</span> kr</td>
+                                <td th:text="${item.quantity}">1</td>
+                                <td><span th:text="${item.price * item.quantity}">0</span> kr</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3">Totalsumma:</th>
+                                <th><span th:text="${order.totalAmount}">0</span> kr</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+
+                        <div th:if="${#lists.isEmpty(order.orderItems)}">
+                            <p>Inga produkter hittades.</p>
+                        </div>
+                    </div>
+
+                    <div th:unless="${order.orderItems}">
+                        <p>Inga produkter att visa.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Leveransinformation</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${order.deliveryName}">
+                        <strong>Leveransadress:</strong><br>
+                        <span th:text="${order.deliveryName}">-</span><br>
+                        <span th:text="${order.deliveryAddress}">-</span><br>
+                        <span th:text="${order.deliveryPostalCode}">-</span> <span th:text="${order.deliveryCity}">-</span>
+                    </div>
+
+                    <div th:if="${order.deliveryPhone}" class="mt-2">
+                        <strong>Telefon:</strong><br>
+                        <span th:text="${order.deliveryPhone}">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <a th:href="@{/orders}" class="btn btn-primary w-100 mb-2">
+                        Tillbaka till beställningar
+                    </a>
+                    <button class="btn btn-secondary w-100" onclick="window.print()">
+                        Skriv ut kvitto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

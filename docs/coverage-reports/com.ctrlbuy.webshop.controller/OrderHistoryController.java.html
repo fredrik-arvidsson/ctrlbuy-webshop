@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderHistoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">OrderHistoryController.java</span></div><h1>OrderHistoryController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.OrderService;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Optional;
+
+@Controller
+@RequestMapping(&quot;/orders&quot;)
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+<span class="fc" id="L21">@Slf4j</span>
+public class OrderHistoryController {
+
+    private final OrderService orderService;
+    private final UserRepository userRepository;
+
+    /**
+     * Visa orderhistorik med paginering
+     */
+    @GetMapping
+    public String viewOrderHistory(
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size,
+            Authentication authentication,
+            Model model) {
+
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (authentication == null) {</span>
+<span class="nc" id="L38">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L41">        Optional&lt;User&gt; userOpt = userRepository.findByUsername(authentication.getName());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (userOpt.isEmpty()) {</span>
+<span class="nc" id="L43">            log.error(&quot;Användare inte hittad: {}&quot;, authentication.getName());</span>
+<span class="nc" id="L44">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L47">        User user = userOpt.get();</span>
+
+        // Hämta orders med paginering
+<span class="fc" id="L50">        Page&lt;Order&gt; orderPage = orderService.getOrdersByUserWithPagination(user, page, size);</span>
+
+        // Beräkna statistik
+<span class="fc" id="L53">        Long totalOrders = orderService.countOrdersByUser(user);</span>
+<span class="fc" id="L54">        Double totalSpent = orderService.getTotalSpentByUser(user);</span>
+<span class="fc" id="L55">        Optional&lt;Order&gt; latestOrder = orderService.getLatestOrderByUser(user);</span>
+
+<span class="fc" id="L57">        model.addAttribute(&quot;orderPage&quot;, orderPage);</span>
+<span class="fc" id="L58">        model.addAttribute(&quot;currentPage&quot;, page);</span>
+<span class="fc" id="L59">        model.addAttribute(&quot;totalPages&quot;, orderPage.getTotalPages());</span>
+<span class="fc" id="L60">        model.addAttribute(&quot;totalOrders&quot;, totalOrders);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        model.addAttribute(&quot;totalSpent&quot;, totalSpent != null ? totalSpent : 0.0);</span>
+<span class="fc" id="L62">        model.addAttribute(&quot;latestOrder&quot;, latestOrder.orElse(null));</span>
+<span class="fc" id="L63">        model.addAttribute(&quot;user&quot;, user);</span>
+
+<span class="fc" id="L65">        log.info(&quot;Visar orderhistorik för användare: {} ({} orders)&quot;, user.getUsername(), totalOrders);</span>
+<span class="fc" id="L66">        return &quot;order-history&quot;;</span>
+    }
+
+    /**
+     * Visa detaljer för specifik order
+     */
+    @GetMapping(&quot;/{orderId}&quot;)
+    public String viewOrderDetails(
+            @PathVariable Long orderId,
+            Authentication authentication,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (authentication == null) {</span>
+<span class="nc" id="L80">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L83">        Optional&lt;User&gt; userOpt = userRepository.findByUsername(authentication.getName());</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (userOpt.isEmpty()) {</span>
+<span class="nc" id="L85">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L88">        User user = userOpt.get();</span>
+<span class="fc" id="L89">        Optional&lt;Order&gt; orderOpt = orderService.getOrderByIdAndUser(orderId, user);</span>
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (orderOpt.isEmpty()) {</span>
+<span class="fc" id="L92">            log.warn(&quot;Order {} inte hittad eller tillhör inte användare {}&quot;, orderId, user.getUsername());</span>
+<span class="fc" id="L93">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Order inte hittad eller tillhör inte dig.&quot;);</span>
+<span class="fc" id="L94">            return &quot;redirect:/orders&quot;;</span>
+        }
+
+<span class="fc" id="L97">        Order order = orderOpt.get();</span>
+<span class="fc" id="L98">        model.addAttribute(&quot;order&quot;, order);</span>
+<span class="fc" id="L99">        model.addAttribute(&quot;user&quot;, user);</span>
+
+<span class="fc" id="L101">        log.info(&quot;Visar orderdetaljer för order: {} (användare: {})&quot;, order.getOrderNumber(), user.getUsername());</span>
+<span class="fc" id="L102">        return &quot;order-details&quot;;</span>
+    }
+
+    /**
+     * Sök order via ordernummer
+     */
+    @PostMapping(&quot;/search&quot;)
+    public String searchOrder(
+            @RequestParam String orderNumber,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (authentication == null) {</span>
+<span class="nc" id="L115">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L118">        Optional&lt;User&gt; userOpt = userRepository.findByUsername(authentication.getName());</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (userOpt.isEmpty()) {</span>
+<span class="nc" id="L120">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="fc" id="L123">        User user = userOpt.get();</span>
+<span class="fc" id="L124">        Optional&lt;Order&gt; orderOpt = orderService.getOrderByOrderNumberAndUser(orderNumber.trim(), user);</span>
+
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (orderOpt.isEmpty()) {</span>
+<span class="fc" id="L127">            log.warn(&quot;Order med nummer {} inte hittad för användare {}&quot;, orderNumber, user.getUsername());</span>
+<span class="fc" id="L128">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Order med nummer &quot; + orderNumber + &quot; inte hittad.&quot;);</span>
+<span class="fc" id="L129">            return &quot;redirect:/orders&quot;;</span>
+        }
+
+<span class="fc" id="L132">        log.info(&quot;Order hittad via sök: {} (användare: {})&quot;, orderNumber, user.getUsername());</span>
+<span class="fc" id="L133">        return &quot;redirect:/orders/&quot; + orderOpt.get().getId();</span>
+    }
+
+    /**
+     * Svenska rutt för orderhistorik
+     */
+    @GetMapping(&quot;/mina-ordrar&quot;)
+    public String viewOrderHistorySwedish(
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size,
+            Authentication authentication,
+            Model model) {
+<span class="fc" id="L145">        return viewOrderHistory(page, size, authentication, model);</span>
+    }
+
+    /**
+     * Orderdetaljer via svensk rutt
+     */
+    @GetMapping(&quot;/mina-ordrar/{orderId}&quot;)
+    public String viewOrderDetailsSwedish(
+            @PathVariable Long orderId,
+            Authentication authentication,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+<span class="fc" id="L157">        return viewOrderDetails(orderId, authentication, model, redirectAttributes);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

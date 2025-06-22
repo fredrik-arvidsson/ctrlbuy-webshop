@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alla produkter - CTRL+BUY Solutions</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /* Header - SAMMA SOM HOME */
+    .header-container {
+      background: #000000;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      width: 100%;
+      height: 250px;
+      background: #000000;
+      border-radius: 0px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 20vw;
+      height: 250px;
+      object-fit: contain;
+    }
+
+    /* Grön navigation */
+    .top-nav {
+      background-color: #28a745;
+      padding: 15px 0;
+    }
+
+    .top-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+    }
+
+    .top-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .top-nav a.active {
+      background-color: rgba(255,255,255,0.2);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    /* Produktkort stilar */
+    .product-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-card-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-card-link:hover {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-actions {
+      background-color: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .category-filter {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .search-section {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 40px 0;
+      margin-bottom: 30px;
+    }
+
+    .breadcrumb {
+      background: rgba(40, 167, 69, 0.1);
+      border-radius: 5px;
+    }
+
+    .product-image {
+      height: 200px;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .product-image:hover {
+      transform: scale(1.05);
+    }
+
+    .price-display {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .stock-indicator {
+      font-size: 0.9rem;
+    }
+
+    .stock-low {
+      color: #dc3545;
+    }
+
+    .stock-ok {
+      color: #28a745;
+    }
+
+    .no-products {
+      background: white;
+      border-radius: 10px;
+      padding: 60px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header med logotyp -->
+<header class="header-container">
+  <div class="logo-icon">
+    <img src="/images/logo.png" alt="CtrlBuy Logo">
+  </div>
+</header>
+
+<!-- Grön navigation -->
+<div class="top-nav text-center">
+  <a href="/">Hem</a>
+  <a href="/products" class="active">Produkter</a>
+  <a href="/about">Om oss</a>
+  <a href="/contact">Kontakt</a>
+  <a href="/support">Support</a>
+  <a href="/varukorg">
+    <i class="fas fa-shopping-cart"></i> Varukorg
+  </a>
+</div>
+
+<!-- Hero sektion -->
+<div class="search-section">
+  <div class="container text-center">
+    <h1 class="display-4">Alla produkter</h1>
+    <p class="lead">Upptäck vårt omfattande sortiment av högkvalitativa produkter</p>
+
+    <!-- Sökformulär -->
+    <form action="/products" method="get" class="form-inline justify-content-center mt-4">
+      <div class="input-group" style="max-width: 400px;">
+        <input type="text" name="search" class="form-control form-control-lg"
+               placeholder="Sök produkter..."
+               value=""
+               style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+        <div class="input-group-append">
+          <button type="submit" class="btn btn-light btn-lg">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/"><i class="fas fa-home"></i> Hem</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <span>Alla produkter</span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Flash meddelanden -->
+  
+
+  <div class="row">
+    <!-- Kategorifilfter -->
+    <div class="col-md-3 mb-4">
+      <div class="category-filter">
+        <div class="card-header bg-success text-white">
+          <i class="fas fa-filter"></i> Kategorier
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <a href="/products"
+               class="list-group-item list-group-item-action active">
+              <i class="fas fa-th-large me-2"></i> Alla kategorier
+            </a>
+            <a href="/products?category=Electronics"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-microchip me-2"></i> Electronics
+            </a>
+            <a href="/products?category=Gaming"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-gamepad me-2"></i> Gaming
+            </a>
+            <a href="/products?category=H%C3%B6rlurar"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-headphones me-2"></i> Hörlurar
+            </a>
+            <a href="/products?category=Laptops"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-laptop me-2"></i> Laptops
+            </a>
+            <a href="/products?category=Smartklockor"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-clock me-2"></i> Smartklockor
+            </a>
+            <a href="/products?category=Smartphones"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-mobile-alt me-2"></i> Smartphones
+            </a>
+            <a href="/products?category=Tablets"
+               class="list-group-item list-group-item-action">
+              <i class="fas fa-tablet-alt me-2"></i> Tablets
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Snabblänkar -->
+      <div class="card mt-3">
+        <div class="card-header bg-info text-white">
+          <i class="fas fa-star"></i> Utvalda
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <a href="/products/sale" class="list-group-item list-group-item-action">
+              <i class="fas fa-fire text-danger"></i> Rea
+            </a>
+            <a href="/products/new" class="list-group-item list-group-item-action">
+              <i class="fas fa-star text-warning"></i> Nya produkter
+            </a>
+            <a href="/products/popular" class="list-group-item list-group-item-action">
+              <i class="fas fa-thumbs-up text-success"></i> Populära
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Produktlista -->
+    <div class="col-md-9">
+      <!-- Produkträknare och sortering -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">
+          <span>58</span> produkter
+          
+        </h5>
+        <div>
+          <select class="form-control" id="sortSelect">
+            <option>Sortera efter...</option>
+            <option value="name">Namn A-Ö</option>
+            <option value="price-low">Pris låg-hög</option>
+            <option value="price-high">Pris hög-låg</option>
+            <option value="newest">Nyaste först</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Produktkort -->
+      <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="card product-card h-100">
+            <!-- Produktbild -->
+            <a href="/products/1" class="product-card-link">
+              <img src="/images/products/iphone15promax.jpg"
+                   class="card-img-top product-image"
+                   alt="iPhone 15 Pro"
+                   onerror="this.src='/images/placeholder.jpg'">
+            </a>
+
+            <!-- Produktinfo -->
+            <div class="card-body d-flex flex-column">
+              <a href="/products/1" class="product-card-link">
+                <h5 class="card-title">iPhone 15 Pro</h5>
+                <p class="card-text text-muted">Senaste iPhone med titanium design och A17 Pro chip</p>
+              </a>
+
+              <div class="mt-auto">
+                <!-- Pris -->
+                <div class="price-display mb-2">14999,00 kr</div>
+
+                <!-- Lagerstatus -->
+                <div class="stock-indicator mb-3">
+                  <span class="stock-ok">
+                    <i class="fas fa-check-circle"></i> <span>12</span> i lager
+                  </span>
+                  
+                  
+                </div>
+              </div>
+            </div>
+
+            <!-- Köpsektion -->
+            <div class="card-footer product-actions">
+              <div>
+                <!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fel - CTRL+BUY SOLUTIONS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .simple-header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+    }
+
+    .simple-header h1 {
+      font-size: 3rem;
+      color: #17a2b8;
+      margin: 0;
+    }
+
+    .simple-header p {
+      color: #6c757d;
+      margin: 5px 0 0 0;
+    }
+
+    .simple-nav {
+      background-color: #28a745;
+      padding: 15px 0;
+      text-align: center;
+    }
+
+    .simple-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+      padding: 10px 15px;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    .simple-nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      text-decoration: none;
+      color: white;
+    }
+
+    .error-container {
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin: 50px auto;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .error-title {
+      color: #dc3545;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .error-details {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 5px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .back-link {
+      display: inline-block;
+      background-color: #28a745;
+      color: white;
+      padding: 12px 30px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .back-link:hover {
+      background-color: #218838;
+      text-decoration: none;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ENKEL HEADER - INGA FRAGMENTS -->
+<div class="simple-header">
+  <div>
+    <h1>CTRL+BUY</h1>
+    <p>SOLUTIONS</p>
+  </div>
+</div>
+
+<!-- ENKEL NAVIGATION - INGA FRAGMENTS -->
+<div class="simple-nav">
+  <a href="/">Hem</a>
+  <a href="/produkter">Produkter</a>
+  <a href="/about">Om oss</a>
+  <a href="/kontakt">Kontakt</a>
+  <a href="/support">Support</a>
+  <a href="/varukorg">
+    <i class="fas fa-shopping-cart"></i> Varukorg
+  </a>
+</div>
+
+<div class="container">
+  <div class="error-container">
+    <h1 class="error-title">
+      <i class="fas fa-exclamation-triangle"></i>
+      Ett fel har inträffat
+    </h1>
+    <p>Vi beklagar, men ett fel har uppstått när sidan skulle visas.</p>
+
+    <div class="error-details">
+      <p><strong>Status:</strong> <span>500</span></p>
+      <p class="error-message"><strong>Felmeddelande:</strong> <span>Ett oväntat fel uppstod</span></p>
+      <p><strong>Hjälp:</strong> Försök ladda om sidan eller gå tillbaka till startsidan</p>
+    </div>
+
+    <a href="/" class="back-link">
+      <i class="fas fa-home"></i>
+      Tillbaka till hemsidan
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Välkommen - CtrlBuy Webshop</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Inkludera header fragment -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="content">
+    <!-- Välkomstsection -->
+    <div class="welcome-section">
+        <h1>Välkommen till CtrlBuy, <span th:text="${#authentication.name}">user</span>!</h1>
+        <p>Din nya favorit för produkter online</p>
+
+        <div class="welcome-buttons">
+            <a href="/produkter" class="welcome-button">Utforska produkter</a>
+            <a href="/om-oss" class="welcome-button">Om oss</a>
+        </div>
+    </div>
+
+    <!-- Produktsection -->
+    <h2>Utvalda produkter</h2>
+
+    <div class="product-grid">
+        <!-- Produkt 1 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 1</h3>
+            <p class="price">199 kr</p>
+            <a href="/produkt/1" class="product-link">Visa detaljer</a>
+        </div>
+
+        <!-- Produkt 2 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 2</h3>
+            <p class="price">299 kr</p>
+            <a href="/produkt/2" class="product-link">Visa detaljer</a>
+        </div>
+
+        <!-- Produkt 3 -->
+        <div class="product-card">
+            <img src="/images/produktbild.jpg" alt="Produktbild">
+            <h3>Exempelprodukt 3</h3>
+            <p class="price">399 kr</p>
+            <a href="/produkt/3" class="product-link">Visa detaljer</a>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; 2025 CtrlBuy Webshop. Alla rättigheter förbehållna.</p>
+</footer>
+</body>
+</html>

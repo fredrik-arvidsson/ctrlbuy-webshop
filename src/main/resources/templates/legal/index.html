@@ -1,0 +1,244 @@
+# Kopiera innehållet från legal/index.html-artefakten här
+
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Juridisk information - CtrlBuy</title>
+    <meta name="description" th:content="${pageDescription}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary">
+                    <i class="fas fa-balance-scale me-3"></i>
+                    Juridisk information
+                </h1>
+                <p class="lead text-muted">All viktig information om villkor, rättigheter och policys på CtrlBuy</p>
+            </div>
+
+            <!-- Legal Documents Grid -->
+            <div class="row g-4 mb-5">
+                <!-- Användarvillkor -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-primary text-white text-center">
+                            <i class="fas fa-file-contract fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">Användarvillkor</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Läs våra villkor för handel och användning av CtrlBuy-plattformen. Här hittar du information om köp, leveranser och returner.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/terms" class="btn btn-primary w-100">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Läs villkoren
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            Gäller vid alla köp
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integritetspolicy -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-success text-white text-center">
+                            <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">Integritetspolicy</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Hur vi samlar in, använder och skyddar dina personuppgifter. Din integritet är viktig för oss.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/privacy-policy" class="btn btn-success w-100">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Läs policyn
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-lock me-1"></i>
+                            GDPR-kompatibel
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GDPR-rättigheter -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-info text-white text-center">
+                            <i class="fas fa-user-shield fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">GDPR-rättigheter</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Dina rättigheter enligt dataskyddsförordningen. Lär dig hur du kan kontrollera dina personuppgifter.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/gdpr" class="btn btn-info w-100">
+                                    <i class="fas fa-user-shield me-2"></i>
+                                    Se dina rättigheter
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-certificate me-1"></i>
+                            EU-lagstiftning
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cookies-policy -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <i class="fas fa-cookie-bite fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">Cookies-policy</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Information om hur vi använder cookies och liknande teknologier för att förbättra din upplevelse.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/cookies" class="btn btn-warning w-100">
+                                    <i class="fas fa-cookie-bite me-2"></i>
+                                    Läs om cookies
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-cog me-1"></i>
+                            Anpassningsbara inställningar
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kontakt -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-secondary text-white text-center">
+                            <i class="fas fa-envelope fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">Kontakta oss</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Har du frågor om våra villkor eller policies? Vi hjälper dig gärna med juridiska frågor.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/contact" class="btn btn-secondary w-100">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    Kontakta oss
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-reply me-1"></i>
+                            Svar inom 24h
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-dark text-white text-center">
+                            <i class="fas fa-life-ring fa-2x mb-2"></i>
+                            <h3 class="h5 mb-0">Support</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text flex-grow-1">
+                                Behöver du hjälp med din beställning eller har tekniska problem? Vår support finns här för dig.
+                            </p>
+                            <div class="mt-auto">
+                                <a href="/support" class="btn btn-dark w-100">
+                                    <i class="fas fa-life-ring me-2"></i>
+                                    Få support
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            Vardagar 9-17
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viktig information -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h5 mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Viktig information
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h3 class="h6 text-primary">
+                                        <i class="fas fa-building me-2"></i>
+                                        Företagsinformation
+                                    </h3>
+                                    <address class="small">
+                                        <strong>CtrlBuy AB</strong><br>
+                                        Organisationsnummer: 556123-4567<br>
+                                        Box 123, 123 45 Stockholm<br>
+                                        <abbr title="Telefon">Tel:</abbr> 08-123 456 78
+                                    </address>
+                                </div>
+                                <div class="col-md-6">
+                                    <h3 class="h6 text-primary">
+                                        <i class="fas fa-gavel me-2"></i>
+                                        Lagstiftning
+                                    </h3>
+                                    <p class="small">
+                                        Alla våra villkor och policys följer svensk lagstiftning och EU:s dataskyddsförordning (GDPR).
+                                        Vid tvister gäller svensk rätt och svenska domstolar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="text-center mt-5">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>
+                    Tillbaka till startsidan
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

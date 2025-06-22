@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Cookies-policy - CtrlBuy</title>
+    <meta name="description" th:content="${pageDescription}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-cookie-bite me-2"></i>
+                        Cookies-policy
+                    </h1>
+                </div>
+
+                <div class="card-body">
+                    <!-- Introduktion -->
+                    <div class="mb-4">
+                        <p class="lead">Denna sida förklarar hur CtrlBuy använder cookies och liknande teknologier för att förbättra din användarupplevelse.</p>
+                    </div>
+
+                    <!-- Vad är cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">
+                            <i class="fas fa-question-circle me-2"></i>
+                            Vad är cookies?
+                        </h2>
+                        <p>Cookies är små textfiler som lagras på din enhet när du besöker vår webbplats. De hjälper oss att komma ihåg dina preferenser och förbättra din användarupplevelse.</p>
+                    </section>
+
+                    <!-- Typer av cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">
+                            <i class="fas fa-list me-2"></i>
+                            Typer av cookies vi använder
+                        </h2>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            Nödvändiga cookies
+                                        </h5>
+                                        <p class="card-text small">Krävs för webbplatsens grundläggande funktioner som inloggning och kundvagn.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-info">
+                                            <i class="fas fa-chart-line me-1"></i>
+                                            Analytiska cookies
+                                        </h5>
+                                        <p class="card-text small">Hjälper oss förstå hur besökare använder webbplatsen för att förbättra prestanda.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-warning">
+                                            <i class="fas fa-bullseye me-1"></i>
+                                            Funktionella cookies
+                                        </h5>
+                                        <p class="card-text small">Sparar dina preferenser och anpassar innehållet efter dina behov.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-secondary">
+                                            <i class="fas fa-ad me-1"></i>
+                                            Marknadsföringscookies
+                                        </h5>
+                                        <p class="card-text small">Används för att visa relevanta annonser baserat på dina intressen.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Hantera cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">
+                            <i class="fas fa-cog me-2"></i>
+                            Hantera dina cookie-inställningar
+                        </h2>
+                        <p>Du kan när som helst ändra dina cookie-inställningar:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-browser text-primary me-2"></i>
+                                Genom din webbläsares inställningar
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-sliders-h text-primary me-2"></i>
+                                Via vår cookie-banner (visas vid första besöket)
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-user-cog text-primary me-2"></i>
+                                I dina kontoinställningar (för inloggade användare)
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Kontakt -->
+                    <section class="mb-4">
+                        <h2 class="h4 text-primary mb-3">
+                            <i class="fas fa-envelope me-2"></i>
+                            Frågor om cookies?
+                        </h2>
+                        <p>Kontakta oss gärna om du har frågor om vår användning av cookies:</p>
+                        <p>
+                            <strong>E-post:</strong>
+                            <a href="mailto:privacy@ctrlbuy.se" class="text-decoration-none">privacy@ctrlbuy.se</a>
+                        </p>
+                    </section>
+
+                    <!-- Uppdaterad -->
+                    <div class="text-muted small border-top pt-3">
+                        <p class="mb-0">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Senast uppdaterad: <span th:text="${#dates.format(#dates.createNow(), 'dd MMMM yyyy')}">2 juni 2025</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="text-center mt-4">
+                <a href="/legal" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Tillbaka till juridisk information
+                </a>
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-home me-1"></i>
+                    Till startsidan
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

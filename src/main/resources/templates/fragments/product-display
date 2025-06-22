@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="product-gallery">
+        <h2>Våra populära produkter</h2>
+        <div class="product-grid">
+            <!-- Här kan du visa produkter dynamiskt -->
+            <div class="product-card">
+                <img src="/images/placeholder.jpg" alt="Produkt">
+                <h3>Produkt 1</h3>
+                <p>En fantastisk produkt med många funktioner.</p>
+                <p class="price">199 kr</p>
+                <a href="#" class="button">Lägg i kundvagn</a>
+            </div>
+            <div class="product-card">
+                <img src="/images/placeholder.jpg" alt="Produkt">
+                <h3>Produkt 2</h3>
+                <p>En annan fantastisk produkt med många funktioner.</p>
+                <p class="price">299 kr</p>
+                <a href="#" class="button">Lägg i kundvagn</a>
+            </div>
+            <!-- Fler produkter här -->
+        </div>
+    </div>
+</body>
+</html>

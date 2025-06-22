@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service.impl</a> &gt; <span class="el_source">EmailServiceImpl.java</span></div><h1>EmailServiceImpl.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service.impl;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.model.OrderItem;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.EmailService;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Email service implementation for handling all email communications
+ */
+@Service
+<span class="nc" id="L27">public class EmailServiceImpl implements EmailService {</span>
+
+<span class="nc" id="L29">    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);</span>
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Autowired
+    private Environment env;
+
+    @Value(&quot;${app.base-url:http://localhost:8080}&quot;)
+    private String baseUrl;
+
+    @Value(&quot;${app.email.from:noreply@ctrlbuy.com}&quot;)
+    private String fromEmail;
+
+    @Value(&quot;${app.email.company-name:CtrlBuy}&quot;)
+    private String companyName;
+
+    // ✅ NY METOD: Kontrollera om email är konfigurerat
+    public boolean isConfigured() {
+<span class="nc" id="L51">        String host = env.getProperty(&quot;spring.mail.host&quot;);</span>
+<span class="nc" id="L52">        String username = env.getProperty(&quot;spring.mail.username&quot;);</span>
+<span class="nc" id="L53">        String password = env.getProperty(&quot;spring.mail.password&quot;);</span>
+
+<span class="nc bnc" id="L55" title="All 6 branches missed.">        boolean configured = host != null &amp;&amp; !host.isEmpty() &amp;&amp;</span>
+<span class="nc bnc" id="L56" title="All 4 branches missed.">                username != null &amp;&amp; !username.isEmpty() &amp;&amp;</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                password != null &amp;&amp; !password.isEmpty();</span>
+
+<span class="nc" id="L59">        logger.debug(&quot;Email service configured: {}&quot;, configured);</span>
+<span class="nc" id="L60">        return configured;</span>
+    }
+
+    // ✅ 1. EMAIL VERIFICATION - New interface method
+    @Override
+    public void sendVerificationEmail(User user, String token) {
+<span class="nc" id="L66">        sendVerificationEmail(user.getEmail(), token, user.getFirstName());</span>
+<span class="nc" id="L67">    }</span>
+
+    // ✅ 2. EMAIL VERIFICATION - Legacy method
+    @Override
+    public void sendVerificationEmail(String email, String token, String firstName) {
+        try {
+<span class="nc" id="L73">            logger.info(&quot;📧 Skickar verifieringsmail till: {}&quot;, email);</span>
+
+<span class="nc" id="L75">            String verificationUrl = baseUrl + &quot;/verify-email?token=&quot; + token;</span>
+
+            // Försök med Thymeleaf template först
+            try {
+<span class="nc" id="L79">                Context context = new Context();</span>
+<span class="nc" id="L80">                context.setVariable(&quot;firstName&quot;, firstName);</span>
+<span class="nc" id="L81">                context.setVariable(&quot;email&quot;, email);</span>
+<span class="nc" id="L82">                context.setVariable(&quot;verificationUrl&quot;, verificationUrl);</span>
+<span class="nc" id="L83">                context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L84">                context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+
+<span class="nc" id="L86">                String htmlContent = templateEngine.process(&quot;emails/email-verification&quot;, context);</span>
+<span class="nc" id="L87">                sendHtmlEmail(email, &quot;Verifiera din email - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L88">            } catch (Exception templateError) {</span>
+                // Om template inte finns, använd enkel HTML
+<span class="nc" id="L90">                logger.warn(&quot;Kunde inte använda Thymeleaf template, använder enkel HTML&quot;);</span>
+<span class="nc" id="L91">                String htmlContent = createSimpleVerificationEmail(firstName, verificationUrl);</span>
+<span class="nc" id="L92">                sendHtmlEmail(email, &quot;Verifiera din email - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L93">            }</span>
+
+<span class="nc" id="L95">            logger.info(&quot;✅ Verifieringsmail skickat till: {}&quot;, email);</span>
+
+<span class="nc" id="L97">        } catch (Exception e) {</span>
+<span class="nc" id="L98">            logger.error(&quot;❌ Fel vid skickande av verifieringsmail till {}: {}&quot;, email, e.getMessage());</span>
+<span class="nc" id="L99">            throw new RuntimeException(&quot;Kunde inte skicka verifieringsmail&quot;, e);</span>
+<span class="nc" id="L100">        }</span>
+<span class="nc" id="L101">    }</span>
+
+    // ✅ NY METOD: Email verification som returnerar boolean (för AdminController)
+    public boolean sendVerificationEmail(String email, String token) {
+        try {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            if (!isConfigured()) {</span>
+<span class="nc" id="L107">                logger.warn(&quot;Email service is not configured - skipping email to: {}&quot;, email);</span>
+<span class="nc" id="L108">                return false;</span>
+            }
+
+<span class="nc" id="L111">            sendVerificationEmail(email, token, &quot;&quot;);</span>
+<span class="nc" id="L112">            return true;</span>
+<span class="nc" id="L113">        } catch (Exception e) {</span>
+<span class="nc" id="L114">            logger.error(&quot;Failed to send verification email to: {}&quot;, email, e);</span>
+<span class="nc" id="L115">            return false;</span>
+        }
+    }
+
+    // ✅ 3. WELCOME EMAIL - After successful verification
+    @Override
+    public void sendWelcomeEmail(User user) {
+        try {
+<span class="nc" id="L123">            logger.info(&quot;🎉 Skickar välkomstmail till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L125">            Context context = new Context();</span>
+<span class="nc" id="L126">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L127">            context.setVariable(&quot;lastName&quot;, user.getLastName());</span>
+<span class="nc" id="L128">            context.setVariable(&quot;loginUrl&quot;, baseUrl + &quot;/login&quot;);</span>
+<span class="nc" id="L129">            context.setVariable(&quot;shopUrl&quot;, baseUrl + &quot;/products&quot;);</span>
+<span class="nc" id="L130">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L131">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+
+<span class="nc" id="L133">            String htmlContent = templateEngine.process(&quot;emails/welcome&quot;, context);</span>
+<span class="nc" id="L134">            sendHtmlEmail(user.getEmail(), &quot;Välkommen till &quot; + companyName + &quot;!&quot;, htmlContent);</span>
+
+<span class="nc" id="L136">            logger.info(&quot;✅ Välkomstmail skickat till: {}&quot;, user.getEmail());</span>
+
+<span class="nc" id="L138">        } catch (Exception e) {</span>
+<span class="nc" id="L139">            logger.error(&quot;❌ Fel vid skickande av välkomstmail till {}: {}&quot;, user.getEmail(), e.getMessage());</span>
+<span class="nc" id="L140">            throw new RuntimeException(&quot;Kunde inte skicka välkomstmail&quot;, e);</span>
+<span class="nc" id="L141">        }</span>
+<span class="nc" id="L142">    }</span>
+
+    // ✅ 4. PASSWORD RESET - New interface method
+    @Override
+    public void sendPasswordResetEmail(User user, String resetToken) {
+<span class="nc" id="L147">        sendPasswordResetEmail(user.getEmail(), resetToken, user.getFirstName());</span>
+<span class="nc" id="L148">    }</span>
+
+    // ✅ 5. PASSWORD RESET - Legacy method
+    @Override
+    public void sendPasswordResetEmail(String email, String resetToken, String firstName) {
+        try {
+<span class="nc" id="L154">            logger.info(&quot;🔐 Skickar lösenordsåterställning till: {}&quot;, email);</span>
+
+<span class="nc" id="L156">            String resetUrl = baseUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
+
+            // Försök med Thymeleaf template först
+            try {
+<span class="nc" id="L160">                Context context = new Context();</span>
+<span class="nc" id="L161">                context.setVariable(&quot;firstName&quot;, firstName);</span>
+<span class="nc" id="L162">                context.setVariable(&quot;resetUrl&quot;, resetUrl);</span>
+<span class="nc" id="L163">                context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L164">                context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L165">                context.setVariable(&quot;expiryHours&quot;, 1);</span>
+
+<span class="nc" id="L167">                String htmlContent = templateEngine.process(&quot;emails/password-reset&quot;, context);</span>
+<span class="nc" id="L168">                sendHtmlEmail(email, &quot;Återställ ditt lösenord - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L169">            } catch (Exception templateError) {</span>
+                // Om template inte finns, använd enkel HTML
+<span class="nc" id="L171">                logger.warn(&quot;Kunde inte använda Thymeleaf template, använder enkel HTML&quot;);</span>
+<span class="nc" id="L172">                String htmlContent = createSimplePasswordResetEmail(firstName, resetUrl);</span>
+<span class="nc" id="L173">                sendHtmlEmail(email, &quot;Återställ ditt lösenord - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L174">            }</span>
+
+<span class="nc" id="L176">            logger.info(&quot;✅ Lösenordsåterställning skickad till: {}&quot;, email);</span>
+
+<span class="nc" id="L178">        } catch (Exception e) {</span>
+<span class="nc" id="L179">            logger.error(&quot;❌ Fel vid skickande av lösenordsåterställning till {}: {}&quot;, email, e.getMessage());</span>
+<span class="nc" id="L180">            throw new RuntimeException(&quot;Kunde inte skicka lösenordsåterställning&quot;, e);</span>
+<span class="nc" id="L181">        }</span>
+<span class="nc" id="L182">    }</span>
+
+    // ✅ NY METOD: Password reset som returnerar boolean
+    public boolean sendPasswordResetEmail(String email, String resetToken) {
+        try {
+<span class="nc bnc" id="L187" title="All 2 branches missed.">            if (!isConfigured()) {</span>
+<span class="nc" id="L188">                logger.warn(&quot;Email service is not configured - skipping email to: {}&quot;, email);</span>
+<span class="nc" id="L189">                return false;</span>
+            }
+
+<span class="nc" id="L192">            sendPasswordResetEmail(email, resetToken, &quot;&quot;);</span>
+<span class="nc" id="L193">            return true;</span>
+<span class="nc" id="L194">        } catch (Exception e) {</span>
+<span class="nc" id="L195">            logger.error(&quot;Failed to send password reset email to: {}&quot;, email, e);</span>
+<span class="nc" id="L196">            return false;</span>
+        }
+    }
+
+    // ✅ 6. ORDER CONFIRMATION - New interface method
+    @Override
+    public void sendOrderConfirmationEmail(User user, String orderNumber) {
+        try {
+<span class="nc" id="L204">            logger.info(&quot;🧾 Skickar orderbekräftelse till: {} för order: {}&quot;, user.getEmail(), orderNumber);</span>
+
+<span class="nc" id="L206">            Context context = new Context();</span>
+<span class="nc" id="L207">            context.setVariable(&quot;firstName&quot;, user.getFirstName());</span>
+<span class="nc" id="L208">            context.setVariable(&quot;orderNumber&quot;, orderNumber);</span>
+<span class="nc" id="L209">            context.setVariable(&quot;orderDate&quot;, LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)));</span>
+<span class="nc" id="L210">            context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L211">            context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L212">            context.setVariable(&quot;supportEmail&quot;, fromEmail);</span>
+
+<span class="nc" id="L214">            String htmlContent = templateEngine.process(&quot;emails/order-confirmation-simple&quot;, context);</span>
+<span class="nc" id="L215">            sendHtmlEmail(user.getEmail(), &quot;Orderbekräftelse #&quot; + orderNumber + &quot; - &quot; + companyName, htmlContent);</span>
+
+<span class="nc" id="L217">            logger.info(&quot;✅ Orderbekräftelse skickad till: {} för order: {}&quot;, user.getEmail(), orderNumber);</span>
+
+<span class="nc" id="L219">        } catch (Exception e) {</span>
+<span class="nc" id="L220">            logger.error(&quot;❌ Fel vid skickande av orderbekräftelse till {} för order {}: {}&quot;, user.getEmail(), orderNumber, e.getMessage());</span>
+<span class="nc" id="L221">            throw new RuntimeException(&quot;Kunde inte skicka orderbekräftelse&quot;, e);</span>
+<span class="nc" id="L222">        }</span>
+<span class="nc" id="L223">    }</span>
+
+    // ✅ 7. ORDER CONFIRMATION - Legacy method with full Order object
+    @Override
+    public void sendOrderConfirmation(Order order, String email) {
+<span class="nc" id="L228">        sendOrderConfirmation(email, order);</span>
+<span class="nc" id="L229">    }</span>
+
+    // ✅ NY METOD: Order confirmation som returnerar boolean (för CheckoutController)
+    public boolean sendOrderConfirmation(String toEmail, Order order) {
+        try {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">            if (!isConfigured()) {</span>
+<span class="nc" id="L235">                logger.error(&quot;E-posttjänsten är inte konfigurerad&quot;);</span>
+<span class="nc" id="L236">                return false;</span>
+            }
+
+<span class="nc" id="L239">            logger.info(&quot;🧾 Skickar detaljerad orderbekräftelse för order: {} till: {}&quot;, order.getId(), toEmail);</span>
+
+            // Försök med Thymeleaf template först
+            try {
+<span class="nc" id="L243">                Context context = new Context();</span>
+<span class="nc" id="L244">                context.setVariable(&quot;order&quot;, order);</span>
+<span class="nc" id="L245">                context.setVariable(&quot;orderNumber&quot;, order.getOrderNumber());</span>
+<span class="nc" id="L246">                context.setVariable(&quot;orderDate&quot;, order.getOrderDate().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)));</span>
+<span class="nc" id="L247">                context.setVariable(&quot;companyName&quot;, companyName);</span>
+<span class="nc" id="L248">                context.setVariable(&quot;currentYear&quot;, LocalDateTime.now().getYear());</span>
+<span class="nc" id="L249">                context.setVariable(&quot;supportEmail&quot;, fromEmail);</span>
+
+<span class="nc" id="L251">                String htmlContent = templateEngine.process(&quot;emails/order-confirmation-detailed&quot;, context);</span>
+<span class="nc" id="L252">                sendHtmlEmail(toEmail, &quot;Orderbekräftelse #&quot; + order.getOrderNumber() + &quot; - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L253">            } catch (Exception templateError) {</span>
+                // Om template inte finns, använd enkel HTML
+<span class="nc" id="L255">                logger.warn(&quot;Kunde inte använda Thymeleaf template, använder enkel HTML&quot;);</span>
+<span class="nc" id="L256">                String htmlContent = createSimpleOrderConfirmationEmail(order);</span>
+<span class="nc" id="L257">                sendHtmlEmail(toEmail, &quot;Orderbekräftelse #&quot; + order.getOrderNumber() + &quot; - &quot; + companyName, htmlContent);</span>
+<span class="nc" id="L258">            }</span>
+
+<span class="nc" id="L260">            logger.info(&quot;✅ Detaljerad orderbekräftelse skickad till: {} för order: {}&quot;, toEmail, order.getId());</span>
+
+<span class="nc" id="L262">            return true;</span>
+
+<span class="nc" id="L264">        } catch (Exception e) {</span>
+<span class="nc" id="L265">            logger.error(&quot;❌ Fel vid skickande av detaljerad orderbekräftelse för order {} till {}: {}&quot;,</span>
+<span class="nc" id="L266">                    order.getId(), toEmail, e.getMessage());</span>
+<span class="nc" id="L267">            return false;</span>
+        }
+    }
+
+    // ✅ 8. TEST EMAIL CONNECTION
+    @Override
+    public boolean testEmailConnection() {
+        try {
+<span class="nc" id="L275">            logger.info(&quot;🧪 Testar email-anslutning...&quot;);</span>
+
+<span class="nc" id="L277">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L278">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L280">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L281">            helper.setTo(fromEmail); // Skicka till oss själva</span>
+<span class="nc" id="L282">            helper.setSubject(&quot;Email Test - &quot; + companyName);</span>
+<span class="nc" id="L283">            helper.setText(&quot;Detta är ett testmail för att kontrollera email-konfigurationen.\n\nTid: &quot; +</span>
+<span class="nc" id="L284">                    LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;)), false);</span>
+
+<span class="nc" id="L286">            mailSender.send(message);</span>
+<span class="nc" id="L287">            logger.info(&quot;✅ Email-test lyckades!&quot;);</span>
+<span class="nc" id="L288">            return true;</span>
+
+<span class="nc" id="L290">        } catch (Exception e) {</span>
+<span class="nc" id="L291">            logger.error(&quot;❌ Email-test misslyckades: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L292">            return false;</span>
+        }
+    }
+
+    // ✅ 9. ACCOUNT DELETION NOTIFICATION
+    @Override
+    public void sendAccountDeletionNotification(User deletedUser, String adminUsername, String reason) {
+        try {
+<span class="nc" id="L300">            logger.info(&quot;🗑️ Skickar kontoborttagningsnotifiering till: {}&quot;, deletedUser.getEmail());</span>
+
+<span class="nc" id="L302">            String htmlContent = createAccountDeletionEmailContent(deletedUser, adminUsername, reason);</span>
+<span class="nc" id="L303">            sendHtmlEmail(deletedUser.getEmail(), &quot;Ditt CtrlBuy-konto har tagits bort&quot;, htmlContent);</span>
+
+<span class="nc" id="L305">            logger.info(&quot;✅ Kontoborttagningsnotifiering skickad till: {}&quot;, deletedUser.getEmail());</span>
+
+<span class="nc" id="L307">        } catch (Exception e) {</span>
+<span class="nc" id="L308">            logger.error(&quot;❌ Fel vid skickande av kontoborttagningsnotifiering till {}: {}&quot;,</span>
+<span class="nc" id="L309">                    deletedUser.getEmail(), e.getMessage());</span>
+<span class="nc" id="L310">            throw new RuntimeException(&quot;Kunde inte skicka kontoborttagningsnotifiering&quot;, e);</span>
+<span class="nc" id="L311">        }</span>
+<span class="nc" id="L312">    }</span>
+
+    // ✅ 10. ACCOUNT DEACTIVATION NOTIFICATION
+    @Override
+    public void sendAccountDeactivationNotification(User deactivatedUser, String adminUsername, String reason) {
+        try {
+<span class="nc" id="L318">            logger.info(&quot;⏸️ Skickar kontoinaktiveringsnotifiering till: {}&quot;, deactivatedUser.getEmail());</span>
+
+<span class="nc" id="L320">            String htmlContent = createAccountDeactivationEmailContent(deactivatedUser, adminUsername, reason);</span>
+<span class="nc" id="L321">            sendHtmlEmail(deactivatedUser.getEmail(), &quot;Ditt CtrlBuy-konto har inaktiverats&quot;, htmlContent);</span>
+
+<span class="nc" id="L323">            logger.info(&quot;✅ Kontoinaktiveringsnotifiering skickad till: {}&quot;, deactivatedUser.getEmail());</span>
+
+<span class="nc" id="L325">        } catch (Exception e) {</span>
+<span class="nc" id="L326">            logger.error(&quot;❌ Fel vid skickande av kontoinaktiveringsnotifiering till {}: {}&quot;,</span>
+<span class="nc" id="L327">                    deactivatedUser.getEmail(), e.getMessage());</span>
+            // Logga bara fel, kasta inte exception för detta
+<span class="nc" id="L329">        }</span>
+<span class="nc" id="L330">    }</span>
+
+    // ✅ 11. ACCOUNT REACTIVATION NOTIFICATION
+    @Override
+    public void sendAccountReactivationNotification(User reactivatedUser, String adminUsername) {
+        try {
+<span class="nc" id="L336">            logger.info(&quot;▶️ Skickar kontoåteraktiveringsnotifiering till: {}&quot;, reactivatedUser.getEmail());</span>
+
+<span class="nc" id="L338">            String htmlContent = createAccountReactivationEmailContent(reactivatedUser, adminUsername);</span>
+<span class="nc" id="L339">            sendHtmlEmail(reactivatedUser.getEmail(), &quot;Ditt CtrlBuy-konto har återaktiverats&quot;, htmlContent);</span>
+
+<span class="nc" id="L341">            logger.info(&quot;✅ Kontoåteraktiveringsnotifiering skickad till: {}&quot;, reactivatedUser.getEmail());</span>
+
+<span class="nc" id="L343">        } catch (Exception e) {</span>
+<span class="nc" id="L344">            logger.error(&quot;❌ Fel vid skickande av återaktiveringsnotifiering till {}: {}&quot;,</span>
+<span class="nc" id="L345">                    reactivatedUser.getEmail(), e.getMessage());</span>
+            // Logga bara fel, kasta inte exception för detta
+<span class="nc" id="L347">        }</span>
+<span class="nc" id="L348">    }</span>
+
+    // ✅ UTILITY METODER
+
+    /**
+     * Skicka HTML email
+     */
+    private void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+        try {
+<span class="nc" id="L357">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L358">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L360">            helper.setFrom(fromEmail, companyName);</span>
+<span class="nc" id="L361">            helper.setTo(to);</span>
+<span class="nc" id="L362">            helper.setSubject(subject);</span>
+<span class="nc" id="L363">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L365">            mailSender.send(message);</span>
+<span class="nc" id="L366">        } catch (Exception e) {</span>
+<span class="nc" id="L367">            throw new MessagingException(&quot;Failed to send email&quot;, e);</span>
+<span class="nc" id="L368">        }</span>
+<span class="nc" id="L369">    }</span>
+
+    /**
+     * Formatera pengar för email-templates
+     */
+    private String formatCurrency(Double amount) {
+<span class="nc" id="L375">        return String.format(&quot;%.2f kr&quot;, amount);</span>
+    }
+
+    // ✅ ENKLA HTML TEMPLATES (om Thymeleaf templates saknas)
+
+    private String createSimpleVerificationEmail(String firstName, String verificationUrl) {
+<span class="nc" id="L381">        return &quot;&quot;&quot;</span>
+            &lt;html&gt;
+            &lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333;&quot;&gt;
+                &lt;div style=&quot;max-width: 600px; margin: 0 auto; padding: 20px;&quot;&gt;
+                    &lt;h2 style=&quot;color: #007bff;&quot;&gt;Välkommen till %s!&lt;/h2&gt;
+                    &lt;p&gt;Hej %s,&lt;/p&gt;
+                    &lt;p&gt;Tack för att du registrerat dig. För att slutföra din registrering behöver du verifiera din e-postadress.&lt;/p&gt;
+                    &lt;div style=&quot;margin: 30px 0; text-align: center;&quot;&gt;
+                        &lt;a href=&quot;%s&quot; style=&quot;background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;&quot;&gt;
+                            Verifiera e-postadress
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;p&gt;Eller kopiera och klistra in denna länk i din webbläsare:&lt;/p&gt;
+                    &lt;p style=&quot;word-break: break-all; color: #007bff;&quot;&gt;%s&lt;/p&gt;
+                    &lt;p style=&quot;margin-top: 30px; font-size: 14px; color: #666;&quot;&gt;
+                        Denna länk är giltig i 24 timmar. Om du inte har registrerat dig på %s kan du ignorera detta mail.
+                    &lt;/p&gt;
+                    &lt;hr style=&quot;margin-top: 30px; border: none; border-top: 1px solid #eee;&quot;&gt;
+                    &lt;p style=&quot;font-size: 12px; color: #999;&quot;&gt;
+                        Detta är ett automatiskt mail från %s. Vänligen svara inte på detta mail.
+                    &lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+<span class="nc" id="L405">            &quot;&quot;&quot;.formatted(companyName, firstName, verificationUrl, verificationUrl, companyName, companyName);</span>
+    }
+
+    private String createSimplePasswordResetEmail(String firstName, String resetUrl) {
+<span class="nc" id="L409">        return &quot;&quot;&quot;</span>
+            &lt;html&gt;
+            &lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333;&quot;&gt;
+                &lt;div style=&quot;max-width: 600px; margin: 0 auto; padding: 20px;&quot;&gt;
+                    &lt;h2 style=&quot;color: #007bff;&quot;&gt;Återställ ditt lösenord&lt;/h2&gt;
+                    &lt;p&gt;Hej %s,&lt;/p&gt;
+                    &lt;p&gt;Vi har mottagit en begäran om att återställa lösenordet för ditt konto.&lt;/p&gt;
+                    &lt;div style=&quot;margin: 30px 0; text-align: center;&quot;&gt;
+                        &lt;a href=&quot;%s&quot; style=&quot;background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;&quot;&gt;
+                            Återställ lösenord
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;p&gt;Eller kopiera och klistra in denna länk i din webbläsare:&lt;/p&gt;
+                    &lt;p style=&quot;word-break: break-all; color: #007bff;&quot;&gt;%s&lt;/p&gt;
+                    &lt;p style=&quot;margin-top: 30px; font-size: 14px; color: #666;&quot;&gt;
+                        Denna länk är giltig i 1 timme. Om du inte har begärt att återställa ditt lösenord kan du ignorera detta mail.
+                    &lt;/p&gt;
+                    &lt;hr style=&quot;margin-top: 30px; border: none; border-top: 1px solid #eee;&quot;&gt;
+                    &lt;p style=&quot;font-size: 12px; color: #999;&quot;&gt;
+                        Detta är ett automatiskt mail från %s. Vänligen svara inte på detta mail.
+                    &lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+<span class="nc" id="L433">            &quot;&quot;&quot;.formatted(firstName, resetUrl, resetUrl, companyName);</span>
+    }
+
+    private String createSimpleOrderConfirmationEmail(Order order) {
+<span class="nc" id="L437">        StringBuilder content = new StringBuilder();</span>
+<span class="nc" id="L438">        content.append(&quot;&lt;html&gt;&lt;body style='font-family: Arial, sans-serif;'&gt;&quot;);</span>
+<span class="nc" id="L439">        content.append(&quot;&lt;div style='max-width: 600px; margin: auto; padding: 20px;'&gt;&quot;);</span>
+
+        // Header
+<span class="nc" id="L442">        content.append(&quot;&lt;div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'&gt;&quot;);</span>
+<span class="nc" id="L443">        content.append(&quot;&lt;h1 style='margin: 0;'&gt;Tack för din beställning!&lt;/h1&gt;&quot;);</span>
+<span class="nc" id="L444">        content.append(&quot;&lt;/div&gt;&quot;);</span>
+
+        // Order info
+<span class="nc" id="L447">        content.append(&quot;&lt;div style='padding: 20px; background-color: #f8f9fa;'&gt;&quot;);</span>
+<span class="nc" id="L448">        content.append(&quot;&lt;h2&gt;Ordernummer: &quot;).append(order.getOrderNumber()).append(&quot;&lt;/h2&gt;&quot;);</span>
+<span class="nc" id="L449">        content.append(&quot;&lt;p&gt;Beställningsdatum: &quot;).append(</span>
+<span class="nc" id="L450">                order.getOrderDate().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;))</span>
+<span class="nc" id="L451">        ).append(&quot;&lt;/p&gt;&quot;);</span>
+
+        // Leveransadress
+<span class="nc" id="L454">        content.append(&quot;&lt;h3&gt;Leveransadress:&lt;/h3&gt;&quot;);</span>
+<span class="nc" id="L455">        content.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L456">        content.append(order.getDeliveryName()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L457">        content.append(order.getDeliveryAddress()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L458">        content.append(order.getDeliveryPostalCode()).append(&quot; &quot;).append(order.getDeliveryCity()).append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">        if (order.getDeliveryPhone() != null) {</span>
+<span class="nc" id="L460">            content.append(&quot;Telefon: &quot;).append(order.getDeliveryPhone()).append(&quot;&lt;br&gt;&quot;);</span>
+        }
+<span class="nc" id="L462">        content.append(&quot;&lt;/p&gt;&quot;);</span>
+
+        // Orderrader
+<span class="nc bnc" id="L465" title="All 4 branches missed.">        if (order.getOrderItems() != null &amp;&amp; !order.getOrderItems().isEmpty()) {</span>
+<span class="nc" id="L466">            content.append(&quot;&lt;h3&gt;Din beställning:&lt;/h3&gt;&quot;);</span>
+<span class="nc" id="L467">            content.append(&quot;&lt;table style='width: 100%; border-collapse: collapse;'&gt;&quot;);</span>
+<span class="nc" id="L468">            content.append(&quot;&lt;tr style='background-color: #e9ecef;'&gt;&quot;);</span>
+<span class="nc" id="L469">            content.append(&quot;&lt;th style='padding: 10px; text-align: left;'&gt;Produkt&lt;/th&gt;&quot;);</span>
+<span class="nc" id="L470">            content.append(&quot;&lt;th style='padding: 10px; text-align: center;'&gt;Antal&lt;/th&gt;&quot;);</span>
+<span class="nc" id="L471">            content.append(&quot;&lt;th style='padding: 10px; text-align: right;'&gt;Pris&lt;/th&gt;&quot;);</span>
+<span class="nc" id="L472">            content.append(&quot;&lt;th style='padding: 10px; text-align: right;'&gt;Summa&lt;/th&gt;&quot;);</span>
+<span class="nc" id="L473">            content.append(&quot;&lt;/tr&gt;&quot;);</span>
+
+<span class="nc bnc" id="L475" title="All 2 branches missed.">            for (OrderItem item : order.getOrderItems()) {</span>
+<span class="nc" id="L476">                double itemTotal = item.getPrice().doubleValue() * item.getQuantity();</span>
+
+<span class="nc" id="L478">                content.append(&quot;&lt;tr&gt;&quot;);</span>
+<span class="nc" id="L479">                content.append(&quot;&lt;td style='padding: 10px; border-bottom: 1px solid #dee2e6;'&gt;&quot;)</span>
+<span class="nc" id="L480">                        .append(item.getProductName()).append(&quot;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L481">                content.append(&quot;&lt;td style='padding: 10px; text-align: center; border-bottom: 1px solid #dee2e6;'&gt;&quot;)</span>
+<span class="nc" id="L482">                        .append(item.getQuantity()).append(&quot;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L483">                content.append(&quot;&lt;td style='padding: 10px; text-align: right; border-bottom: 1px solid #dee2e6;'&gt;&quot;)</span>
+<span class="nc" id="L484">                        .append(formatCurrency(item.getPrice().doubleValue())).append(&quot;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L485">                content.append(&quot;&lt;td style='padding: 10px; text-align: right; border-bottom: 1px solid #dee2e6;'&gt;&quot;)</span>
+<span class="nc" id="L486">                        .append(formatCurrency(itemTotal)).append(&quot;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L487">                content.append(&quot;&lt;/tr&gt;&quot;);</span>
+<span class="nc" id="L488">            }</span>
+
+            // Total
+<span class="nc" id="L491">            content.append(&quot;&lt;tr&gt;&quot;);</span>
+<span class="nc" id="L492">            content.append(&quot;&lt;td colspan='3' style='padding: 10px; text-align: right;'&gt;&lt;strong&gt;Totalt:&lt;/strong&gt;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L493">            content.append(&quot;&lt;td style='padding: 10px; text-align: right;'&gt;&lt;strong&gt;&quot;)</span>
+<span class="nc" id="L494">                    .append(formatCurrency(order.getTotalAmount())).append(&quot;&lt;/strong&gt;&lt;/td&gt;&quot;);</span>
+<span class="nc" id="L495">            content.append(&quot;&lt;/tr&gt;&quot;);</span>
+<span class="nc" id="L496">            content.append(&quot;&lt;/table&gt;&quot;);</span>
+        }
+
+        // Betalningsmetod
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        if (order.getPaymentMethod() != null) {</span>
+<span class="nc" id="L501">            content.append(&quot;&lt;p style='margin-top: 20px;'&gt;&lt;strong&gt;Betalningsmetod:&lt;/strong&gt; &quot;)</span>
+<span class="nc" id="L502">                    .append(order.getPaymentMethod()).append(&quot;&lt;/p&gt;&quot;);</span>
+        }
+
+        // Status
+<span class="nc" id="L506">        content.append(&quot;&lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; &quot;).append(order.getStatus()).append(&quot;&lt;/p&gt;&quot;);</span>
+
+        // Footer
+<span class="nc" id="L509">        content.append(&quot;&lt;hr style='margin-top: 30px;'&gt;&quot;);</span>
+<span class="nc" id="L510">        content.append(&quot;&lt;p&gt;Vi kommer att behandla din beställning så snart som möjligt.&lt;/p&gt;&quot;);</span>
+<span class="nc" id="L511">        content.append(&quot;&lt;p&gt;Om du har frågor, kontakta oss på support@ctrlbuy.se&lt;/p&gt;&quot;);</span>
+<span class="nc" id="L512">        content.append(&quot;&lt;p&gt;Med vänliga hälsningar,&lt;br&gt;&lt;strong&gt;&quot;).append(companyName).append(&quot; Team&lt;/strong&gt;&lt;/p&gt;&quot;);</span>
+<span class="nc" id="L513">        content.append(&quot;&lt;/div&gt;&quot;);</span>
+<span class="nc" id="L514">        content.append(&quot;&lt;/div&gt;&quot;);</span>
+<span class="nc" id="L515">        content.append(&quot;&lt;/body&gt;&lt;/html&gt;&quot;);</span>
+
+<span class="nc" id="L517">        return content.toString();</span>
+    }
+
+    // ✅ PRIVATA HJÄLPMETODER FÖR KONTOADMINISTRATION
+
+    private String createAccountDeletionEmailContent(User deletedUser, String adminUsername, String reason) {
+<span class="nc" id="L523">        return String.format(&quot;&quot;&quot;</span>
+            &lt;html&gt;
+            &lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333;&quot;&gt;
+                &lt;div style=&quot;max-width: 600px; margin: 0 auto; padding: 20px;&quot;&gt;
+                    &lt;div style=&quot;background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;&quot;&gt;
+                        &lt;h1 style=&quot;margin: 0;&quot;&gt;⚠️ Kontoborttagning&lt;/h1&gt;
+                        &lt;p style=&quot;margin: 10px 0 0 0;&quot;&gt;Viktigt meddelande angående ditt %s-konto&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;&quot;&gt;
+                        &lt;p&gt;Hej %s,&lt;/p&gt;
+                        
+                        &lt;div style=&quot;background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;&quot;&gt;
+                            &lt;strong&gt;🚫 Ditt %s-konto har tagits bort permanent&lt;/strong&gt;&lt;br&gt;
+                            &lt;strong&gt;Datum:&lt;/strong&gt; %s&lt;br&gt;
+                            &lt;strong&gt;Utförd av:&lt;/strong&gt; Administratör (%s)
+                            %s
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;&lt;strong&gt;Vad detta innebär:&lt;/strong&gt;&lt;/p&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;Ditt konto och all associerad data har tagits bort permanent&lt;/li&gt;
+                            &lt;li&gt;Du kan inte längre logga in på %s&lt;/li&gt;
+                            &lt;li&gt;All orderhistorik och personlig information har raderats&lt;/li&gt;
+                            &lt;li&gt;Denna åtgärd kan inte ångras&lt;/li&gt;
+                        &lt;/ul&gt;
+                        
+                        &lt;div style=&quot;background: #e7f3ff; border: 1px solid #b8daff; padding: 15px; border-radius: 5px; margin: 20px 0;&quot;&gt;
+                            &lt;strong&gt;📞 Har du frågor?&lt;/strong&gt;&lt;br&gt;
+                            Om du anser att detta är ett misstag eller har frågor om borttagningen, 
+                            vänligen kontakta vår kundtjänst på &lt;a href=&quot;mailto:%s&quot;&gt;%s&lt;/a&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;Tack för att du var en del av %s-communityn.&lt;/p&gt;
+                        
+                        &lt;p&gt;Med vänliga hälsningar,&lt;br&gt;
+                        &lt;strong&gt;%s Team&lt;/strong&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; color: #6c757d;&quot;&gt;
+                        &lt;p&gt;Detta är ett automatiskt meddelande från %s&lt;br&gt;
+                        &lt;small&gt;Skickat: %s&lt;/small&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+            &quot;&quot;&quot;,
+                companyName,
+<span class="nc" id="L571">                deletedUser.getFirstName(),</span>
+                companyName,
+<span class="nc" id="L573">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)),</span>
+                adminUsername,
+<span class="nc bnc" id="L575" title="All 4 branches missed.">                reason != null &amp;&amp; !reason.trim().isEmpty() ?</span>
+<span class="nc" id="L576">                        String.format(&quot;&lt;br&gt;&lt;strong&gt;Anledning:&lt;/strong&gt; %s&quot;, reason) : &quot;&quot;,</span>
+                companyName,
+                fromEmail,
+                fromEmail,
+                companyName,
+                companyName,
+                companyName,
+<span class="nc" id="L583">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;))</span>
+        );
+    }
+
+    private String createAccountDeactivationEmailContent(User deactivatedUser, String adminUsername, String reason) {
+<span class="nc" id="L588">        return String.format(&quot;&quot;&quot;</span>
+            &lt;html&gt;
+            &lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333;&quot;&gt;
+                &lt;div style=&quot;max-width: 600px; margin: 0 auto; padding: 20px;&quot;&gt;
+                    &lt;div style=&quot;background: linear-gradient(135deg, #fd7e14, #e55100); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;&quot;&gt;
+                        &lt;h1 style=&quot;margin: 0;&quot;&gt;⏸️ Konto inaktiverat&lt;/h1&gt;
+                        &lt;p style=&quot;margin: 10px 0 0 0;&quot;&gt;Meddelande angående ditt %s-konto&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;&quot;&gt;
+                        &lt;p&gt;Hej %s,&lt;/p&gt;
+                        
+                        &lt;div style=&quot;background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;&quot;&gt;
+                            &lt;strong&gt;⏸️ Ditt %s-konto har inaktiverats&lt;/strong&gt;&lt;br&gt;
+                            &lt;strong&gt;Datum:&lt;/strong&gt; %s&lt;br&gt;
+                            &lt;strong&gt;Utförd av:&lt;/strong&gt; Administratör (%s)
+                            %s
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;&lt;strong&gt;Vad detta innebär:&lt;/strong&gt;&lt;/p&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;Du kan inte logga in på ditt konto för tillfället&lt;/li&gt;
+                            &lt;li&gt;Dina data är kvar men kontot är temporärt avstängt&lt;/li&gt;
+                            &lt;li&gt;Inaktiveringen kan eventuellt hävs av en administratör&lt;/li&gt;
+                        &lt;/ul&gt;
+                        
+                        &lt;div style=&quot;background: #e7f3ff; border: 1px solid #b8daff; padding: 15px; border-radius: 5px; margin: 20px 0;&quot;&gt;
+                            &lt;strong&gt;📞 Överklagande eller frågor?&lt;/strong&gt;&lt;br&gt;
+                            Om du anser att inaktiveringen är felaktig eller har frågor, 
+                            vänligen kontakta vår kundtjänst på &lt;a href=&quot;mailto:%s&quot;&gt;%s&lt;/a&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;Med vänliga hälsningar,&lt;br&gt;
+                        &lt;strong&gt;%s Team&lt;/strong&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; color: #6c757d;&quot;&gt;
+                        &lt;p&gt;Detta är ett automatiskt meddelande från %s&lt;br&gt;
+                        &lt;small&gt;Skickat: %s&lt;/small&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+            &quot;&quot;&quot;,
+                companyName,
+<span class="nc" id="L633">                deactivatedUser.getFirstName(),</span>
+                companyName,
+<span class="nc" id="L635">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)),</span>
+                adminUsername,
+<span class="nc bnc" id="L637" title="All 4 branches missed.">                reason != null &amp;&amp; !reason.trim().isEmpty() ?</span>
+<span class="nc" id="L638">                        String.format(&quot;&lt;br&gt;&lt;strong&gt;Anledning:&lt;/strong&gt; %s&quot;, reason) : &quot;&quot;,</span>
+                fromEmail,
+                fromEmail,
+                companyName,
+                companyName,
+<span class="nc" id="L643">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;))</span>
+        );
+    }
+
+    private String createAccountReactivationEmailContent(User reactivatedUser, String adminUsername) {
+<span class="nc" id="L648">        return String.format(&quot;&quot;&quot;</span>
+            &lt;html&gt;
+            &lt;body style=&quot;font-family: Arial, sans-serif; line-height: 1.6; color: #333;&quot;&gt;
+                &lt;div style=&quot;max-width: 600px; margin: 0 auto; padding: 20px;&quot;&gt;
+                    &lt;div style=&quot;background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;&quot;&gt;
+                        &lt;h1 style=&quot;margin: 0;&quot;&gt;✅ Välkommen tillbaka!&lt;/h1&gt;
+                        &lt;p style=&quot;margin: 10px 0 0 0;&quot;&gt;Ditt %s-konto är nu aktivt igen&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;&quot;&gt;
+                        &lt;p&gt;Hej %s,&lt;/p&gt;
+                        
+                        &lt;div style=&quot;background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0;&quot;&gt;
+                            &lt;strong&gt;🎉 Ditt %s-konto har återaktiverats&lt;/strong&gt;&lt;br&gt;
+                            &lt;strong&gt;Datum:&lt;/strong&gt; %s&lt;br&gt;
+                            &lt;strong&gt;Utförd av:&lt;/strong&gt; Administratör (%s)
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;&lt;strong&gt;Vad detta innebär:&lt;/strong&gt;&lt;/p&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;Du kan nu logga in på ditt konto igen&lt;/li&gt;
+                            &lt;li&gt;All din data och orderhistorik är fortfarande kvar&lt;/li&gt;
+                            &lt;li&gt;Du har full tillgång till alla %s-funktioner&lt;/li&gt;
+                        &lt;/ul&gt;
+                        
+                        &lt;div style=&quot;background: #e7f3ff; border: 1px solid #b8daff; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;&quot;&gt;
+                            &lt;strong&gt;🛒 Redo att handla?&lt;/strong&gt;&lt;br&gt;
+                            &lt;a href=&quot;%s/login&quot; style=&quot;background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;&quot;&gt;Logga in nu&lt;/a&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;p&gt;Vi ser fram emot att välkomna dig tillbaka till %s!&lt;/p&gt;
+                        
+                        &lt;p&gt;Med vänliga hälsningar,&lt;br&gt;
+                        &lt;strong&gt;%s Team&lt;/strong&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div style=&quot;text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; color: #6c757d;&quot;&gt;
+                        &lt;p&gt;Detta är ett automatiskt meddelande från %s&lt;br&gt;
+                        &lt;small&gt;Skickat: %s&lt;/small&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+            &quot;&quot;&quot;,
+                companyName,
+<span class="nc" id="L693">                reactivatedUser.getFirstName(),</span>
+                companyName,
+<span class="nc" id="L695">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm&quot;)),</span>
+                adminUsername,
+                companyName,
+                baseUrl,
+                companyName,
+                companyName,
+                companyName,
+<span class="nc" id="L702">                LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;))</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

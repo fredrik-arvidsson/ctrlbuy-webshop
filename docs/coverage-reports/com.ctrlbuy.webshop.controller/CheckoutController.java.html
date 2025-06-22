@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CheckoutController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">CheckoutController.java</span></div><h1>CheckoutController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.service.OrderService;
+import com.ctrlbuy.webshop.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.util.List;
+
+@Controller
+@RequestMapping(&quot;/checkout&quot;)
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
+<span class="fc" id="L22">@Slf4j</span>
+public class CheckoutController {
+
+    private final OrderService orderService;
+    private final UserService userService;
+
+    @GetMapping
+    public String showCheckout(Model model, HttpSession session, Authentication auth) {
+        try {
+            // Kontrollera att användaren är inloggad
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">            if (auth == null || !auth.isAuthenticated()) {</span>
+<span class="fc" id="L33">                return &quot;redirect:/login&quot;;</span>
+            }
+
+<span class="nc" id="L36">            User currentUser = userService.findByUsername(auth.getName()).orElse(null);</span>
+<span class="nc" id="L37">            model.addAttribute(&quot;user&quot;, currentUser);</span>
+
+            // Hämta varukorg från SESSION (samma som CartController)
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L41">            List&lt;CartController.CartItem&gt; cartItems = (List&lt;CartController.CartItem&gt;)</span>
+<span class="nc" id="L42">                    session.getAttribute(&quot;shopping_cart&quot;);</span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            log.debug(&quot;DEBUG CHECKOUT: Cart items from session = {}&quot;, cartItems != null ? cartItems.size() : &quot;null&quot;);</span>
+
+<span class="nc bnc" id="L46" title="All 4 branches missed.">            if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="nc" id="L47">                log.debug(&quot;DEBUG CHECKOUT: Cart is null or empty, redirecting to cart&quot;);</span>
+<span class="nc" id="L48">                model.addAttribute(&quot;error&quot;, &quot;Din varukorg är tom&quot;);</span>
+<span class="nc" id="L49">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+            // Beräkna total från session-data
+<span class="nc" id="L53">            BigDecimal subtotal = cartItems.stream()</span>
+<span class="nc" id="L54">                    .map(CartController.CartItem::getTotalPrice)</span>
+<span class="nc" id="L55">                    .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="nc" id="L57">            BigDecimal shipping = BigDecimal.valueOf(49.00);</span>
+<span class="nc" id="L58">            BigDecimal total = subtotal.add(shipping);</span>
+
+<span class="nc" id="L60">            log.debug(&quot;DEBUG CHECKOUT: Proceeding to checkout with {} items, total: {}&quot;,</span>
+<span class="nc" id="L61">                    cartItems.size(), total);</span>
+
+            // Lägg till i model (samma struktur som innan)
+<span class="nc" id="L64">            model.addAttribute(&quot;cartItems&quot;, cartItems);</span>
+<span class="nc" id="L65">            model.addAttribute(&quot;subtotal&quot;, subtotal);</span>
+<span class="nc" id="L66">            model.addAttribute(&quot;shipping&quot;, shipping);</span>
+<span class="nc" id="L67">            model.addAttribute(&quot;total&quot;, total);</span>
+
+<span class="nc" id="L69">            return &quot;checkout&quot;;</span>
+
+<span class="nc" id="L71">        } catch (Exception e) {</span>
+<span class="nc" id="L72">            log.error(&quot;Error in checkout: &quot;, e);</span>
+<span class="nc" id="L73">            model.addAttribute(&quot;error&quot;, &quot;Ett fel uppstod vid checkout&quot;);</span>
+<span class="nc" id="L74">            return &quot;redirect:/varukorg&quot;;</span>
+        }
+    }
+
+    @PostMapping(&quot;/process&quot;)
+    public String processOrder(
+            @RequestParam String email,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String address,
+            @RequestParam String city,
+            @RequestParam String postalCode,
+            @RequestParam String phone,
+            @RequestParam(required = false) String notes,
+            @RequestParam String paymentMethod,
+            HttpSession session,
+            Authentication auth,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Kontrollera inloggning
+<span class="pc bpc" id="L95" title="2 of 4 branches missed.">            if (auth == null || !auth.isAuthenticated()) {</span>
+<span class="fc" id="L96">                return &quot;redirect:/login&quot;;</span>
+            }
+
+<span class="nc" id="L99">            User currentUser = userService.findByUsername(auth.getName()).orElse(null);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (currentUser == null) {</span>
+<span class="nc" id="L101">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Användaren kunde inte hittas&quot;);</span>
+<span class="nc" id="L102">                return &quot;redirect:/login&quot;;</span>
+            }
+
+            // Hämta varukorg från SESSION
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L107">            List&lt;CartController.CartItem&gt; cartItems = (List&lt;CartController.CartItem&gt;)</span>
+<span class="nc" id="L108">                    session.getAttribute(&quot;shopping_cart&quot;);</span>
+
+<span class="nc bnc" id="L110" title="All 4 branches missed.">            if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="nc" id="L111">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Din varukorg är tom&quot;);</span>
+<span class="nc" id="L112">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+<span class="nc" id="L115">            log.info(&quot;Processing order for user: {} with {} items&quot;, currentUser.getUsername(), cartItems.size());</span>
+
+            // Beräkna total
+<span class="nc" id="L118">            BigDecimal subtotal = cartItems.stream()</span>
+<span class="nc" id="L119">                    .map(CartController.CartItem::getTotalPrice)</span>
+<span class="nc" id="L120">                    .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="nc" id="L122">            BigDecimal shipping = BigDecimal.valueOf(49.00);</span>
+<span class="nc" id="L123">            BigDecimal orderTotal = subtotal.add(shipping);</span>
+
+<span class="nc" id="L125">            log.info(&quot;Order total: {} kr&quot;, orderTotal);</span>
+<span class="nc" id="L126">            log.info(&quot;About to call orderService.createOrderFromCart()&quot;);</span>
+
+            // Skapa OrderDetails objekt (korrekt struktur med 6 fält)
+<span class="nc" id="L129">            OrderService.OrderDetails orderDetails = new OrderService.OrderDetails();</span>
+<span class="nc" id="L130">            orderDetails.setDeliveryName(firstName + &quot; &quot; + lastName);</span>
+<span class="nc" id="L131">            orderDetails.setDeliveryAddress(address);</span>
+<span class="nc" id="L132">            orderDetails.setDeliveryCity(city);</span>
+<span class="nc" id="L133">            orderDetails.setDeliveryPostalCode(postalCode);</span>
+<span class="nc" id="L134">            orderDetails.setDeliveryPhone(phone);</span>
+<span class="nc" id="L135">            orderDetails.setPaymentMethod(paymentMethod);</span>
+
+            // **SKAPA BESTÄLLNINGEN I DATABASEN**
+<span class="nc" id="L138">            Order savedOrder = orderService.createOrderFromCart(currentUser, cartItems, orderDetails);</span>
+
+<span class="nc" id="L140">            log.info(&quot;Order created successfully with ID: {}&quot;, savedOrder.getId());</span>
+
+            // Rensa session-varukorg EFTER att beställningen sparats
+<span class="nc" id="L143">            session.removeAttribute(&quot;shopping_cart&quot;);</span>
+
+            // Success meddelande med ordernummer
+<span class="nc" id="L146">            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;,</span>
+<span class="nc" id="L147">                    &quot;Beställning genomförd! Ordernummer: &quot; + savedOrder.getId());</span>
+
+<span class="nc" id="L149">            return &quot;redirect:/checkout/confirmation/&quot; + savedOrder.getId();</span>
+
+<span class="nc" id="L151">        } catch (Exception e) {</span>
+<span class="nc" id="L152">            log.error(&quot;ERROR in checkout process: &quot;, e);</span>
+<span class="nc" id="L153">            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;,</span>
+<span class="nc" id="L154">                    &quot;Något gick fel vid beställningen: &quot; + e.getMessage());</span>
+<span class="nc" id="L155">            return &quot;redirect:/checkout&quot;;</span>
+        }
+    }
+
+    @GetMapping(&quot;/confirmation/{orderId}&quot;)
+    @Transactional(readOnly = true)
+    public String showConfirmation(@PathVariable Long orderId, Model model) {
+        try {
+<span class="fc" id="L163">            Order order = orderService.findById(orderId);</span>
+
+<span class="fc bfc" id="L165" title="All 2 branches covered.">            if (order == null) {</span>
+<span class="fc" id="L166">                model.addAttribute(&quot;error&quot;, &quot;Beställningen kunde inte hittas&quot;);</span>
+<span class="fc" id="L167">                return &quot;redirect:/&quot;;</span>
+            }
+
+<span class="fc" id="L170">            model.addAttribute(&quot;order&quot;, order);</span>
+<span class="fc" id="L171">            return &quot;confirmation&quot;;</span>
+
+<span class="fc" id="L173">        } catch (Exception e) {</span>
+<span class="fc" id="L174">            log.error(&quot;Error showing confirmation: &quot;, e);</span>
+<span class="fc" id="L175">            model.addAttribute(&quot;error&quot;, &quot;Ett fel uppstod&quot;);</span>
+<span class="fc" id="L176">            return &quot;redirect:/&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

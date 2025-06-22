@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orderbekräftelse - CtrlBuy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .order-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid #28a745;
+        }
+        .order-info h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .order-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        .order-detail strong {
+            color: #28a745;
+        }
+        .order-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #28a745;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #d4edda;
+            border-radius: 8px;
+        }
+        .next-steps {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d4fc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .next-steps h3 {
+            margin: 0 0 15px 0;
+            color: #0c5460;
+            font-size: 16px;
+        }
+        .next-steps ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #0c5460;
+        }
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 5px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .company-name {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 30px;
+        }
+        .support-email {
+            color: #007bff;
+            text-decoration: none;
+        }
+        @media (max-width: 480px) {
+            .order-detail {
+                flex-direction: column;
+            }
+            .btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="icon">🎉</div>
+        <h1>Tack för din beställning!</h1>
+    </div>
+
+    <div class="content">
+        <div class="greeting">
+            Hej <span th:text="${firstName}">Kund</span>! 🛍️
+        </div>
+
+        <div class="message">
+            <p><strong>Vi har mottagit din beställning!</strong></p>
+            <p>Tack för att du handlar hos <span class="company-name" th:text="${companyName}">CtrlBuy</span>. Din order är nu registrerad i vårt system och vi förbereder leveransen.</p>
+        </div>
+
+        <div class="order-number">
+            Ordernummer: <span th:text="${orderNumber}">#ORD-00001</span>
+        </div>
+
+        <div class="order-info">
+            <h3>📋 Orderdetaljer</h3>
+            <div class="order-detail">
+                <span>Ordernummer:</span>
+                <strong th:text="${orderNumber}">#ORD-00001</strong>
+            </div>
+            <div class="order-detail">
+                <span>Orderdatum:</span>
+                <strong th:text="${orderDate}">2025-06-10 15:30</strong>
+            </div>
+            <div class="order-detail">
+                <span>Status:</span>
+                <strong style="color: #28a745;">Bekräftad</strong>
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <h3>📦 Nästa steg</h3>
+            <ul>
+                <li>Du får en ny email när din order packas och skickas</li>
+                <li>Spårningsinformation skickas när paketet lämnar vårt lager</li>
+                <li>Leveranstid är normalt 2-5 arbetsdagar</li>
+                <li>Du kan följa din order i ditt kundkonto</li>
+            </ul>
+        </div>
+
+        <div class="btn-container">
+            <a href="#" class="btn btn-primary">
+                📦 Följ min order
+            </a>
+            <a href="#" class="btn btn-secondary">
+                🛍️ Fortsätt handla
+            </a>
+        </div>
+
+        <div class="message">
+            <p><strong>Frågor om din order?</strong></p>
+            <p>Kontakta vår kundservice på <a th:href="'mailto:' + ${supportEmail}" class="support-email" th:text="${supportEmail}">support@ctrlbuy.com</a> så hjälper vi dig gärna!</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Tack för att du handlar hos <span th:text="${companyName}">CtrlBuy</span>!</p>
+        <p>Detta är en automatisk bekräftelse för ordernummer <span th:text="${orderNumber}">#ORD-00001</span></p>
+        <p>&copy; <span th:text="${currentYear}">2025</span> <span th:text="${companyName}">CtrlBuy</span>. Alla rättigheter förbehållna.</p>
+    </div>
+</div>
+</body>
+</html>

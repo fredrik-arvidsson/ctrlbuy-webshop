@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">OrderService.java</span></div><h1>OrderService.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
+
+import com.ctrlbuy.webshop.model.Cart;
+import com.ctrlbuy.webshop.model.CartItem;
+import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.model.OrderItem;
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.repository.OrderRepository;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
+@Service
+@Transactional
+<span class="fc" id="L31">@RequiredArgsConstructor</span>
+<span class="fc" id="L32">@Slf4j</span>
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final ProductService productService;
+    private final EmailService emailService; // ✅ NYTT: Lägg till EmailService
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /**
+     * Skapa beställning från checkout-formulär
+     */
+    public Order createOrder(Cart cart, String email, String firstName, String lastName,
+                             String address, String city, String postalCode, String phone,
+                             String notes, String paymentMethod, Authentication auth) {
+
+<span class="fc bfc" id="L50" title="All 4 branches covered.">        if (cart == null || cart.getItems().isEmpty()) {</span>
+<span class="fc" id="L51">            throw new RuntimeException(&quot;Kundvagnen är tom&quot;);</span>
+        }
+
+<span class="fc" id="L54">        log.info(&quot;Skapar beställning från checkout för: {}&quot;, email);</span>
+
+        // Hämta användare om inloggad
+<span class="fc" id="L57">        User user = null;</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        if (auth != null &amp;&amp; auth.isAuthenticated()) {</span>
+<span class="fc" id="L59">            Optional&lt;User&gt; userOpt = userRepository.findByUsername(auth.getName());</span>
+<span class="fc" id="L60">            user = userOpt.orElse(null);</span>
+        }
+
+        // Beräkna totaler
+<span class="fc" id="L64">        BigDecimal subtotal = cart.getTotalAmount();</span>
+<span class="fc" id="L65">        BigDecimal shipping = BigDecimal.valueOf(49.00);</span>
+<span class="fc" id="L66">        BigDecimal total = subtotal.add(shipping);</span>
+
+        // Generera ordernummer
+<span class="fc" id="L69">        String orderNumber = generateOrderNumber();</span>
+
+        // Skapa beställning
+<span class="fc" id="L72">        Order order = new Order();</span>
+<span class="fc" id="L73">        order.setUser(user);</span>
+<span class="fc" id="L74">        order.setOrderNumber(orderNumber);</span>
+<span class="fc" id="L75">        order.setTotalAmount(total.doubleValue());</span>
+<span class="fc" id="L76">        order.setStatus(Order.OrderStatus.PENDING);</span>
+<span class="fc" id="L77">        order.setOrderDate(LocalDateTime.now());</span>
+
+        // Leveransadress
+<span class="fc" id="L80">        order.setDeliveryName(firstName + &quot; &quot; + lastName);</span>
+<span class="fc" id="L81">        order.setDeliveryAddress(address);</span>
+<span class="fc" id="L82">        order.setDeliveryCity(city);</span>
+<span class="fc" id="L83">        order.setDeliveryPostalCode(postalCode);</span>
+<span class="fc" id="L84">        order.setDeliveryPhone(phone);</span>
+<span class="fc" id="L85">        order.setPaymentMethod(paymentMethod);</span>
+
+        // Spara beställning först
+<span class="fc" id="L88">        order = orderRepository.save(order);</span>
+
+        // Lägg till orderitems från cart
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (CartItem cartItem : cart.getItems()) {</span>
+<span class="fc" id="L92">            OrderItem orderItem = new OrderItem();</span>
+<span class="fc" id="L93">            orderItem.setOrder(order);</span>
+<span class="fc" id="L94">            orderItem.setProduct(cartItem.getProduct());</span>
+<span class="fc" id="L95">            orderItem.setQuantity(cartItem.getQuantity());</span>
+<span class="fc" id="L96">            orderItem.setPrice(cartItem.getUnitPrice().doubleValue());</span>
+<span class="fc" id="L97">            orderItem.setProductName(cartItem.getProduct().getName());</span>
+
+<span class="fc" id="L99">            order.addOrderItem(orderItem);</span>
+<span class="fc" id="L100">        }</span>
+
+        // Spara igen med orderitems
+<span class="fc" id="L103">        order = orderRepository.save(order);</span>
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            emailService.sendOrderConfirmation(order, user != null ? user.getEmail() : email);</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            log.info(&quot;Orderbekräftelse skickad till: {}&quot;, user != null ? user.getEmail() : email);</span>
+<span class="fc" id="L109">        } catch (Exception e) {</span>
+<span class="fc" id="L110">            log.error(&quot;Kunde inte skicka orderbekräftelse för order {}: {}&quot;, orderNumber, e.getMessage());</span>
+            // Logga felet men låt inte det stoppa orderprocessen
+<span class="fc" id="L112">        }</span>
+
+<span class="fc" id="L114">        log.info(&quot;Beställning skapad med ordernummer: {}&quot;, orderNumber);</span>
+<span class="fc" id="L115">        return order;</span>
+    }
+
+    /**
+     * Skapa ny beställning från kundvagn
+     */
+    public Order createOrderFromCart(User user, List&lt;com.ctrlbuy.webshop.controller.CartController.CartItem&gt; cartItems, OrderDetails orderDetails) {
+
+<span class="fc bfc" id="L123" title="All 4 branches covered.">        if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="fc" id="L124">            throw new RuntimeException(&quot;Kundvagnen är tom&quot;);</span>
+        }
+
+<span class="fc" id="L127">        log.info(&quot;Skapar beställning för användare: {}&quot;, user.getEmail());</span>
+
+        // Beräkna totaler
+<span class="fc" id="L130">        BigDecimal subtotal = cartItems.stream()</span>
+<span class="fc" id="L131">                .map(com.ctrlbuy.webshop.controller.CartController.CartItem::getTotalPrice)</span>
+<span class="fc" id="L132">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        BigDecimal shipping = subtotal.compareTo(new BigDecimal(&quot;499&quot;)) &gt;= 0</span>
+<span class="fc" id="L135">                ? BigDecimal.ZERO</span>
+<span class="fc" id="L136">                : new BigDecimal(&quot;49&quot;);</span>
+<span class="fc" id="L137">        BigDecimal total = subtotal.add(shipping);</span>
+
+        // Generera ordernummer
+<span class="fc" id="L140">        String orderNumber = generateOrderNumber();</span>
+
+        // Skapa beställning
+<span class="fc" id="L143">        Order order = new Order();</span>
+<span class="fc" id="L144">        order.setUser(user);</span>
+<span class="fc" id="L145">        order.setOrderNumber(orderNumber);</span>
+<span class="fc" id="L146">        order.setTotalAmount(total.doubleValue());</span>
+<span class="fc" id="L147">        order.setStatus(Order.OrderStatus.PENDING);</span>
+<span class="fc" id="L148">        order.setOrderDate(LocalDateTime.now());</span>
+
+        // Leveransadress
+<span class="fc" id="L151">        order.setDeliveryName(orderDetails.getDeliveryName());</span>
+<span class="fc" id="L152">        order.setDeliveryAddress(orderDetails.getDeliveryAddress());</span>
+<span class="fc" id="L153">        order.setDeliveryCity(orderDetails.getDeliveryCity());</span>
+<span class="fc" id="L154">        order.setDeliveryPostalCode(orderDetails.getDeliveryPostalCode());</span>
+<span class="fc" id="L155">        order.setDeliveryPhone(orderDetails.getDeliveryPhone());</span>
+
+        // Betalningsinformation
+<span class="fc" id="L158">        order.setPaymentMethod(orderDetails.getPaymentMethod());</span>
+
+        // Spara beställning först
+<span class="fc" id="L161">        order = orderRepository.save(order);</span>
+
+        // Lägg till orderitems
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        for (com.ctrlbuy.webshop.controller.CartController.CartItem cartItem : cartItems) {</span>
+<span class="fc" id="L165">            OrderItem orderItem = new OrderItem();</span>
+<span class="fc" id="L166">            orderItem.setOrder(order);</span>
+<span class="fc" id="L167">            orderItem.setProduct(cartItem.getProduct());</span>
+<span class="fc" id="L168">            orderItem.setQuantity(cartItem.getQuantity());</span>
+<span class="fc" id="L169">            orderItem.setPrice(cartItem.getUnitPrice().doubleValue());</span>
+<span class="fc" id="L170">            orderItem.setProductName(cartItem.getProduct().getName());</span>
+
+<span class="fc" id="L172">            order.addOrderItem(orderItem);</span>
+<span class="fc" id="L173">        }</span>
+
+        // Spara igen med orderitems
+<span class="fc" id="L176">        order = orderRepository.save(order);</span>
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+<span class="fc" id="L180">            emailService.sendOrderConfirmation(order, user.getEmail());</span>
+<span class="fc" id="L181">            log.info(&quot;Orderbekräftelse skickad till: {}&quot;, user.getEmail());</span>
+<span class="nc" id="L182">        } catch (Exception e) {</span>
+<span class="nc" id="L183">            log.error(&quot;Kunde inte skicka orderbekräftelse för order {}: {}&quot;, orderNumber, e.getMessage());</span>
+            // Logga felet men låt inte det stoppa orderprocessen
+<span class="fc" id="L185">        }</span>
+
+<span class="fc" id="L187">        log.info(&quot;Beställning skapad med ordernummer: {}&quot;, orderNumber);</span>
+<span class="fc" id="L188">        return order;</span>
+    }
+
+    /**
+     * Skapa beställning för icke-inloggad användare (gäst)
+     */
+    public Order createGuestOrder(List&lt;com.ctrlbuy.webshop.controller.CartController.CartItem&gt; cartItems, GuestOrderDetails guestDetails) {
+
+<span class="pc bpc" id="L196" title="1 of 4 branches missed.">        if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="fc" id="L197">            throw new RuntimeException(&quot;Kundvagnen är tom&quot;);</span>
+        }
+
+<span class="fc" id="L200">        log.info(&quot;Skapar gästbeställning för: {}&quot;, guestDetails.getEmail());</span>
+
+        // Beräkna totaler
+<span class="fc" id="L203">        BigDecimal subtotal = cartItems.stream()</span>
+<span class="fc" id="L204">                .map(com.ctrlbuy.webshop.controller.CartController.CartItem::getTotalPrice)</span>
+<span class="fc" id="L205">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        BigDecimal shipping = subtotal.compareTo(new BigDecimal(&quot;499&quot;)) &gt;= 0</span>
+<span class="nc" id="L208">                ? BigDecimal.ZERO</span>
+<span class="fc" id="L209">                : new BigDecimal(&quot;49&quot;);</span>
+<span class="fc" id="L210">        BigDecimal total = subtotal.add(shipping);</span>
+
+        // Generera ordernummer
+<span class="fc" id="L213">        String orderNumber = generateOrderNumber();</span>
+
+        // Skapa beställning utan User
+<span class="fc" id="L216">        Order order = new Order();</span>
+<span class="fc" id="L217">        order.setOrderNumber(orderNumber);</span>
+<span class="fc" id="L218">        order.setTotalAmount(total.doubleValue());</span>
+<span class="fc" id="L219">        order.setStatus(Order.OrderStatus.PENDING);</span>
+<span class="fc" id="L220">        order.setOrderDate(LocalDateTime.now());</span>
+
+        // Leveransadress från gäst
+<span class="fc" id="L223">        order.setDeliveryName(guestDetails.getFirstName() + &quot; &quot; + guestDetails.getLastName());</span>
+<span class="fc" id="L224">        order.setDeliveryAddress(guestDetails.getAddress());</span>
+<span class="fc" id="L225">        order.setDeliveryCity(guestDetails.getCity());</span>
+<span class="fc" id="L226">        order.setDeliveryPostalCode(guestDetails.getPostalCode());</span>
+<span class="fc" id="L227">        order.setDeliveryPhone(guestDetails.getPhone());</span>
+
+        // Betalningsinformation
+<span class="fc" id="L230">        order.setPaymentMethod(guestDetails.getPaymentMethod());</span>
+
+        // Spara beställning först
+<span class="fc" id="L233">        order = orderRepository.save(order);</span>
+
+        // Lägg till orderitems
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        for (com.ctrlbuy.webshop.controller.CartController.CartItem cartItem : cartItems) {</span>
+<span class="fc" id="L237">            OrderItem orderItem = new OrderItem();</span>
+<span class="fc" id="L238">            orderItem.setOrder(order);</span>
+<span class="fc" id="L239">            orderItem.setProduct(cartItem.getProduct());</span>
+<span class="fc" id="L240">            orderItem.setQuantity(cartItem.getQuantity());</span>
+<span class="fc" id="L241">            orderItem.setPrice(cartItem.getUnitPrice().doubleValue());</span>
+<span class="fc" id="L242">            orderItem.setProductName(cartItem.getProduct().getName());</span>
+
+<span class="fc" id="L244">            order.addOrderItem(orderItem);</span>
+<span class="fc" id="L245">        }</span>
+
+        // Spara igen med orderitems
+<span class="fc" id="L248">        order = orderRepository.save(order);</span>
+
+        // ✅ NYTT: Skicka orderbekräftelse via e-post för gäster
+        try {
+<span class="fc" id="L252">            emailService.sendOrderConfirmation(order, guestDetails.getEmail());</span>
+<span class="fc" id="L253">            log.info(&quot;Gäst-orderbekräftelse skickad till: {}&quot;, guestDetails.getEmail());</span>
+<span class="fc" id="L254">        } catch (Exception e) {</span>
+<span class="fc" id="L255">            log.error(&quot;Kunde inte skicka gäst-orderbekräftelse för order {}: {}&quot;, orderNumber, e.getMessage());</span>
+            // Logga felet men låt inte det stoppa orderprocessen
+<span class="fc" id="L257">        }</span>
+
+<span class="fc" id="L259">        log.info(&quot;Gästbeställning skapad med ordernummer: {}&quot;, orderNumber);</span>
+<span class="fc" id="L260">        return order;</span>
+    }
+
+    /**
+     * Hitta beställning baserat på ordernummer och användare
+     */
+    public Order findByOrderNumberAndUser(String orderNumber, User user) {
+<span class="fc" id="L267">        return orderRepository.findByOrderNumberAndUser(orderNumber, user);</span>
+    }
+
+    /**
+     * Hitta beställning endast baserat på ordernummer (för gäster)
+     */
+    public Order findByOrderNumber(String orderNumber) {
+<span class="fc" id="L274">        return orderRepository.findByOrderNumber(orderNumber);</span>
+    }
+
+    /**
+     * Hitta alla beställningar för en användare
+     */
+    public List&lt;Order&gt; findByUser(User user) {
+<span class="fc" id="L281">        return orderRepository.findByUserOrderByOrderDateDesc(user);</span>
+    }
+
+    /**
+     * Uppdatera orderstatus
+     */
+    public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
+<span class="fc" id="L288">        Order order = orderRepository.findById(orderId)</span>
+<span class="fc" id="L289">                .orElseThrow(() -&gt; new RuntimeException(&quot;Beställning hittades inte&quot;));</span>
+
+<span class="fc" id="L291">        order.setStatus(status);</span>
+<span class="fc" id="L292">        Order updatedOrder = orderRepository.save(order);</span>
+
+<span class="fc" id="L294">        log.info(&quot;Orderstatus uppdaterad för beställning {}: {}&quot;, order.getOrderNumber(), status);</span>
+<span class="fc" id="L295">        return updatedOrder;</span>
+    }
+
+    /**
+     * ✅ UPPDATERAD: Generera enkelt ordernummer med löpnummer
+     */
+    private String generateOrderNumber() {
+        // Hämta totalt antal ordrar och lägg till 1 för nästa nummer
+<span class="fc" id="L303">        long nextOrderNumber = orderRepository.count() + 1;</span>
+<span class="fc" id="L304">        return String.format(&quot;CB%03d&quot;, nextOrderNumber);</span>
+    }
+
+    /**
+     * Hitta beställning baserat på ID
+     */
+    public Order findById(Long id) {
+<span class="fc" id="L311">        return orderRepository.findById(id)</span>
+<span class="fc" id="L312">                .orElseThrow(() -&gt; new RuntimeException(&quot;Beställning hittades inte&quot;));</span>
+    }
+
+    /**
+     * Hitta beställning med orderItems (för att undvika LazyInitializationException)
+     */
+    @Transactional(readOnly = true)
+    public Order findOrderWithItemsById(Long orderId) {
+        try {
+<span class="nc" id="L321">            return entityManager.createQuery(</span>
+                            &quot;SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId&quot;,
+                            Order.class)
+<span class="nc" id="L324">                    .setParameter(&quot;orderId&quot;, orderId)</span>
+<span class="nc" id="L325">                    .getSingleResult();</span>
+<span class="nc" id="L326">        } catch (Exception e) {</span>
+<span class="nc" id="L327">            log.error(&quot;Kunde inte hämta beställning med ID: {}&quot;, orderId, e);</span>
+<span class="nc" id="L328">            return null;</span>
+        }
+    }
+
+    /**
+     * Alla beställningar (admin)
+     */
+    public List&lt;Order&gt; findAll() {
+<span class="fc" id="L336">        return orderRepository.findAllByOrderByOrderDateDesc();</span>
+    }
+
+    /**
+     * Räkna antal beställningar för användare
+     */
+    public Long countOrdersByUser(User user) {
+<span class="fc" id="L343">        return orderRepository.countByUser(user);</span>
+    }
+
+    // ========================================
+    // NYA METODER FÖR ORDERHISTORIK
+    // ========================================
+
+    /**
+     * Hämta orders med paginering för orderhistorik
+     */
+    public Page&lt;Order&gt; getOrdersByUserWithPagination(User user, int page, int size) {
+<span class="fc" id="L354">        Pageable pageable = PageRequest.of(page, size, Sort.by(&quot;orderDate&quot;).descending());</span>
+<span class="fc" id="L355">        return orderRepository.findByUser(user, pageable);</span>
+    }
+
+    /**
+     * Hämta specifik order för användare (säkerhetscheck)
+     */
+    public Optional&lt;Order&gt; getOrderByIdAndUser(Long orderId, User user) {
+<span class="fc" id="L362">        return orderRepository.findByIdAndUser(orderId, user);</span>
+    }
+
+    /**
+     * Hämta order via ordernummer och användare (säkerhetscheck) - wrapprar befintlig metod
+     */
+    public Optional&lt;Order&gt; getOrderByOrderNumberAndUser(String orderNumber, User user) {
+<span class="fc" id="L369">        Order order = findByOrderNumberAndUser(orderNumber, user);</span>
+<span class="fc" id="L370">        return Optional.ofNullable(order);</span>
+    }
+
+    /**
+     * Beräkna total summa för alla orders av användare
+     */
+    public Double getTotalSpentByUser(User user) {
+<span class="fc" id="L377">        return orderRepository.sumTotalAmountByUser(user);</span>
+    }
+
+    /**
+     * Hämta senaste order för användare
+     */
+    public Optional&lt;Order&gt; getLatestOrderByUser(User user) {
+<span class="fc" id="L384">        List&lt;Order&gt; orders = findByUser(user); // Använder befintlig metod</span>
+<span class="fc bfc" id="L385" title="All 2 branches covered.">        return orders.isEmpty() ? Optional.empty() : Optional.of(orders.get(0));</span>
+    }
+
+    /**
+     * Hämta orders för användare (orderhistorik - använder befintlig metod)
+     */
+    public List&lt;Order&gt; getOrdersByUser(User user) {
+<span class="fc" id="L392">        return findByUser(user); // Använder din befintliga metod</span>
+    }
+
+    // DTO klasser för beställningsdata
+<span class="pc bnc" id="L396" title="All 54 branches missed.">    @lombok.Data</span>
+<span class="fc" id="L397">    @lombok.NoArgsConstructor</span>
+<span class="nc" id="L398">    @lombok.AllArgsConstructor</span>
+    public static class OrderDetails {
+<span class="fc" id="L400">        private String deliveryName;</span>
+<span class="fc" id="L401">        private String deliveryAddress;</span>
+<span class="fc" id="L402">        private String deliveryCity;</span>
+<span class="fc" id="L403">        private String deliveryPostalCode;</span>
+<span class="fc" id="L404">        private String deliveryPhone;</span>
+<span class="fc" id="L405">        private String paymentMethod;</span>
+    }
+
+<span class="pc bnc" id="L408" title="All 70 branches missed.">    @lombok.Data</span>
+<span class="fc" id="L409">    @lombok.NoArgsConstructor</span>
+    public static class GuestOrderDetails {
+<span class="fc" id="L411">        private String firstName;</span>
+<span class="fc" id="L412">        private String lastName;</span>
+<span class="fc" id="L413">        private String email;</span>
+<span class="fc" id="L414">        private String phone;</span>
+<span class="fc" id="L415">        private String address;</span>
+<span class="fc" id="L416">        private String city;</span>
+<span class="fc" id="L417">        private String postalCode;</span>
+<span class="fc" id="L418">        private String paymentMethod;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
