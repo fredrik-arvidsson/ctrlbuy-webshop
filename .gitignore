@@ -119,3 +119,5 @@ src/main/resources/application-dev.properties
 src/main/resources/application-dev.properties
 .elasticbeanstalk/app_versions/
 .elasticbeanstalk/logs/
+*.jar
+webshop-1.0-SNAPSHOT.jar
