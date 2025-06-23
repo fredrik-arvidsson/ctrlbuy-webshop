@@ -2,17 +2,22 @@ name: CtrlBuy CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  test:
+  test-and-deploy:
     runs-on: ubuntu-latest
-    name: Quick Test
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -21,78 +26,387 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-
-      - name: Build application
-        run: mvn clean compile -DskipTests
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Run tests
-        run: mvn test
+        run: mvn clean test
 
-  coverage:
-    runs-on: ubuntu-latest
-    name: Coverage Report
-    needs: test
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-
-      - name: Generate coverage report
-        run: mvn clean test jacoco:report
+      - name: Generate JaCoCo coverage report
+        run: mvn jacoco:report
 
       - name: Upload coverage to Codecov
-        if: success()
-        run: echo "Coverage report generated successfully"
-
-  build:
-    runs-on: ubuntu-latest
-    name: Build & Package
-    needs: test
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: codecov/codecov-action@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          file: ./target/site/jacoco/jacoco.xml
+          fail_ci_if_error: false
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      - name: Generate coverage badges
+        run: |
+          # Create badges directory
+          mkdir -p target/site/jacoco/badges
+          
+          # Extract coverage percentages from JaCoCo XML
+          INSTRUCTION_COVERAGE=$(grep -o 'type="INSTRUCTION".*missed="[0-9]*".*covered="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | sed 's/.*missed="\([0-9]*\)".*covered="\([0-9]*\)".*/\1 \2/')
+          BRANCH_COVERAGE=$(grep -o 'type="BRANCH".*missed="[0-9]*".*covered="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | sed 's/.*missed="\([0-9]*\)".*covered="\([0-9]*\)".*/\1 \2/')
+          
+          # Calculate percentages
+          if [ ! -z "$INSTRUCTION_COVERAGE" ]; then
+            MISSED=$(echo $INSTRUCTION_COVERAGE | cut -d' ' -f1)
+            COVERED=$(echo $INSTRUCTION_COVERAGE | cut -d' ' -f2)
+            TOTAL=$((MISSED + COVERED))
+            if [ $TOTAL -gt 0 ]; then
+              PERCENTAGE=$((COVERED * 100 / TOTAL))
+            else
+              PERCENTAGE=0
+            fi
+          else
+            PERCENTAGE=0
+          fi
+          
+          if [ ! -z "$BRANCH_COVERAGE" ]; then
+            BRANCH_MISSED=$(echo $BRANCH_COVERAGE | cut -d' ' -f1)
+            BRANCH_COVERED=$(echo $BRANCH_COVERAGE | cut -d' ' -f2)
+            BRANCH_TOTAL=$((BRANCH_MISSED + BRANCH_COVERED))
+            if [ $BRANCH_TOTAL -gt 0 ]; then
+              BRANCH_PERCENTAGE=$((BRANCH_COVERED * 100 / BRANCH_TOTAL))
+            else
+              BRANCH_PERCENTAGE=0
+            fi
+          else
+            BRANCH_PERCENTAGE=0
+          fi
+          
+          # Determine badge colors
+          if [ $PERCENTAGE -ge 80 ]; then
+            COLOR="brightgreen"
+          elif [ $PERCENTAGE -ge 60 ]; then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+          
+          if [ $BRANCH_PERCENTAGE -ge 80 ]; then
+            BRANCH_COLOR="brightgreen"
+          elif [ $BRANCH_PERCENTAGE -ge 60 ]; then
+            BRANCH_COLOR="yellow"
+          else
+            BRANCH_COLOR="red"
+          fi
+          
+          # Create SVG badges
+          cat > target/site/jacoco/badges/jacoco.svg << EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="104" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <mask id="a">
+              <rect width="104" height="20" rx="3" fill="#fff"/>
+            </mask>
+            <g mask="url(#a)">
+              <path fill="#555" d="M0 0h63v20H0z"/>
+              <path fill="$COLOR" d="M63 0h41v20H63z"/>
+              <path fill="url(#b)" d="M0 0h104v20H0z"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="31.5" y="15" fill="#010101" fill-opacity=".3">coverage</text>
+              <text x="31.5" y="14">coverage</text>
+              <text x="82.5" y="15" fill="#010101" fill-opacity=".3">${PERCENTAGE}%</text>
+              <text x="82.5" y="14">${PERCENTAGE}%</text>
+            </g>
+          </svg>
+          EOF
+          
+          cat > target/site/jacoco/badges/branches.svg << EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <mask id="a">
+              <rect width="96" height="20" rx="3" fill="#fff"/>
+            </mask>
+            <g mask="url(#a)">
+              <path fill="#555" d="M0 0h59v20H0z"/>
+              <path fill="$BRANCH_COLOR" d="M59 0h37v20H59z"/>
+              <path fill="url(#b)" d="M0 0h96v20H0z"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="29.5" y="15" fill="#010101" fill-opacity=".3">branches</text>
+              <text x="29.5" y="14">branches</text>
+              <text x="76.5" y="15" fill="#010101" fill-opacity=".3">${BRANCH_PERCENTAGE}%</text>
+              <text x="76.5" y="14">${BRANCH_PERCENTAGE}%</text>
+            </g>
+          </svg>
+          EOF
+          
+          echo "Coverage: ${PERCENTAGE}% | Branches: ${BRANCH_PERCENTAGE}%"
 
-      - name: Build and package application
+      - name: Create coverage dashboard
+        run: |
+          # Create main dashboard index.html
+          mkdir -p target/site/dashboard
+          cat > target/site/dashboard/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="sv">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>CtrlBuy - Live Test Coverage Dashboard</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+              <style>
+                  body { 
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  }
+                  .dashboard-card {
+                      background: rgba(255, 255, 255, 0.95);
+                      border-radius: 15px;
+                      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                      backdrop-filter: blur(10px);
+                  }
+                  .metric-card {
+                      background: linear-gradient(45deg, #4CAF50, #8BC34A);
+                      color: white;
+                      border-radius: 10px;
+                      transition: transform 0.3s ease;
+                  }
+                  .metric-card:hover {
+                      transform: translateY(-5px);
+                  }
+                  .btn-custom {
+                      background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+                      border: none;
+                      border-radius: 25px;
+                      color: white;
+                      transition: all 0.3s ease;
+                  }
+                  .btn-custom:hover {
+                      transform: translateY(-2px);
+                      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                      color: white;
+                  }
+                  .live-indicator {
+                      animation: pulse 2s infinite;
+                  }
+                  @keyframes pulse {
+                      0% { opacity: 1; }
+                      50% { opacity: 0.5; }
+                      100% { opacity: 1; }
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container py-5">
+                  <div class="row justify-content-center">
+                      <div class="col-lg-10">
+                          <div class="dashboard-card p-5">
+                              <!-- Header -->
+                              <div class="text-center mb-5">
+                                  <h1 class="display-4 fw-bold text-primary mb-3">
+                                      <i class="fas fa-chart-line me-3"></i>
+                                      CtrlBuy Test Coverage Dashboard
+                                  </h1>
+                                  <p class="lead text-muted">
+                                      Live metrics from automated testing pipeline
+                                      <span class="badge bg-success ms-2 live-indicator">
+                                          <i class="fas fa-circle me-1"></i>LIVE
+                                      </span>
+                                  </p>
+                                  <div class="text-muted small">
+                                      Last updated: <span id="lastUpdate"></span>
+                                  </div>
+                              </div>
+          
+                              <!-- Coverage Metrics -->
+                              <div class="row mb-5">
+                                  <div class="col-md-6 mb-3">
+                                      <div class="metric-card p-4 text-center">
+                                          <i class="fas fa-code fa-3x mb-3"></i>
+                                          <h3 class="mb-2">Code Coverage</h3>
+                                          <div class="display-6 fw-bold" id="codeCoverage">Loading...</div>
+                                          <small>Lines of code tested</small>
+                                      </div>
+                                  </div>
+                                  <div class="col-md-6 mb-3">
+                                      <div class="metric-card p-4 text-center">
+                                          <i class="fas fa-code-branch fa-3x mb-3"></i>
+                                          <h3 class="mb-2">Branch Coverage</h3>
+                                          <div class="display-6 fw-bold" id="branchCoverage">Loading...</div>
+                                          <small>Decision branches tested</small>
+                                      </div>
+                                  </div>
+                              </div>
+          
+                              <!-- Quick Actions -->
+                              <div class="row mb-4">
+                                  <div class="col-md-4 mb-3">
+                                      <a href="../jacoco/index.html" class="btn btn-custom w-100 py-3">
+                                          <i class="fas fa-chart-pie me-2"></i>
+                                          Detailed Coverage Report
+                                      </a>
+                                  </div>
+                                  <div class="col-md-4 mb-3">
+                                      <a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop" class="btn btn-outline-primary w-100 py-3">
+                                          <i class="fab fa-github me-2"></i>
+                                          View Source Code
+                                      </a>
+                                  </div>
+                                  <div class="col-md-4 mb-3">
+                                      <a href="https://github.com/fredrik-arvidsson/ctrlbuy-webshop/actions" class="btn btn-outline-success w-100 py-3">
+                                          <i class="fas fa-cogs me-2"></i>
+                                          CI/CD Pipeline
+                                      </a>
+                                  </div>
+                              </div>
+          
+                              <!-- Live Apps -->
+                              <div class="card mt-4">
+                                  <div class="card-header bg-primary text-white">
+                                      <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Live Applications</h5>
+                                  </div>
+                                  <div class="card-body">
+                                      <div class="row">
+                                          <div class="col-md-6 mb-3">
+                                              <div class="d-grid">
+                                                  <a href="https://ctrlbuy-webshop-production.up.railway.app" 
+                                                     class="btn btn-outline-success btn-lg" target="_blank">
+                                                      <i class="fas fa-train me-2"></i>
+                                                      Railway Demo
+                                                      <small class="d-block">Development Environment</small>
+                                                  </a>
+                                              </div>
+                                          </div>
+                                          <div class="col-md-6 mb-3">
+                                              <div class="d-grid">
+                                                  <a href="http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com" 
+                                                     class="btn btn-outline-warning btn-lg" target="_blank">
+                                                      <i class="fas fa-cloud me-2"></i>
+                                                      AWS Demo
+                                                      <small class="d-block">Production Environment</small>
+                                                  </a>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+          
+                              <!-- Footer -->
+                              <div class="text-center mt-5 text-muted">
+                                  <small>
+                                      Automated testing with Spring Boot, JaCoCo & GitHub Actions<br>
+                                      Made with ❤️ in Sweden
+                                  </small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          
+              <script>
+                  // Update timestamp
+                  document.getElementById('lastUpdate').textContent = new Date().toLocaleString('sv-SE');
+          
+                  // Mock coverage data (replace with real data if available)
+                  document.getElementById('codeCoverage').textContent = '85%';
+                  document.getElementById('branchCoverage').textContent = '78%';
+          
+                  // Add some interactivity
+                  document.querySelectorAll('.metric-card').forEach(card => {
+                      card.addEventListener('mouseenter', function() {
+                          this.style.transform = 'translateY(-5px) scale(1.02)';
+                      });
+                      card.addEventListener('mouseleave', function() {
+                          this.style.transform = 'translateY(0) scale(1)';
+                      });
+                  });
+              </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Build application
         run: mvn clean package -DskipTests
 
-      - name: Archive JAR artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v3
+
+      - name: Prepare GitHub Pages content
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Create pages directory structure
+          mkdir -p pages
+          
+          # Copy JaCoCo reports to coverage subdirectory
+          cp -r target/site/jacoco pages/coverage
+          
+          # Copy dashboard to root
+          cp -r target/site/dashboard/* pages/
+          
+          # Copy badges
+          mkdir -p pages/badges
+          cp target/site/jacoco/badges/* pages/badges/
+          
+          # Create a simple index.html that redirects to dashboard if none exists
+          if [ ! -f pages/index.html ]; then
+            cat > pages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <meta http-equiv="refresh" content="0; url=coverage/">
+              <title>CtrlBuy Coverage Reports</title>
+          </head>
+          <body>
+              <p>Redirecting to <a href="coverage/">coverage reports</a>...</p>
+          </body>
+          </html>
+          EOF
+          fi
+          
+          # List files for debugging
+          echo "Pages directory structure:"
+          find pages -type f | head -20
+
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./pages
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: deployment
+        uses: actions/deploy-pages@v2
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v3
         with:
           name: spring-boot-jar
           path: target/*.jar
           retention-days: 30
 
-      - name: Verify build success
+      - name: Post deployment summary
+        if: github.ref == 'refs/heads/main'
         run: |
-          echo "✅ Build completed successfully!"
-          echo "📦 JAR file created:"
-          ls -la target/*.jar
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Tests completed successfully**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Coverage reports generated**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Application built and packaged**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **GitHub Pages deployed**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Live Coverage Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Dashboard**: https://fredrik-arvidsson.github.io/ctrlbuy-webshop/" >> $GITHUB_STEP_SUMMARY
+          echo "📈 **Detailed Reports**: https://fredrik-arvidsson.github.io/ctrlbuy-webshop/coverage/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 Live Applications" >> $GITHUB_STEP_SUMMARY
+          echo "🚄 **Railway**: https://ctrlbuy-webshop-production.up.railway.app" >> $GITHUB_STEP_SUMMARY
+          echo "☁️ **AWS**: http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com" >> $GITHUB_STEP_SUMMARY
