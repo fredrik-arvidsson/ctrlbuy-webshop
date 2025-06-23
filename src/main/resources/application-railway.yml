@@ -1,0 +1,28 @@
+spring:
+  profiles:
+    active: railway
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${MYSQLUSER}
+    password: ${MYSQLPASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    com.ctrlbuy.webshop: INFO
+
+info:
+  app:
+    name: CtrlBuy Webshop
+    version: 1.0.0
+    environment: Railway Production
