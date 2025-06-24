@@ -1,0 +1,49 @@
+# =======================================
+# AWS MILJÖ - ELASTIC BEANSTALK + RDS MySQL
+# =======================================
+# AWS sätter RDS environment variables automatiskt
+# =======================================
+
+spring:
+  datasource:
+    url: jdbc:mysql://${RDS_HOSTNAME:localhost}:${RDS_PORT:3306}/${RDS_DB_NAME:ctrlbuy_webshop}?useSSL=true&requireSSL=true&serverTimezone=Europe/Stockholm
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Strikt för AWS produktion
+    show-sql: false
+
+  # AWS Production settings
+  thymeleaf:
+    cache: true
+
+# =======================================
+# AWS PRODUCTION LOGGING
+# =======================================
+logging:
+  level:
+    root: WARN
+    com.ctrlbuy.webshop: INFO
+    org.hibernate.SQL: ERROR  # Minimal logging för AWS
+
+# =======================================
+# AWS ENVIRONMENT
+# =======================================
+app:
+  base:
+    url: ${AWS_BASE_URL:https://your-app.elasticbeanstalk.com}
+
+server:
+  port: 8080  # Fixed for nginx proxy configuration
+
+# =======================================
+# AWS INFO
+# =======================================
+info:
+  app:
+    environment: Production (AWS)
+    database:
+      provider: AWS RDS MySQL
+      region: ${AWS_REGION:eu-north-1}
