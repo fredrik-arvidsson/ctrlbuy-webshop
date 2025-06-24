@@ -33,11 +33,11 @@ En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring 
 
 ### 🎯 VÄLJ DIN PLATTFORM
 
-### 🚄 Railway Demo (Snabbast startup)
+### 🚄 Railway Demo (Primary Production)
 [![Railway Demo](https://img.shields.io/badge/🚄_Railway-LIVE_DEMO-brightgreen?style=for-the-badge&logo=railway)](https://ctrlbuy-webshop-production.up.railway.app)
 
-### ☁️ AWS Demo (Enterprise-ready)
-[![AWS Demo](https://img.shields.io/badge/☁️_AWS-LIVE_DEMO-orange?style=for-the-badge&logo=amazonaws)](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com)
+### ☁️ AWS Demo (Fixing proxy config)
+[![AWS Demo](https://img.shields.io/badge/☁️_AWS-CONFIGURING-yellow?style=for-the-badge&logo=amazonaws)](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com)
 
 **✨ Live Features Du Kan Testa:**
 * 🛒 Fullständig e-handelsfunktionalitet med varukorg
@@ -51,6 +51,8 @@ En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring 
 * Admin: `backup.admin` / `AdminPass123!`
 * User: `test.user` / `TestPass123!`
 
+⚠️ **OBS:** AWS deployment genomgår för närvarande underhåll för optimering. Railway-demon är fullt funktionell för alla tester.
+
 </div>
 
 ## 🚀 Multi-Platform Deployment
@@ -58,7 +60,7 @@ En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring 
 | Platform | Status | URL | Features |
 |----------|--------|-----|----------|
 | 🚄 Railway | ✅ LIVE | [ctrlbuy-webshop-production.up.railway.app](https://ctrlbuy-webshop-production.up.railway.app) | Full MySQL, Auto-deploy |
-| ☁️ AWS | ✅ LIVE | [webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com) | Elastic Beanstalk + Docker |
+| ☁️ AWS | 🔧 Configuring | [webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com) | Elastic Beanstalk + Docker |
 | 📊 GitHub Pages | ✅ LIVE | [fredrik-arvidsson.github.io/ctrlbuy-webshop](https://fredrik-arvidsson.github.io/ctrlbuy-webshop) | Coverage Reports |
 | 🐳 Docker | ✅ Ready | `docker run -p 8080:8080 ctrlbuy/webshop` | Container ready |
 
@@ -87,75 +89,62 @@ En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring 
 
 ## ⚡ Quick Start (8 sekunder)
 
-Vill du bara testa applikationen snabbt? Här är det snabbaste sättet:
+Vill du bara testa applikationen snabbt? Med Docker Compose får du igång hela stacken på sekunder:
 
 ```bash
 # 1. Klona och gå in i projektet
 git clone https://github.com/fredrik-arvidsson/ctrlbuy-webshop.git
 cd ctrlbuy-webshop
 
-# 2. Starta applikationen (använder H2 in-memory databas)
-./mvnw clean spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+# 2. Starta hela stacken med Docker Compose
+docker-compose up -d
+
+# 3. Bygg och starta applikationen
+./mvnw clean spring-boot:run
 ```
 
 🎉 **Klart!** Applikationen kör nu på: http://localhost:8080 (startar på ~8 sekunder)
+
+**Modern utveckling:** Docker Compose är branschstandard för lokal utveckling - en kommando startar databas, cache och alla dependencies!
 
 ## 🔍 Verify Everything Works
 
 1. **Main Application:**  
    http://localhost:8080
 
-2. **H2 Database Console (development):**  
-   http://localhost:8080/h2-console
-    * JDBC URL: `jdbc:h2:mem:ctrlbuydb`
-    * Username: `sa`
-    * Password: (leave empty)
+2. **MySQL Database:**  
+   Körs i Docker container på port 3306
+   * Database: `ctrlbuy_webshop`
+   * Username: `root`
+   * Password: `password123`
 
 3. **Test Login:**
-    * Admin: `backup.admin` / `AdminPass123!`
-    * Developer: `developer.admin` / `DevPass123!`
-    * User: `test.user` / `TestPass123!`
+   * Admin: `backup.admin` / `AdminPass123!`
+   * Developer: `developer.admin` / `DevPass123!`
+   * User: `test.user` / `TestPass123!`
 
 ## 🗄️ Database Configuration
 
-Välj den databas som passar dig bäst:
+**Enhetlig MySQL-konfiguration** genom hela projektet för konsekvens och stabilitet.
 
-### 🟢 Option 1: H2 Database (Rekommenderat för testing)
-✅ Inget setup krävs - fungerar direkt!
+### 🚀 Docker Compose Setup (Rekommenderat)
+✅ Modern branschstandard för lokal utveckling!
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+# Starta hela stacken
+docker-compose up -d
+
+# Verifiera att MySQL körs
+docker-compose ps
 ```
 
 **Fördelar:**
-* ✅ Inget installation
-* ✅ Fungerar direkt
-* ✅ Perfekt för demo och utveckling
-* ✅ Inkluderar test-data
+* ✅ Enhetlig miljö för alla utvecklare
+* ✅ Isolerad databas som inte krockar med systeminstallationer
+* ✅ Inga konfigurationsproblem
+* ✅ Enkelt att rensa och starta om
 
-### 🔵 Option 2: MySQL med Docker (Enklast för produktion-liknande setup)
-✅ Rekommenderat om du vill testa med riktig databas
-
-```bash
-# 1. Starta MySQL container
-docker run --name ctrlbuy-mysql \
-  -e MYSQL_ROOT_PASSWORD=password123 \
-  -e MYSQL_DATABASE=ctrlbuy_webshop \
-  -p 3306:3306 -d mysql:8.0
-
-# 2. Vänta 30 sekunder för MySQL att starta, sedan:
-./mvnw spring-boot:run -Dspring.profiles.active=prod \
-  -Dspring.datasource.password=password123
-```
-
-Stoppa MySQL senare:
-```bash
-docker stop ctrlbuy-mysql
-docker rm ctrlbuy-mysql
-```
-
-### 🟠 Option 3: Lokal MySQL Installation
-För de som vill ha permanent MySQL setup
+### 🔧 Manuell MySQL Installation (Om du föredrar det)
 
 **macOS (med Homebrew):**
 ```bash
@@ -169,7 +158,7 @@ CREATE DATABASE ctrlbuy_webshop;
 EXIT;
 
 # 3. Starta applikationen
-./mvnw spring-boot:run -Dspring.profiles.active=prod
+./mvnw spring-boot:run
 ```
 
 **Ubuntu/Debian:**
@@ -188,14 +177,14 @@ CREATE DATABASE ctrlbuy_webshop;
 EXIT;
 
 # 4. Starta applikationen
-./mvnw spring-boot:run -Dspring.profiles.active=prod
+./mvnw spring-boot:run
 ```
 
-**Windows:**
-1. Ladda ner MySQL från https://dev.mysql.com/downloads/mysql/
-2. Installera och följ setup-wizarden
-3. Skapa databas `ctrlbuy_webshop`
-4. Kör: `mvnw.cmd spring-boot:run -Dspring.profiles.active=prod`
+### 📁 YAML Configuration
+Projektet använder nu `.yml`-filer istället för `.properties` för bättre läsbarhet och struktur:
+- `application.yml` - Huvudkonfiguration
+- `application-dev.yml` - Utvecklingsmiljö
+- `application-prod.yml` - Produktionsmiljö
 
 ## 🚀 Test & Development
 
@@ -213,10 +202,10 @@ xdg-open target/site/jacoco/index.html  # Linux
 
 ### Olika utvecklingsmiljöer
 ```bash
-# Development med H2
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+# Development miljö
+./mvnw spring-boot:run -Dspring.profiles.active=dev
 
-# Production med MySQL
+# Production miljö  
 ./mvnw spring-boot:run -Dspring.profiles.active=prod
 
 # Test miljö
@@ -271,15 +260,72 @@ xdg-open target/site/jacoco/index.html  # Linux
 * 📊 **CloudWatch monitoring** och alerting
 * 🌍 **CDN integration** för global performance
 
+## 🔧 Medvetenhet om Förbättringar & Fortsatt Utveckling
+
+Som utvecklare är jag medveten om att detta projekt, trots sin funktionalitet, har utrymme för kontinuerliga förbättringar. Detta är en aktiv del av min utvecklingsprocess och professionella tillväxt.
+
+### 🎯 Identifierade Förbättringsområden
+
+**Arkitektur & Design Patterns:**
+* Implementera Repository Pattern för bättre dataabstraktion
+* Utvärdera möjligheter för microservices-arkitektur
+* Förbättra error handling med centraliserad exception management
+* Implementera caching-strategier för bättre performance
+
+**Säkerhet & Compliance:**
+* Integrera OAuth2/JWT för modernare autentisering
+* Implementera rate limiting och DDoS-skydd
+* GDPR-compliance för användardata
+* Säkerhetsaudit och penetrationstestning
+
+**Teknisk Skuld & Refactoring:**
+* Kodgranskning för att identifiera duplicerad kod
+* Förbättra service layer separation
+* Optimera databasqueries och indexering
+* Migrera till Spring Boot 3.x senaste funktioner
+
+**Användarupplevelse:**
+* Implementera real-time notifikationer
+* Förbättra mobilresponsivitet
+* A/B-testning för conversion optimization
+* Internationalisering för fler språk
+
+### 🚀 Nästa Sprint-mål
+
+**Kort sikt (1-2 månader):**
+* ✅ Docker Compose implementation (Klart!)
+* ✅ YAML configuration migration (Klart!)
+* 🔄 Implementera Redis för session management
+* 🔄 Förbättra test coverage till 90%+
+
+**Medellång sikt (3-6 månader):**
+* Kubernetes deployment för skalbarhet
+* Elasticsearch integration för produktsökning
+* Payment gateway integration (Stripe/Klarna)
+* Mobile app med React Native
+
+**Lång sikt (6-12 månader):**
+* AI-driven produktrekommendationer
+* Multi-tenant arkitektur
+* Global expansion med multi-currency support
+* Enterprise-level monitoring och observability
+
+### 💡 Kontinuerlig Förbättring
+
+Detta projekt representerar inte bara nuvarande funktionalitet utan även min resa som utvecklare. Varje identifierat förbättringsområde är en möjlighet att växa och lära sig nya teknologier och best practices.
+
+**Filosofi:** "Kod är aldrig färdig - den utvecklas kontinuerligt precis som vi utvecklare gör."
+
 ## 🛠️ Troubleshooting
 
 ### Problem: MySQL Connection Error
 ```
 Access denied for user 'root'@'localhost'
 ```
-**Lösning:** Använd H2 istället:
+**Lösning:** Använd Docker Compose istället:
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
+docker-compose down
+docker-compose up -d
 ```
 
 ### Problem: Port redan används
@@ -373,6 +419,58 @@ Detta projekt är redo för LinkedIn-delning med:
 * ✅ **Enterprise-ready architecture** med Docker och auto-scaling
 
 **Dela med stolthet!** 🚀
+
+## 📄 Licens & Användningsvillkor
+
+**CtrlBuy Webshop** är ett proprietärt projekt utvecklat och underhållet av Fredrik Arvidsson.
+
+### 🔒 Begränsningar / Restrictions
+
+Detta projekt, inklusive all källkod, dokumentation och tillgångar, är **inte licensierat för kommersiell användning**.
+
+Du får **inte**:
+- Använda denna kod eller någon del av den i kommersiella produkter, tjänster eller distributioner utan skriftligt tillstånd.
+- Sälja, licensiera eller tjäna pengar på detta projekt i någon form.
+- Ta bort eller ändra upphovsrättsnotiser.
+
+You **may not**:
+- Use this code or any part of it in commercial products, services, or deployments without written permission.
+- Sell, license, or monetize this project in any form.
+- Remove or alter copyright notices.
+
+### ✅ Vad du får göra / What You May Do
+
+Du är **fri att**:
+- Klona eller fork:a repot för personligt lärande eller utbildningssyfte.
+- Läsa, studera och granska koden.
+- Hänvisa till eller länka till repot i portföljer, artiklar eller utbildningsmaterial, **med korrekt attribution**.
+
+You are **free to**:
+- Clone or fork the repository for personal learning or educational purposes.
+- View, read, and study the code.
+- Refer to or link to the repository in portfolios, articles, or educational content, **with proper attribution**.
+
+### 📋 Attribution / Källhänvisning
+
+Om du delar delar av detta projekt offentligt (t.ex. i bloggar, föreläsningar, kurser), måste du inkludera följande text:
+> "Ursprungligen skapat av Fredrik Arvidsson – https://github.com/fredrik-arvidsson/ctrlbuy-webshop"
+
+If you share any part of this project publicly (e.g., in blogs, talks, courses), you must include the following text:
+> "Originally created by Fredrik Arvidsson – https://github.com/fredrik-arvidsson/ctrlbuy-webshop"
+
+### 📬 Kommersiell användning / Commercial Use
+
+För kommersiella licenser eller företagsintresse, kontakta:  
+📧 **fredrik.arvidsson.dev@gmail.com**
+
+For commercial licenses or enterprise interest, please contact:  
+📧 **fredrik.arvidsson.dev@gmail.com**
+
+### 🔐 Juridisk ansvarsfriskrivning / Legal Disclaimer
+
+Denna mjukvara tillhandahålls *i befintligt skick*, utan några garantier. Använd på egen risk.
+
+This software is provided *as is*, without warranty of any kind. Use at your own risk.
 
 ---
 
