@@ -44,13 +44,13 @@ spring:
     show-sql: false
 
   # =======================================
-  # EMAIL CONFIGURATION (SMTP) - GMAIL SÄKER MED MILJÖVARIABLER
+  # EMAIL CONFIGURATION (SMTP) - SÄKER MED MILJÖVARIABLER
   # =======================================
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:fredrik.g.arvidsson@gmail.com}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -103,18 +103,18 @@ server:
 # SECURITY - JWT CONFIGURATION
 # =======================================
 jwt:
-  secret: ${JWT_SECRET:PleaseChangeThisSecretKeyInProduction}
+  secret: ${JWT_SECRET}
   expirationMs: 86400000
   refresh-token:
     expiration: 604800000
 
 # =======================================
-# EMAIL APPLICATION SETTINGS - UPPDATERAT
+# EMAIL APPLICATION SETTINGS - SÄKER
 # =======================================
 app:
   email:
     enabled: true
-    from: ${MAIL_FROM:fredrik.g.arvidsson@gmail.com}
+    from: ${MAIL_FROM:noreply@ctrlbuy.se}
     from-name: CTRL+BUY Solutions
     company:
       name: CtrlBuy
@@ -182,7 +182,7 @@ info:
 
 ---
 # =======================================
-# DEV PROFILE - LOKAL UTVECKLING MED MAILHOG - FIXAD!
+# DEV PROFILE - LOKAL UTVECKLING MED MAILHOG
 # =======================================
 spring:
   config:
@@ -191,13 +191,13 @@ spring:
   datasource:
     url: ${DEV_DATABASE_URL:jdbc:mysql://localhost:3306/ctrlbuy_webshop}
     username: ${DEV_DATABASE_USERNAME:ctrlbuy_user}
-    password: ${DEV_DATABASE_PASSWORD:}
-  # MAILHOG KONFIGURATION - FIXAD!
+    password: ${DEV_DATABASE_PASSWORD}
+  # MAILHOG KONFIGURATION
   mail:
-    host: mailhog                                      # ✅ FIXAT: mailhog för Docker
+    host: mailhog
     port: 1025
-    username: noreply@ctrlbuy.se                       # ✅ FIXAT: Inte tom sträng!
-    password: ""                                       # ✅ Tom lösenord OK för MailHog
+    username: ${DEV_MAIL_USERNAME:noreply@ctrlbuy.se}
+    password: ""
     properties:
       mail:
         smtp:
@@ -216,10 +216,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-  # THYMELEAF DEV SETTINGS - FÖRBÄTTRAT!
+  # THYMELEAF DEV SETTINGS
   thymeleaf:
     cache: false
-  # WEB RESOURCES CACHE OFF - NYTT!
+  # WEB RESOURCES CACHE OFF
   web:
     resources:
       cache:
@@ -230,7 +230,7 @@ spring:
 app:
   email:
     enabled: true
-    from: test@ctrlbuy.se
+    from: ${DEV_MAIL_FROM:test@ctrlbuy.se}
     from-name: CTRL+BUY Solutions (DEV)
     company:
       name: CtrlBuy DEV
@@ -244,16 +244,14 @@ spring:
     activate:
       on-profile: aws
   datasource:
-    # AWS kommer använda miljövariabler eller dessa defaults
-    url: ${DATABASE_URL:jdbc:mysql://database-1.cluster-abc123.eu-north-1.rds.amazonaws.com:3306/webshop?useSSL=true&serverTimezone=Europe/Stockholm}
-    username: ${DATABASE_USERNAME:admin}
-    password: ${DATABASE_PASSWORD:}
-  # AWS ANVÄNDER GMAIL SMTP (behåller original konfiguration)
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:fredrik.g.arvidsson@gmail.com}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -268,7 +266,6 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: validate
-  # THYMELEAF PROD SETTINGS
   thymeleaf:
     cache: true
 
@@ -284,12 +281,11 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
-  # RAILWAY ANVÄNDER GMAIL SMTP
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:fredrik.g.arvidsson@gmail.com}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -304,6 +300,5 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: update
-  # THYMELEAF PROD SETTINGS
   thymeleaf:
     cache: true
