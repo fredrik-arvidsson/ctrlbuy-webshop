@@ -6,7 +6,9 @@ import com.ctrlbuy.webshop.dto.RegistrationResult;
 
 // ===== SECURITY IMPORTS =====
 import com.ctrlbuy.webshop.security.entity.User;
+// Role-entitet behövs inte längre - User använder List<String> för roller
 import com.ctrlbuy.webshop.security.repository.UserRepository;
+// RoleRepository behövs inte längre - User hanterar roller som strings
 
 // ===== JPA IMPORTS =====
 import jakarta.persistence.EntityManager;
@@ -38,6 +40,8 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    // RoleRepository behövs inte längre - User använder List<String> för roller
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -47,30 +51,55 @@ public class UserService {
     // ===== REGISTRATION METHODS =====
 
     public RegistrationResult registerUser(RegisterRequest request) {
-        logger.info("Attempting to register user with email: {}", request.getEmail());
+        logger.info("Attempting to register user with username: {} and email: {}", request.getUsername(), request.getEmail());
 
         try {
-            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-                logger.warn("Registration failed - email already exists: {}", request.getEmail());
-                return new RegistrationResult(false, "Email already exists");
+            // 🔍 Kontrollera att username inte är null
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                logger.error("Username is null or empty in RegisterRequest!");
+                return new RegistrationResult(false, "Användarnamn är obligatoriskt");
             }
 
+            // 🔍 Kontrollera att email inte är null
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                logger.error("Email is null or empty in RegisterRequest!");
+                return new RegistrationResult(false, "E-postadress är obligatorisk");
+            }
+
+            // Kontrollera om username redan finns
+            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+                logger.warn("Registration failed - username already exists: {}", request.getUsername());
+                return new RegistrationResult(false, "Användarnamnet är redan upptaget");
+            }
+
+            // Kontrollera om email redan finns
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                logger.warn("Registration failed - email already exists: {}", request.getEmail());
+                return new RegistrationResult(false, "E-postadressen är redan registrerad");
+            }
+
+            // 🛠️ Skapa User-objekt med ALLA obligatoriska fält
             User user = new User();
+            user.setUsername(request.getUsername());     // ✅ DETTA SAKNADES!
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setEnabled(true);
+            user.setActive(true);                        // ✅ Sätt active istället för enabled
+            user.setEmailVerified(true);                 // ✅ Aktivera direkt utan email-verifiering
             user.setCreatedAt(LocalDateTime.now());
 
-            User savedUser = userRepository.save(user);
-            logger.info("User registered successfully with ID: {}", savedUser.getId());
+            logger.info("Creating user with username: '{}', email: '{}', active: {}, emailVerified: {}",
+                    user.getUsername(), user.getEmail(), user.isActive(), user.isEmailVerified());
 
-            return new RegistrationResult(true, "User registered successfully");
+            User savedUser = userRepository.save(user);
+            logger.info("User registered successfully with ID: {} and username: {}", savedUser.getId(), savedUser.getUsername());
+
+            return new RegistrationResult(true, "Användare registrerad framgångsrikt");
 
         } catch (Exception e) {
-            logger.error("Error during user registration for email: {}", request.getEmail(), e);
-            return new RegistrationResult(false, "Registration failed: " + e.getMessage());
+            logger.error("Error during user registration for username: {} and email: {}", request.getUsername(), request.getEmail(), e);
+            return new RegistrationResult(false, "Registrering misslyckades: " + e.getMessage());
         }
     }
 
@@ -106,18 +135,374 @@ public class UserService {
         return new RegistrationResult(savedUser, token);
     }
 
+    // ===== PASSWORD UPDATE METHODS ===== 🔥 NYA METODER
+
+    /**
+     * Uppdaterar lösenord för en användare (för admin-panelen)
+     * @param userId Användar-ID
+     * @param newPassword Nytt lösenord (ohashad)
+     * @return true om lyckad, false om misslyckad
+     */
+    @Transactional
+    public boolean updatePassword(Long userId, String newPassword) {
+        try {
+            logger.info("🔐 Uppdaterar lösenord för userId: {}", userId);
+
+            // Validera input
+            if (userId == null) {
+                logger.error("❌ UserId är null");
+                return false;
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                logger.error("❌ Nytt lösenord är tomt");
+                return false;
+            }
+
+            // Hitta användaren
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                logger.error("❌ Användare med ID {} hittades inte", userId);
+                return false;
+            }
+
+            User user = userOpt.get();
+            logger.info("👤 Hittat användare: {} ({})", user.getUsername(), user.getEmail());
+
+            // Hasha nya lösenordet
+            String hashedPassword = passwordEncoder.encode(newPassword.trim());
+            logger.info("🔒 Lösenord hashat");
+
+            // Uppdatera lösenord
+            user.setPassword(hashedPassword);
+
+            // Spara användaren
+            User savedUser = userRepository.save(user);
+            logger.info("✅ Lösenord uppdaterat för användare: {} (ID: {})", savedUser.getUsername(), savedUser.getId());
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid uppdatering av lösenord för userId {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Uppdaterar lösenord för en användare med användarnamn
+     * @param username Användarnamn
+     * @param newPassword Nytt lösenord (ohashad)
+     * @return true om lyckad, false om misslyckad
+     */
+    @Transactional
+    public boolean updatePassword(String username, String newPassword) {
+        try {
+            logger.info("🔐 Uppdaterar lösenord för användarnamn: {}", username);
+
+            // Validera input
+            if (username == null || username.trim().isEmpty()) {
+                logger.error("❌ Användarnamn är tomt");
+                return false;
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                logger.error("❌ Nytt lösenord är tomt");
+                return false;
+            }
+
+            // Hitta användaren
+            Optional<User> userOpt = userRepository.findByUsername(username.trim());
+            if (userOpt.isEmpty()) {
+                logger.error("❌ Användare med användarnamn '{}' hittades inte", username);
+                return false;
+            }
+
+            User user = userOpt.get();
+            logger.info("👤 Hittat användare: {} (ID: {}, Email: {})", user.getUsername(), user.getId(), user.getEmail());
+
+            // Hasha nya lösenordet
+            String hashedPassword = passwordEncoder.encode(newPassword.trim());
+            logger.info("🔒 Lösenord hashat");
+
+            // Uppdatera lösenord
+            user.setPassword(hashedPassword);
+
+            // Spara användaren
+            User savedUser = userRepository.save(user);
+            logger.info("✅ Lösenord uppdaterat för användare: {} (ID: {})", savedUser.getUsername(), savedUser.getId());
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid uppdatering av lösenord för användarnamn {}: {}", username, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Uppdaterar lösenord med gammalt lösenord-verifiering (för användarens egen profil)
+     * @param username Användarnamn
+     * @param currentPassword Nuvarande lösenord (för verifiering)
+     * @param newPassword Nytt lösenord
+     * @return true om lyckad, false om misslyckad
+     * @throws IllegalArgumentException om gammalt lösenord är fel
+     */
+    @Transactional
+    public boolean updatePassword(String username, String currentPassword, String newPassword) throws IllegalArgumentException {
+        try {
+            logger.info("🔐 Uppdaterar lösenord med verifiering för användarnamn: {}", username);
+
+            // Validera input
+            if (username == null || username.trim().isEmpty()) {
+                throw new IllegalArgumentException("Användarnamn är obligatoriskt");
+            }
+
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                throw new IllegalArgumentException("Nuvarande lösenord är obligatoriskt");
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                throw new IllegalArgumentException("Nytt lösenord är obligatoriskt");
+            }
+
+            // Hitta användaren
+            Optional<User> userOpt = userRepository.findByUsername(username.trim());
+            if (userOpt.isEmpty()) {
+                throw new IllegalArgumentException("Användare hittades inte");
+            }
+
+            User user = userOpt.get();
+            logger.info("👤 Hittat användare: {} (ID: {})", user.getUsername(), user.getId());
+
+            // Verifiera nuvarande lösenord
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                logger.warn("⚠️ Fel nuvarande lösenord för användare: {}", username);
+                throw new IllegalArgumentException("Nuvarande lösenord är felaktigt");
+            }
+
+            // Kontrollera att nytt lösenord är annorlunda
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                throw new IllegalArgumentException("Nytt lösenord måste vara annorlunda än det nuvarande");
+            }
+
+            // Hasha nya lösenordet
+            String hashedPassword = passwordEncoder.encode(newPassword.trim());
+            logger.info("🔒 Nytt lösenord hashat");
+
+            // Uppdatera lösenord
+            user.setPassword(hashedPassword);
+
+            // Spara användaren
+            User savedUser = userRepository.save(user);
+            logger.info("✅ Lösenord uppdaterat med verifiering för användare: {} (ID: {})", savedUser.getUsername(), savedUser.getId());
+
+            return true;
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("⚠️ Validering misslyckades för lösenordsuppdatering för {}: {}", username, e.getMessage());
+            throw e; // Re-throw validation errors
+        } catch (Exception e) {
+            logger.error("❌ Fel vid verifierad lösenordsuppdatering för {}: {}", username, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    // ===== ROLE MANAGEMENT METHODS ===== 🔥 NYA METODER FÖR ROLES
+
+    /**
+     * Ger admin-rättigheter till en användare (ANPASSAD FÖR STRING ROLES)
+     * @param userId Användar-ID
+     * @return true om lyckad, false om misslyckad
+     */
+    @Transactional
+    public boolean addAdminRole(Long userId) {
+        try {
+            logger.info("🔑 Försöker ge admin-rättigheter till userId: {}", userId);
+
+            User user = findById(userId);
+            if (user == null) {
+                logger.error("❌ Användare med ID {} hittades inte", userId);
+                return false;
+            }
+
+            logger.info("👤 Hittat användare: {} ({})", user.getUsername(), user.getEmail());
+
+            // Kontrollera om användaren redan har admin-roll (STRING VERSION)
+            boolean hasAdminRole = user.getRoles().stream()
+                    .anyMatch(role -> "ADMIN".equalsIgnoreCase(role) ||
+                            "ROLE_ADMIN".equalsIgnoreCase(role));
+
+            if (hasAdminRole) {
+                logger.info("ℹ️ Användare {} har redan admin-rättigheter", user.getUsername());
+                return true; // Redan admin, räknas som lyckat
+            }
+
+            // Lägg till admin-roll (STRING VERSION)
+            user.addRole("ADMIN");
+            save(user);
+
+            logger.info("✅ Admin-rättigheter tillagda för användare: {}", user.getUsername());
+            return true;
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid tillägg av admin-roll för userId {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Tar bort admin-rättigheter från en användare (ANPASSAD FÖR STRING ROLES)
+     * @param userId Användar-ID
+     * @return true om lyckad, false om misslyckad
+     */
+    @Transactional
+    public boolean removeAdminRole(Long userId) {
+        try {
+            logger.info("🔑 Försöker ta bort admin-rättigheter från userId: {}", userId);
+
+            User user = findById(userId);
+            if (user == null) {
+                logger.error("❌ Användare med ID {} hittades inte", userId);
+                return false;
+            }
+
+            logger.info("👤 Hittat användare: {} ({})", user.getUsername(), user.getEmail());
+
+            // Skydda huvudadmin
+            if ("fredrik".equalsIgnoreCase(user.getUsername())) {
+                logger.warn("⛔ Kan inte ta bort admin-rättigheter från huvudadmin 'fredrik'");
+                return false;
+            }
+
+            // Ta bort admin-roller (STRING VERSION)
+            boolean removedAny = user.getRoles().removeIf(role ->
+                    "ADMIN".equalsIgnoreCase(role) ||
+                            "ROLE_ADMIN".equalsIgnoreCase(role));
+
+            if (removedAny) {
+                save(user);
+                logger.info("✅ Admin-rättigheter borttagna för användare: {}", user.getUsername());
+            } else {
+                logger.info("ℹ️ Användare {} hade inga admin-rättigheter att ta bort", user.getUsername());
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid borttagning av admin-roll för userId {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Kontrollerar om en användare har admin-rättigheter (ANPASSAD FÖR STRING ROLES)
+     * @param userId Användar-ID
+     * @return true om användaren är admin
+     */
+    public boolean hasAdminRole(Long userId) {
+        try {
+            User user = findById(userId);
+            if (user == null) {
+                return false;
+            }
+
+            // Kolla användarnamn först (fallback för huvudadmin)
+            if ("fredrik".equalsIgnoreCase(user.getUsername()) ||
+                    "admin".equalsIgnoreCase(user.getUsername())) {
+                return true;
+            }
+
+            // Kolla roller (STRING VERSION)
+            return user.getRoles().stream()
+                    .anyMatch(role -> "ADMIN".equalsIgnoreCase(role) ||
+                            "ROLE_ADMIN".equalsIgnoreCase(role));
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid kontroll av admin-roll för userId {}: {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Kontrollerar om en användare har admin-rättigheter med användarnamn (ANPASSAD FÖR STRING ROLES)
+     * @param username Användarnamn
+     * @return true om användaren är admin
+     */
+    public boolean hasAdminRole(String username) {
+        try {
+            if (username == null || username.trim().isEmpty()) {
+                return false;
+            }
+
+            // Kolla användarnamn först (fallback för huvudadmin)
+            if ("fredrik".equalsIgnoreCase(username.trim()) ||
+                    "admin".equalsIgnoreCase(username.trim())) {
+                return true;
+            }
+
+            Optional<User> userOpt = findByUsername(username.trim());
+            if (userOpt.isEmpty()) {
+                return false;
+            }
+
+            User user = userOpt.get();
+
+            // Kolla roller (STRING VERSION)
+            return user.getRoles().stream()
+                    .anyMatch(role -> "ADMIN".equalsIgnoreCase(role) ||
+                            "ROLE_ADMIN".equalsIgnoreCase(role));
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid kontroll av admin-roll för username {}: {}", username, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Växlar admin-status för en användare
+     * @param userId Användar-ID
+     * @return true om lyckad, false om misslyckad
+     */
+    @Transactional
+    public boolean toggleAdminRole(Long userId) {
+        try {
+            logger.info("🔄 Växlar admin-status för userId: {}", userId);
+
+            if (hasAdminRole(userId)) {
+                logger.info("👤 Användare har admin-rättigheter, tar bort dem...");
+                return removeAdminRole(userId);
+            } else {
+                logger.info("👤 Användare saknar admin-rättigheter, lägger till dem...");
+                return addAdminRole(userId);
+            }
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid växling av admin-roll för userId {}: {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
     // ===== USER RETRIEVAL METHODS =====
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        logger.info("🔍 Hämtar alla användare");
+        List<User> users = userRepository.findAll();
+        logger.info("🔍 Hittade {} användare totalt", users.size());
+        return users;
     }
 
     public List<User> getActiveUsers() {
-        return userRepository.findByActiveTrue();
+        logger.info("🔍 Hämtar aktiva användare");
+        List<User> users = userRepository.findByActiveTrue();
+        logger.info("🔍 Hittade {} aktiva användare", users.size());
+        return users;
     }
 
     public List<User> getInactiveUsers() {
-        return userRepository.findByEnabledFalse();
+        logger.info("🔍 Hämtar inaktiva användare");
+        List<User> users = userRepository.findByActiveFalse(); // ✅ FIXAT: Använd 'active' istället för 'enabled'
+        logger.info("🔍 Hittade {} inaktiva användare", users.size());
+        return users;
     }
 
     public Optional<User> findByUsername(String username) {
@@ -151,11 +536,15 @@ public class UserService {
     // ===== USER COUNT METHODS =====
 
     public long countAllUsers() {
-        return userRepository.count();
+        long count = userRepository.count();
+        logger.info("📊 Totalt antal användare: {}", count);
+        return count;
     }
 
     public long countActiveUsers() {
-        return userRepository.countByActiveTrue();
+        long count = userRepository.countByActiveTrue();
+        logger.info("📊 Antal aktiva användare: {}", count);
+        return count;
     }
 
     // ===== USER EXISTENCE CHECKS =====
@@ -203,9 +592,10 @@ public class UserService {
     public void toggleUserActive(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User finns inte"));
+        boolean oldStatus = user.isActive();
         user.setActive(!user.isActive());
         userRepository.save(user);
-        logger.info("User {} active status toggled to: {}", userId, user.isActive());
+        logger.info("User {} active status toggled from {} to: {}", userId, oldStatus, user.isActive());
     }
 
     @Transactional
@@ -391,6 +781,50 @@ public class UserService {
 
         logger.info("Reset token generated for user: {}", email);
         return resetToken;
+    }
+
+    /**
+     * SÄKER LÖSENORDSÅTERSTÄLLNING - Kräver BÅDE användarnamn OCH email
+     * @param username Användarnamn
+     * @param email E-postadress
+     * @return Reset-token om användare hittas, annars null
+     */
+    @Transactional
+    public String generateResetTokenWithUsernameAndEmail(String username, String email) {
+        try {
+            logger.info("🔐 Försöker generera reset-token för användarnamn: {} och email: {}", username, email);
+
+            // Hitta användare med BÅDE username OCH email
+            User user = userRepository.findByUsernameAndEmail(username, email);
+
+            if (user == null) {
+                logger.warn("⚠️ Ingen användare hittades med användarnamn: {} och email: {}", username, email);
+                return null;
+            }
+
+            // Kontrollera att användaren är aktiv
+            if (!user.isActive()) {
+                logger.warn("⚠️ Användare {} är inaktiv", username);
+                return null;
+            }
+
+            // Generera säker token
+            String resetToken = UUID.randomUUID().toString();
+
+            // Sätt token och utgångstid (1 timme)
+            user.setResetToken(resetToken);
+            user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+
+            // Spara användaren
+            userRepository.save(user);
+
+            logger.info("✅ Reset-token genererad för användare: {} med email: {}", username, email);
+            return resetToken;
+
+        } catch (Exception e) {
+            logger.error("❌ Fel vid generering av reset-token för {}/{}: {}", username, email, e.getMessage());
+            return null;
+        }
     }
 
     public boolean isValidResetToken(String token) {

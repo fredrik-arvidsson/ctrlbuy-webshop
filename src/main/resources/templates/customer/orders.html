@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orderhantering - CTRLBUY Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #dc3545 0%, #6f42c1 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .stats-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .order-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .btn-admin {
+            background: linear-gradient(135deg, #dc3545 0%, #6f42c1 100%);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Admin Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #dc3545 0%, #6f42c1 100%);">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/admin/dashboard">
+            <i class="fas fa-shield-alt me-2"></i>CTRLBUY Admin
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+            <a class="nav-link" href="/admin/users"><i class="fas fa-users me-1"></i>Användare</a>
+            <a class="nav-link" href="/admin/products"><i class="fas fa-box me-1"></i>Produkter</a>
+            <a class="nav-link active" href="/admin/orders"><i class="fas fa-receipt me-1"></i>Beställningar</a>
+            <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Till hemsidan</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-receipt me-3"></i>Orderhantering</h1>
+                <p class="lead mb-0">Hantera och övervaka alla beställningar</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <h3 class="mb-0">
+                    <span th:text="${ordersPage != null ? ordersPage.totalElements : 0}">0</span>
+                    <small>beställningar</small>
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Alert Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 th:text="${pendingCount ?: 0}">0</h3>
+                    <p class="mb-0 text-muted">Väntande</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-check fa-2x text-info mb-2"></i>
+                    <h3 th:text="${confirmedCount ?: 0}">0</h3>
+                    <p class="mb-0 text-muted">Bekräftade</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-truck fa-2x text-primary mb-2"></i>
+                    <h3 th:text="${shippedCount ?: 0}">0</h3>
+                    <p class="mb-0 text-muted">Skickade</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-box fa-2x text-success mb-2"></i>
+                    <h3 th:text="${deliveredCount ?: 0}">0</h3>
+                    <p class="mb-0 text-muted">Levererade</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-times fa-2x text-danger mb-2"></i>
+                    <h3 th:text="${cancelledCount ?: 0}">0</h3>
+                    <p class="mb-0 text-muted">Avbrutna</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-receipt fa-2x text-dark mb-2"></i>
+                    <h3 th:text="${ordersPage != null ? ordersPage.totalElements : 0}">0</h3>
+                    <p class="mb-0 text-muted">Totalt</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card order-table">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Alla Beställningar</h5>
+        </div>
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${ordersPage == null or ordersPage.content.isEmpty()}" class="text-center p-5">
+                <i class="fas fa-inbox fa-5x text-muted mb-3"></i>
+                <h4>Inga beställningar hittades</h4>
+                <p class="text-muted">Det finns inga beställningar att visa för tillfället.</p>
+            </div>
+
+            <!-- Orders Table -->
+            <div th:if="${ordersPage != null and !ordersPage.content.isEmpty()}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>
+                            <a th:href="@{/admin/orders(page=${currentPage}, sortBy='id', sortDir=${sortBy == 'id' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-decoration-none">
+                                Order ID
+                                <i th:if="${sortBy == 'id'}"
+                                   th:class="${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                            </a>
+                        </th>
+                        <th>Kund</th>
+                        <th>
+                            <a th:href="@{/admin/orders(page=${currentPage}, sortBy='orderDate', sortDir=${sortBy == 'orderDate' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-decoration-none">
+                                Datum
+                                <i th:if="${sortBy == 'orderDate'}"
+                                   th:class="${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                            </a>
+                        </th>
+                        <th>Status</th>
+                        <th>
+                            <a th:href="@{/admin/orders(page=${currentPage}, sortBy='totalAmount', sortDir=${sortBy == 'totalAmount' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-decoration-none">
+                                Belopp
+                                <i th:if="${sortBy == 'totalAmount'}"
+                                   th:class="${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                            </a>
+                        </th>
+                        <th>Åtgärder</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${ordersPage.content}">
+                        <td>
+                            <strong th:text="${order.orderNumber ?: order.id}">ORD-001</strong>
+                        </td>
+                        <td>
+                            <div>
+                                <strong th:text="${order.user?.username ?: 'Okänd'}">Kund</strong><br>
+                                <small class="text-muted" th:text="${order.user?.email ?: ''}">email</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Datum</span>
+                        </td>
+                        <td>
+                                <span class="badge status-badge"
+                                      th:classappend="${order.status?.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                                     ${order.status?.name() == 'CONFIRMED'} ? 'bg-info' :
+                                                     ${order.status?.name() == 'SHIPPED'} ? 'bg-primary' :
+                                                     ${order.status?.name() == 'DELIVERED'} ? 'bg-success' : 'bg-danger'"
+                                      th:text="${order.status?.name() == 'PENDING'} ? 'Väntande' :
+                                               ${order.status?.name() == 'CONFIRMED'} ? 'Bekräftad' :
+                                               ${order.status?.name() == 'SHIPPED'} ? 'Skickad' :
+                                               ${order.status?.name() == 'DELIVERED'} ? 'Levererad' : 'Avbruten'">
+                                    Status
+                                </span>
+                        </td>
+                        <td>
+                            <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' kr'">0 kr</strong><br>
+                            <small class="text-muted" th:text="${order.orderItems?.size() ?: 0} + ' artikel' + ${(order.orderItems?.size() ?: 0) > 1 ? 'ar' : ''}">0 artiklar</small>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}"
+                               class="btn btn-sm btn-outline-primary me-1"
+                               title="Visa detaljer">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <div class="btn-group" role="group">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        title="Ändra status">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" th:href="@{/admin/orders/{id}/status(id=${order.id}, status='PENDING')}">Väntande</a></li>
+                                    <li><a class="dropdown-item" th:href="@{/admin/orders/{id}/status(id=${order.id}, status='CONFIRMED')}">Bekräftad</a></li>
+                                    <li><a class="dropdown-item" th:href="@{/admin/orders/{id}/status(id=${order.id}, status='SHIPPED')}">Skickad</a></li>
+                                    <li><a class="dropdown-item" th:href="@{/admin/orders/{id}/status(id=${order.id}, status='DELIVERED')}">Levererad</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" th:href="@{/admin/orders/{id}/status(id=${order.id}, status='CANCELLED')}">Avbryt</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${ordersPage != null and ordersPage.totalPages > 1}" aria-label="Order pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage - 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+
+            <li th:each="pageNum : ${#numbers.sequence(0, ordersPage.totalPages - 1)}"
+                class="page-item"
+                th:classappend="${pageNum == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${pageNum}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                   th:text="${pageNum + 1}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage >= ordersPage.totalPages - 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage + 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Info -->
+    <div th:if="${ordersPage != null}" class="text-center text-muted mt-3">
+        Visar <span th:text="${currentPage * ordersPage.size + 1}">1</span> -
+        <span th:text="${currentPage * ordersPage.size + ordersPage.numberOfElements}">10</span>
+        av <span th:text="${ordersPage.totalElements}">100</span> beställningar
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container text-center">
+        <p>&copy; 2025 CTRLBUY Admin Panel</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

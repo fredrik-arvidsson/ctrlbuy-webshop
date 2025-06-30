@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -43,7 +44,10 @@ public class ProductControllerTest {
     private ProductController productController;
 
     private Product testProduct;
+    private Product saleProduct1;
+    private Product saleProduct2;
     private List<Product> testProducts;
+    private List<Product> saleProducts;
     private Page<Product> testProductPage;
 
     @BeforeEach
@@ -56,6 +60,30 @@ public class ProductControllerTest {
         testProduct.setPrice(new BigDecimal("59.99"));
         testProduct.setStockQuantity(10);
         testProduct.setDescription("Test description");
+        testProduct.setActive(true);
+        testProduct.setOnSale(false);
+
+        // Setup REA-produkter som matchar testerna
+        saleProduct1 = new Product();
+        saleProduct1.setId(4L);
+        saleProduct1.setName("Test Game");
+        saleProduct1.setCategory("Action");
+        saleProduct1.setPrice(new BigDecimal("59.99"));
+        saleProduct1.setOriginalPrice(new BigDecimal("79.99"));
+        saleProduct1.setSalePrice(new BigDecimal("59.99"));
+        saleProduct1.setOnSale(true);
+        saleProduct1.setActive(true);
+        saleProduct1.setDescription("Test description");
+
+        saleProduct2 = new Product();
+        saleProduct2.setId(5L);
+        saleProduct2.setName("Test Game 2");
+        saleProduct2.setCategory("RPG");
+        saleProduct2.setPrice(new BigDecimal("49.99"));
+        saleProduct2.setOriginalPrice(new BigDecimal("69.99"));
+        saleProduct2.setSalePrice(new BigDecimal("49.99"));
+        saleProduct2.setOnSale(true);
+        saleProduct2.setActive(true);
 
         // Setup test products list
         testProducts = new ArrayList<>();
@@ -66,7 +94,12 @@ public class ProductControllerTest {
         product2.setName("Test Game 2");
         product2.setCategory("RPG");
         product2.setPrice(new BigDecimal("49.99"));
+        product2.setActive(true);
+        product2.setOnSale(false);
         testProducts.add(product2);
+
+        // Setup REA products list
+        saleProducts = Arrays.asList(saleProduct1, saleProduct2);
 
         // Setup paginated products
         testProductPage = new PageImpl<>(testProducts, PageRequest.of(0, 10), testProducts.size());
@@ -161,13 +194,17 @@ public class ProductControllerTest {
 
     @Test
     void testViewSaleProducts() {
-        // Test GET /products/sale - rätt template
-        when(productService.getProductsOnSale()).thenReturn(testProducts);
+        // Test GET /products/sale - ✅ FIXAT: Använd REA-produkter istället för tom lista
+        when(productService.getProductsOnSale()).thenReturn(saleProducts);
 
         String result = productController.viewSaleProducts(model);
 
         assertEquals("products", result);
-        verify(model).addAttribute(eq("products"), eq(testProducts));
+
+        // ✅ FIXAT: Verifiera att modellen får rätt produkter (2 REA-produkter istället för tom lista)
+        verify(model).addAttribute("products", saleProducts);
+        verify(model).addAttribute("pageTitle", "Produkter på REA");
+        verify(model).addAttribute("selectedCategory", "sale");
         verify(productService).getProductsOnSale();
     }
 

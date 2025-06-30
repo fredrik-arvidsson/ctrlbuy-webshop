@@ -30,37 +30,42 @@ public class PasswordResetController {
 
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam("email") String email,
+                                        @RequestParam("username") String username,
+                                        Model model,
                                         RedirectAttributes redirectAttributes) {
         try {
-            logger.info("🔐 Begäran om lösenordsåterställning för: {}", email);
+            logger.info("🔐 Begäran om lösenordsåterställning för användarnamn: {} och email: {}", username, email);
 
-            // Generera reset-token via UserService
-            String resetToken = userService.generateResetToken(email.trim().toLowerCase());
+            // Kräv BÅDE username OCH email för säkerhet
+            String resetToken = userService.generateResetTokenWithUsernameAndEmail(
+                    username.trim(),
+                    email.trim().toLowerCase()
+            );
 
             if (resetToken != null) {
                 // Skicka email via EmailService
                 boolean emailSent = emailService.sendPasswordResetEmail(email.trim().toLowerCase(), resetToken);
 
                 if (emailSent) {
-                    logger.info("✅ Reset-mail skickat till: {}", email);
+                    logger.info("✅ Reset-mail skickat till: {} för användare: {}", email, username);
+                    model.addAttribute("success",
+                            "En återställningslänk har skickats till din registrerade e-postadress.");
                 } else {
-                    logger.warn("⚠️ Kunde inte skicka reset-mail till: {}", email);
+                    logger.warn("⚠️ Kunde inte skicka reset-mail till: {} för användare: {}", email, username);
+                    model.addAttribute("error", "Ett tekniskt fel uppstod. Försök igen senare.");
                 }
             } else {
-                logger.warn("⚠️ Ingen reset-token genererad för: {}", email);
+                logger.warn("⚠️ Ingen matchning för användarnamn: {} och email: {}", username, email);
+                model.addAttribute("error",
+                        "Ingen användare hittades med denna kombination av användarnamn och e-postadress.");
             }
 
-            // Visa alltid samma meddelande för säkerhet
-            redirectAttributes.addFlashAttribute("success",
-                    "Om e-postadressen finns har vi skickat återställningsinstruktioner.");
-
         } catch (Exception e) {
-            logger.error("❌ Fel vid lösenordsåterställning för {}: {}", email, e.getMessage());
-            redirectAttributes.addFlashAttribute("success",
-                    "Om e-postadressen finns har vi skickat återställningsinstruktioner.");
+            logger.error("❌ Fel vid lösenordsåterställning för {} / {}: {}", username, email, e.getMessage());
+            model.addAttribute("error", "Ett fel uppstod. Kontrollera dina uppgifter och försök igen.");
         }
 
-        return "redirect:/forgot-password";
+        return "forgot-password";
     }
 
     @GetMapping("/reset-password")
@@ -86,8 +91,14 @@ public class PasswordResetController {
             return "reset-password-error";
         }
 
-        if (password.length() < 6 || !password.equals(confirmPassword)) {
-            model.addAttribute("error", "Ogiltigt lösenord eller matchar inte.");
+        if (password.length() < 6) {
+            model.addAttribute("error", "Lösenordet måste vara minst 6 tecken långt.");
+            model.addAttribute("token", token);
+            return "reset-password";
+        }
+
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Lösenorden matchar inte.");
             model.addAttribute("token", token);
             return "reset-password";
         }
@@ -95,10 +106,12 @@ public class PasswordResetController {
         boolean success = userService.resetPassword(token, password);
 
         if (success) {
-            redirectAttributes.addFlashAttribute("success", "Lösenord återställt!");
+            logger.info("✅ Lösenord återställt framgångsrikt för token: {}", token.substring(0, 8) + "...");
+            redirectAttributes.addFlashAttribute("success", "Lösenord återställt framgångsrikt! Du kan nu logga in.");
             return "redirect:/user/login";
         } else {
-            model.addAttribute("error", "Kunde inte återställa lösenordet.");
+            logger.error("❌ Kunde inte återställa lösenordet för token: {}", token.substring(0, 8) + "...");
+            model.addAttribute("error", "Kunde inte återställa lösenordet. Tokenets giltighetstid kan ha gått ut.");
             return "reset-password-error";
         }
     }

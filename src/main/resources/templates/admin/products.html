@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produktrapport - CTRLBUY Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .debug-section {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .report-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .report-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .analysis-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 0.5rem;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .category-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .category-badge {
+            background: #3498db;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .price-analysis {
+            text-align: center;
+        }
+
+        .price-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .products-table {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .category-tag {
+            background: #e74c3c;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .sale-price {
+            color: #e74c3c;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-sale {
+            background: #e74c3c;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .analysis-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🔥 DEBUG SEKTION -->
+<div class="debug-section">
+    <h4>🔍 DEBUG: Vad som kommer från ReportsController:</h4>
+    <p><strong>maxPrice:</strong> <span th:text="${maxPrice ?: 'NULL'}">NULL</span></p>
+    <p><strong>minPrice:</strong> <span th:text="${minPrice ?: 'NULL'}">NULL</span></p>
+    <p><strong>averagePrice:</strong> <span th:text="${averagePrice ?: 'NULL'}">NULL</span></p>
+    <p><strong>totalProducts:</strong> <span th:text="${totalProducts ?: 'NULL'}">NULL</span></p>
+    <p><strong>mostExpensiveProduct:</strong> <span th:text="${mostExpensiveProduct?.name ?: 'NULL'}">NULL</span></p>
+    <p><strong>cheapestProduct:</strong> <span th:text="${cheapestProduct?.name ?: 'NULL'}">NULL</span></p>
+    <p><strong>productsByCategory size:</strong> <span th:text="${productsByCategory != null ? #maps.size(productsByCategory) : 'NULL'}">NULL</span></p>
+    <p><strong>products size:</strong> <span th:text="${products != null ? #lists.size(products) : 'NULL'}">NULL</span></p>
+</div>
+
+<div class="admin-header">
+    <div class="header-content">
+        <a href="/admin/dashboard" class="logo">
+            <i class="fas fa-cog"></i> CTRLBUY Admin
+        </a>
+        <nav class="nav-links">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/products">Produkter</a>
+            <a href="/admin/orders">Beställningar</a>
+            <a href="/admin/users">Användare</a>
+            <a href="/admin/reports/products" class="active">Rapporter</a>
+            <a href="/">Tillbaka till Shop</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/admin/reports" class="back-button">
+        <i class="fas fa-arrow-left"></i> Tillbaka till Rapporter
+    </a>
+
+    <div class="report-header">
+        <h1 class="report-title">📦 Produktrapport</h1>
+        <p class="report-subtitle">Detaljerad analys av produktportföljen - Dynamiska värden från databas</p>
+    </div>
+
+    <div th:if="${lowStockCount != null and lowStockCount > 0}" class="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Varning:</strong> <span th:text="${lowStockCount}">0</span> produkter har lågt lager och behöver påfyllning.
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value" th:text="${totalProducts ?: 0}">0</div>
+            <div class="stat-label">Totalt Produkter</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value"
+                 th:text="${averagePrice != null ? (#numbers.formatDecimal(averagePrice, 0, 2) + ' kr') : '0 kr'}">0 kr</div>
+            <div class="stat-label">Genomsnittspris</div>
+        </div>
+
+        <!-- 🔥 FIXAD HÖGSTA PRIS -->
+        <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value"
+                 th:text="${maxPrice != null ? (#numbers.formatDecimal(maxPrice, 0, 2) + ' kr') : '0 kr'}">0 kr</div>
+            <div class="stat-label">Högsta Pris</div>
+        </div>
+
+        <!-- 🔥 FIXAD LÄGSTA PRIS -->
+        <div class="stat-card">
+            <div class="stat-icon">📉</div>
+            <div class="stat-value"
+                 th:text="${minPrice != null ? (#numbers.formatDecimal(minPrice, 0, 2) + ' kr') : '0 kr'}">0 kr</div>
+            <div class="stat-label">Lägsta Pris</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-value" th:text="${lowStockCount ?: 0}">0</div>
+            <div class="stat-label">Lågt Lager</div>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <!-- 🔥 FIXAD KATEGORISEKTION -->
+        <div class="analysis-card">
+            <h3 class="card-title">📂 Produkter per Kategori</h3>
+            <div th:if="${productsByCategory != null and not #maps.isEmpty(productsByCategory)}">
+                <div th:each="category : ${productsByCategory}" class="category-item">
+                    <span class="category-name" th:text="${category.key}">Kategori</span>
+                    <span class="category-badge" th:text="${category.value + ' st'}">0 st</span>
+                </div>
+            </div>
+            <div th:if="${productsByCategory == null or #maps.isEmpty(productsByCategory)}"
+                 class="category-item">
+                <span class="category-name">Inga kategorier hittades</span>
+            </div>
+        </div>
+
+        <!-- 🔥 FIXAD PRISANALYS -->
+        <div class="analysis-card">
+            <h3 class="card-title">💰 Prisanalys</h3>
+            <div class="price-analysis">
+                <div class="price-item">
+                    <div class="price-label">Dyraste Produkt</div>
+                    <div class="price-value" th:text="${mostExpensiveProduct?.name ?: 'Ingen data'}">-</div>
+                    <div class="price-value"
+                         th:text="${mostExpensiveProduct?.price != null ? (#numbers.formatDecimal(mostExpensiveProduct.price, 0, 2) + ' kr') : ''}"></div>
+                </div>
+
+                <div class="price-item">
+                    <div class="price-label">Billigaste Produkt</div>
+                    <div class="price-value" th:text="${cheapestProduct?.name ?: 'Ingen data'}">-</div>
+                    <div class="price-value"
+                         th:text="${cheapestProduct?.price != null ? (#numbers.formatDecimal(cheapestProduct.price, 0, 2) + ' kr') : ''}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 FIXAD PRODUKTTABELL -->
+    <div class="products-table">
+        <h3 class="table-title">📋 Alla Produkter</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Produktnamn</th>
+                <th>Kategori</th>
+                <th>Pris</th>
+                <th>Lager</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}" th:if="${products != null}">
+                <td class="product-name" th:text="${product.name ?: 'Okänt namn'}">Produktnamn</td>
+                <td>
+                    <span class="category-tag" th:text="${product.category ?: 'Okänd'}">Kategori</span>
+                </td>
+                <td class="price"
+                    th:text="${product.price != null ? (#numbers.formatDecimal(product.price, 0, 2) + ' kr') : '0 kr'}">0 kr</td>
+                <td th:text="${product.stockQuantity ?: 0} + ' st'">0 st</td>
+                <td>
+                    <span class="status-active">Aktiv</span>
+                </td>
+            </tr>
+            <tr th:if="${products == null or #lists.isEmpty(products)}">
+                <td colspan="5" style="text-align: center; color: #7f8c8d;">
+                    Inga produkter hittades
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

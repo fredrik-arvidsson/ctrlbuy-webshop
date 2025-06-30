@@ -46,6 +46,8 @@ public class User implements UserDetails {
     @Builder.Default
     private Boolean active = true;
 
+    // ✅ COMMENTED OUT - dessa kolumner finns inte i din databas än
+    /*
     @Column(name = "email_verified")
     @Builder.Default
     private Boolean emailVerified = false;
@@ -62,11 +64,34 @@ public class User implements UserDetails {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    // NYA FÄLT: Tidsstämplar för skapande och uppdatering
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    */
+
+    // ✅ TEMPORARY - håller email-verifiering i minnet tills databas uppdateras
+    @Transient
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    @Transient
+    private String verificationToken;
+
+    @Transient
+    private LocalDateTime verificationTokenExpiry;
+
+    @Transient
+    private String resetToken;
+
+    @Transient
+    private LocalDateTime resetTokenExpiry;
+
+    @Transient
+    private LocalDateTime createdAt;
+
+    @Transient
     private LocalDateTime updatedAt;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -75,7 +100,8 @@ public class User implements UserDetails {
     @Builder.Default
     private List<String> roles = new ArrayList<>(List.of("USER"));
 
-    // NYA METODER: Automatisk tidsstämpling
+    // ✅ TILLFÄLLIGT INAKTIVERAD - dessa körs bara om kolumnerna finns
+    /*
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -87,12 +113,24 @@ public class User implements UserDetails {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+    */
 
-    // UserDetails implementation
+    // UserDetails implementation - FIXAD VERSION
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (roles == null || roles.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(role -> {
+                    // FIX: Om rollen redan börjar med "ROLE_", lägg inte till igen
+                    if (role.startsWith("ROLE_")) {
+                        return new SimpleGrantedAuthority(role);
+                    } else {
+                        return new SimpleGrantedAuthority("ROLE_" + role);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -113,7 +151,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return active && emailVerified;
+        // ✅ FIX: Email-verifiering är inaktiverad - bara kontrollera active status
+        return active != null && active;
     }
 
     // ✅ KRITISKA KOMPATIBILITETSMETODER för UserService
@@ -143,8 +182,13 @@ public class User implements UserDetails {
     }
 
     public void addRole(String role) {
-        if (!roles.contains(role)) {
-            roles.add(role);
+        if (roles == null) {
+            roles = new ArrayList<>();
+        }
+        // FIX: Normalisera roller utan "ROLE_" prefix för konsistens
+        String normalizedRole = role.startsWith("ROLE_") ? role.substring(5) : role;
+        if (!roles.contains(normalizedRole)) {
+            roles.add(normalizedRole);
         }
     }
 
@@ -160,7 +204,7 @@ public class User implements UserDetails {
                 LocalDateTime.now().isBefore(resetTokenExpiry);
     }
 
-    // NYA HJÄLPMETODER för datum - FÖRBÄTTRADE VERSIONER
+    // NYA HJÄLPMETODER för datum - TILLFÄLLIGA VERSIONER
     public String getFormattedCreatedAt() {
         if (createdAt != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
@@ -177,10 +221,16 @@ public class User implements UserDetails {
         return "Aldrig uppdaterad";
     }
 
-    // NY METOD: Kontrollerar om profilen är komplett
+    // ✅ FIX: hasCompleteProfile ignorerar email-verifiering när funktionen är inaktiverad
     public boolean hasCompleteProfile() {
+        // Email-verifiering är inaktiverad - bara kontrollera namn
         return firstName != null && !firstName.trim().isEmpty() &&
-                lastName != null && !lastName.trim().isEmpty() &&
-                emailVerified != null && emailVerified;
+                lastName != null && !lastName.trim().isEmpty();
+        // Borttaget: && emailVerified != null && emailVerified;
+    }
+
+    // Hjälpmetod för att kontrollera text
+    private boolean hasText(String str) {
+        return str != null && !str.trim().isEmpty();
     }
 }

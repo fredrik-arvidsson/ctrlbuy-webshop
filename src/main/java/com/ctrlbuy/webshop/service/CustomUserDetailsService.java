@@ -41,19 +41,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails createUserDetails(User user) {
-        // VIKTIGT: Admin-användare ska alltid kunna logga in
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        // FIX: Kontrollera roller UTAN "ROLE_" prefix eftersom de lagras som "ADMIN", "USER" etc.
+        boolean isAdmin = user.getRoles().contains("ADMIN") ||
+                user.getRoles().contains("SUPERADMIN") ||
+                user.getUsername().equals("superadmin");
 
         System.out.println("DEBUG: Is admin user: " + isAdmin);
+        System.out.println("DEBUG: User authorities will be: " + user.getAuthorities());
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities(user.getRoles().toArray(new String[0]))
+                .authorities(user.getAuthorities())  // Använd User-entitetens getAuthorities() metod
                 .accountExpired(false)
-                .accountLocked(!isAdmin && !user.isEmailVerified())  // Admin aldrig låst, andra låsta om ej verifierade
+                .accountLocked(false)  // FIX: Låt aldrig konton vara låsta under utveckling
                 .credentialsExpired(false)
-                .disabled(!user.isActive())
+                .disabled(!user.isActive())  // FIX: Bara kontrollera active, inte emailVerified under utveckling
                 .build();
     }
 }

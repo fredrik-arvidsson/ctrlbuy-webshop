@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle ?: 'Kommer snart - CtrlBuy'}">Kommer snart - CtrlBuy</title>
+    <title th:text="'CTRLBUY Admin - ' + ${pageTitle}">CTRLBUY Admin</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -24,13 +24,13 @@
             padding: 60px 40px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             backdrop-filter: blur(10px);
         }
 
         .coming-soon-icon {
-            font-size: 6rem;
+            font-size: 5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             background-clip: text;
@@ -46,24 +46,24 @@
         }
 
         .coming-soon-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .coming-soon-subtitle {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #667eea;
             font-weight: 600;
             margin-bottom: 30px;
         }
 
         .coming-soon-message {
-            font-size: 1.1rem;
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 40px;
+            font-size: 1.3rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 25px;
         }
 
         .feature-preview {
@@ -84,24 +84,51 @@
             opacity: 0.9;
         }
 
+        .features-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .features-list h6 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .feature-item {
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            color: #555;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
         .action-buttons {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 40px;
         }
 
         .btn {
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             border: none;
             cursor: pointer;
         }
@@ -136,51 +163,26 @@
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 12px;
             background: #e0e0e0;
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 75%;
-            border-radius: 4px;
-            animation: progress 3s ease-in-out infinite;
-        }
-
-        @keyframes progress {
-            0% { width: 65%; }
-            50% { width: 85%; }
-            100% { width: 75%; }
-        }
-
-        .user-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 30px 0;
-            border-left: 4px solid #667eea;
-        }
-
-        .user-info h5 {
-            margin: 0 0 10px 0;
-            color: #333;
-        }
-
-        .user-info p {
-            margin: 0;
-            color: #666;
+            border-radius: 6px;
+            transition: width 0.8s ease;
         }
 
         @media (max-width: 768px) {
             .coming-soon-container {
-                padding: 40px 30px;
+                padding: 40px 25px;
             }
 
             .coming-soon-title {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
             .coming-soon-icon {
@@ -194,7 +196,7 @@
 
             .btn {
                 width: 100%;
-                max-width: 300px;
+                max-width: 280px;
                 justify-content: center;
             }
         }
@@ -202,54 +204,56 @@
 </head>
 <body>
 <div class="coming-soon-container">
-    <!-- Dynamic Icon based on feature -->
+    <!-- Admin Icon -->
     <div class="coming-soon-icon">
-        <i th:class="'fas fa-' + (${icon} ?: 'tools')"></i>
+        <i class="fas fa-tools"></i>
     </div>
 
     <!-- Dynamic Title -->
-    <h1 class="coming-soon-title" th:text="${feature ?: 'Funktion'} + ' kommer snart!'">Funktion kommer snart!</h1>
+    <h1 class="coming-soon-title" th:text="${pageTitle}">🔧 Systeminställningar</h1>
+    <p class="coming-soon-subtitle" th:text="${subtitle}">Administrativ konfiguration och systemhantering</p>
 
-    <p class="coming-soon-subtitle">Vi arbetar hårt för att ge dig den bästa upplevelsen</p>
+    <!-- Main Message -->
+    <h3 class="coming-soon-message" th:text="${comingSoonMessage}">Inställningar kommer snart!</h3>
 
     <!-- Feature Preview Box -->
     <div class="feature-preview">
         <h4><i class="fas fa-rocket me-2"></i>Vad du kan förvänta dig:</h4>
-        <p th:text="${message ?: 'Denna funktion är under utveckling och kommer snart att vara tillgänglig.'}">
-            Denna funktion är under utveckling och kommer snart att vara tillgänglig.
-        </p>
+        <p th:text="${description}">Vi arbetar hårt för att ge dig den bästa administrativa upplevelsen</p>
     </div>
 
-    <!-- User Info (if logged in) -->
-    <div class="user-info" th:if="${user != null}">
-        <h5><i class="fas fa-user me-2"></i>Hej <span th:text="${user.fullName}">Användare</span>!</h5>
-        <p>Vi kommer att meddela dig när denna funktion är redo. Tack för ditt tålamod!</p>
+    <!-- Features List -->
+    <div class="features-list" th:if="${features}">
+        <h6><i class="fas fa-stars"></i> Kommande funktioner:</h6>
+        <div th:each="feature : ${features}" class="feature-item">
+            <span th:text="${feature}">Feature beskrivning</span>
+        </div>
     </div>
 
     <!-- Progress Indicator -->
     <div class="progress-indicator">
         <p><strong>Utvecklingsframsteg:</strong></p>
         <div class="progress-bar">
-            <div class="progress-fill"></div>
+            <div class="progress-fill" th:style="'width: ' + ${progressValue} + '%'"></div>
         </div>
-        <small class="text-muted">~75% färdigt</small>
+        <small class="text-muted" th:text="${progressText}">~85% färdigt</small>
     </div>
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <a th:href="${returnUrl ?: '/min-profil'}" class="btn btn-primary">
+        <a href="/admin" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i>
-            Tillbaka till profil
+            Tillbaka till Admin
         </a>
 
-        <a href="/produkter" class="btn btn-outline">
-            <i class="fas fa-shopping-bag"></i>
-            Utforska produkter
+        <a href="/admin/reports/sales" class="btn btn-outline">
+            <i class="fas fa-chart-line"></i>
+            Utforska Analytics
         </a>
 
-        <a href="/support" class="btn btn-outline">
+        <a href="/support/kundtjanst" class="btn btn-outline">
             <i class="fas fa-headset"></i>
-            Kontakta support
+            Kontakta Support
         </a>
     </div>
 
@@ -257,7 +261,7 @@
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
         <p style="color: #999; font-size: 0.9rem;">
             <i class="fas fa-heart" style="color: #e25555;"></i>
-            Tack för att du använder CtrlBuy
+            Tack för att du använder CtrlBuy Admin
         </p>
     </div>
 </div>

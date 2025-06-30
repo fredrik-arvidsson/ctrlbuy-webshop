@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lägg till Produkt - CtrlBuy Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card-header {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 0.2rem rgba(106, 17, 203, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+        .btn-secondary {
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .form-check-input:checked {
+            background-color: #6a11cb;
+            border-color: #6a11cb;
+        }
+        .required-field {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Flash Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        <span th:text="${pageTitle} ?: 'Lägg till ny produkt'"></span>
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Form med korrekt Thymeleaf object binding -->
+                    <form th:action="@{/admin/products-management/add}" th:object="${product}" method="post">
+
+                        <!-- Grundläggande produktinformation -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Produktnamn <span class="required-field">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}"
+                                       placeholder="t.ex. iPhone 15 Pro Max" required>
+                                <div th:if="${#fields.hasErrors('name')}" class="text-danger small mt-1">
+                                    <span th:errors="*{name}"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-layer-group me-1"></i>Kategori <span class="required-field">*</span>
+                                </label>
+                                <select class="form-select" id="category" th:field="*{category}" required>
+                                    <option value="">Välj kategori</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('category')}" class="text-danger small mt-1">
+                                    <span th:errors="*{category}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prissättning - FIXED: Använd price istället för originalPrice -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Ordinarie pris (SEK) <span class="required-field">*</span>
+                                </label>
+                                <input type="number" step="0.01" min="0" class="form-control"
+                                       id="price" th:field="*{price}"
+                                       placeholder="14999.00" required>
+                                <div th:if="${#fields.hasErrors('price')}" class="text-danger small mt-1">
+                                    <span th:errors="*{price}"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="salePrice" class="form-label">
+                                    <i class="fas fa-percent me-1"></i>REA-pris (SEK)
+                                </label>
+                                <input type="number" step="0.01" min="0" class="form-control"
+                                       id="salePrice" th:field="*{salePrice}"
+                                       placeholder="12999.00 (valfritt)">
+                                <small class="text-muted">Lämna tomt om produkten inte är på rea</small>
+                            </div>
+                        </div>
+
+                        <!-- Beskrivning -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Beskrivning
+                            </label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="4"
+                                      placeholder="Ange en detaljerad produktbeskrivning..."></textarea>
+                            <div th:if="${#fields.hasErrors('description')}" class="text-danger small mt-1">
+                                <span th:errors="*{description}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Bilder och metadata -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="imageUrl" class="form-label">
+                                    <i class="fas fa-image me-1"></i>Huvud bild-URL
+                                </label>
+                                <input type="url" class="form-control" id="imageUrl" th:field="*{imageUrl}"
+                                       placeholder="https://exempel.com/produktbild.jpg">
+                                <small class="text-muted">URL till produktens huvudbild</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="brand" class="form-label">
+                                    <i class="fas fa-copyright me-1"></i>Märke
+                                </label>
+                                <input type="text" class="form-control" id="brand" th:field="*{brand}"
+                                       placeholder="t.ex. Apple, Samsung, Sony">
+                            </div>
+                        </div>
+
+                        <!-- SKU och tillgänglighet -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="sku" class="form-label">
+                                    <i class="fas fa-barcode me-1"></i>SKU (artikelnummer)
+                                </label>
+                                <input type="text" class="form-control" id="sku" th:field="*{sku}"
+                                       placeholder="CB001-IPH15PM">
+                                <small class="text-muted">Unikt artikelnummer för produkten</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="stockQuantity" class="form-label">
+                                    <i class="fas fa-boxes me-1"></i>Lagersaldo
+                                </label>
+                                <input type="number" min="0" class="form-control"
+                                       id="stockQuantity" th:field="*{stockQuantity}"
+                                       placeholder="50" value="0">
+                                <small class="text-muted">Antal produkter i lager</small>
+                            </div>
+                        </div>
+
+                        <!-- Produktstatus och inställningar - FIXED: Ta bort newProduct som inte finns -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="active"
+                                           th:field="*{active}" checked>
+                                    <label class="form-check-label" for="active">
+                                        <i class="fas fa-eye me-1"></i>Aktiv produkt
+                                    </label>
+                                    <small class="text-muted d-block">Produkten visas i webshopen</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featured"
+                                           th:field="*{featured}">
+                                    <label class="form-check-label" for="featured">
+                                        <i class="fas fa-star me-1"></i>Utvald produkt
+                                    </label>
+                                    <small class="text-muted d-block">Visas på startsidan</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Knappar -->
+                        <div class="d-flex justify-content-between pt-4 border-top">
+                            <a href="/admin/products-management" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Tillbaka till produktlista
+                            </a>
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-undo me-2"></i>Rensa formulär
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Spara produkt
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Automatisk SKU-generering baserat på produktnamn och kategori
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameInput = document.getElementById('name');
+        const categorySelect = document.getElementById('category');
+        const skuInput = document.getElementById('sku');
+
+        function generateSKU() {
+            const name = nameInput.value;
+            const category = categorySelect.value;
+
+            if (name && category && !skuInput.value) {
+                const nameCode = name.substring(0, 3).toUpperCase();
+                const categoryCode = category.substring(0, 2).toUpperCase();
+                const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+                skuInput.value = `CB${categoryCode}-${nameCode}${randomNum}`;
+            }
+        }
+
+        nameInput.addEventListener('blur', generateSKU);
+        categorySelect.addEventListener('change', generateSKU);
+
+        // Real-time price validation
+        const priceInput = document.getElementById('price');
+        const salePriceInput = document.getElementById('salePrice');
+
+        salePriceInput.addEventListener('input', function() {
+            const price = parseFloat(priceInput.value);
+            const salePrice = parseFloat(salePriceInput.value);
+
+            if (price && salePrice && salePrice >= price) {
+                salePriceInput.setCustomValidity('REA-priset måste vara lägre än ordinarie priset');
+            } else {
+                salePriceInput.setCustomValidity('');
+            }
+        });
+    });
+</script>
+</body>
+</html>

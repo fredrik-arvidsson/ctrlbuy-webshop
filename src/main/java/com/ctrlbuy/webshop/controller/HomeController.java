@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.security.core.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.ctrlbuy.webshop.repository.ProductRepository;
 import com.ctrlbuy.webshop.service.ProductService;
 import com.ctrlbuy.webshop.service.LoggingService;
 import com.ctrlbuy.webshop.model.Product;
@@ -28,6 +27,80 @@ public class HomeController {
     private LoggingService loggingService;
 
     @GetMapping("/")
+    public String root(Model model, Authentication authentication, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            logger.trace("=== ROOT CONTROLLER START ===");
+            logger.trace("Request URL: {}", request.getRequestURL());
+            logger.trace("Request Method: {}", request.getMethod());
+
+            // ✅ ÄNDRING: Hämta produkter för alla användare (både inloggade och icke-inloggade)
+            try {
+                logger.trace("Loading featured products for public page...");
+                List<Product> featuredProducts = productService.getAllProducts()
+                        .stream()
+                        .filter(Product::isFeatured) // ✅ Använd isFeatured() metoden från Product
+                        .limit(6) // ✅ UPPDATERAT: Visa 6 featured produkter
+                        .toList();
+
+                // Om inga featured produkter finns, ta de 6 första produkterna
+                if (featuredProducts.isEmpty()) {
+                    logger.trace("No featured products found, loading first 6 products instead");
+                    featuredProducts = productService.getAllProducts()
+                            .stream()
+                            .limit(6)
+                            .toList();
+                }
+
+                model.addAttribute("featuredProducts", featuredProducts);
+                logger.trace("Successfully loaded {} featured products", featuredProducts.size());
+
+                // ✅ NY FUNKTIONALITET: Lägg till totalt antal produkter
+                int totalProductCount = productService.getAllProducts().size();
+                model.addAttribute("totalProductCount", totalProductCount);
+                logger.trace("Total products in database: {}", totalProductCount);
+
+                // Debug: logga produktnamn för verifiering
+                featuredProducts.forEach(product ->
+                        logger.trace("Featured product: ID={}, Name={}, Price={}, Featured={}",
+                                product.getId(), product.getName(), product.getCurrentPrice(), product.isFeatured()));
+
+            } catch (Exception e) {
+                logger.warn("Could not load featured products: {}", e.getMessage());
+                loggingService.logError("loadFeaturedProductsPublic", e);
+                // Fortsätt utan produkter om det misslyckas
+                model.addAttribute("featuredProducts", Collections.emptyList());
+                model.addAttribute("totalProductCount", 0);
+            }
+
+            // ÄNDRING: Visa offentlig startsida för icke-inloggade användare
+            if (authentication == null || !authentication.isAuthenticated() ||
+                    authentication.getName().equals("anonymousUser")) {
+                logger.trace("User not authenticated, showing public welcome page");
+                loggingService.logUserAction("anonymous", "PUBLIC_PAGE_VIEW",
+                        "Anonymous user accessed public welcome page");
+                return "home";  // ✅ ÄNDRAT: Visa home istället för welcome-public
+            }
+
+            // Användaren är inloggad - omdirigera till dashboard
+            logger.trace("User is authenticated: {}, redirecting to home dashboard", authentication.getName());
+            String username = getCurrentUsername(authentication);
+            loggingService.logUserAction(username, "AUTHENTICATED_ROOT_ACCESS",
+                    "Authenticated user accessed root, redirecting to dashboard");
+            return "redirect:/home";
+
+        } catch (Exception e) {
+            logger.error("Exception in root controller: ", e);
+            loggingService.logError("rootController", e);
+            throw e;
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            loggingService.logPerformance("root", duration);
+        }
+    }
+
+    @GetMapping("/home")
     public String home(Model model, Authentication authentication, HttpServletRequest request) {
         long startTime = System.currentTimeMillis();
 
@@ -36,6 +109,18 @@ public class HomeController {
             logger.trace("Request URL: {}", request.getRequestURL());
             logger.trace("Request Method: {}", request.getMethod());
             logger.trace("Request Headers: {}", Collections.list(request.getHeaderNames()));
+
+            // Kolla om användaren är inloggad
+            if (authentication == null || !authentication.isAuthenticated() ||
+                    authentication.getName().equals("anonymousUser")) {
+                logger.trace("User not authenticated, redirecting to login");
+                loggingService.logUserAction("anonymous", "UNAUTHENTICATED_HOME_ACCESS",
+                        "Unauthenticated user accessed home URL, redirecting to login");
+                return "redirect:/login";
+            }
+
+            // Användaren är inloggad - visa home-sidan
+            logger.trace("User is authenticated: {}", authentication.getName());
 
             // Logga page view
             String username = getCurrentUsername(authentication);
@@ -57,9 +142,14 @@ public class HomeController {
                     model.addAttribute("featuredProducts", featuredProducts);
                     logger.trace("Successfully loaded {} featured products with images", featuredProducts.size());
 
+                    // ✅ NY FUNKTIONALITET: Lägg till totalt antal produkter för inloggade användare också
+                    int totalProductCount = productService.getAllProducts().size();
+                    model.addAttribute("totalProductCount", totalProductCount);
+                    logger.trace("Total products available: {}", totalProductCount);
+
                     // Logga featured product views
                     loggingService.logUserAction(username, "FEATURED_PRODUCTS_VIEW",
-                            "Viewed " + featuredProducts.size() + " featured products");
+                            "Viewed " + featuredProducts.size() + " featured products out of " + totalProductCount + " total");
 
                     // Debug: logga första produktens bildURL
                     if (!featuredProducts.isEmpty()) {
@@ -69,59 +159,41 @@ public class HomeController {
                     logger.warn("Could not load featured products: {}", e.getMessage());
                     loggingService.logError("loadFeaturedProducts", e);
                     // Fortsätt utan produkter om det misslyckas
+                    model.addAttribute("totalProductCount", 0);
                 }
 
-                // Hantera autentisering
-                if (authentication != null) {
-                    logger.trace("Authentication found: {}", authentication.getClass().getSimpleName());
-                    logger.trace("Is authenticated: {}", authentication.isAuthenticated());
-                    logger.trace("Principal: {}", authentication.getPrincipal());
-                    logger.trace("Name: {}", authentication.getName());
-                    logger.trace("Authorities: {}", authentication.getAuthorities());
+                // Hantera autentisering - vi vet redan att användaren är inloggad
+                logger.trace("Authentication found: {}", authentication.getClass().getSimpleName());
+                logger.trace("Is authenticated: {}", authentication.isAuthenticated());
+                logger.trace("Principal: {}", authentication.getPrincipal());
+                logger.trace("Name: {}", authentication.getName());
+                logger.trace("Authorities: {}", authentication.getAuthorities());
 
-                    if (authentication.isAuthenticated() &&
-                            !authentication.getName().equals("anonymousUser")) {
+                String authenticatedUsername = authentication.getName();
+                logger.trace("Setting user as logged in: {}", authenticatedUsername);
 
-                        String authenticatedUsername = authentication.getName();
-                        logger.trace("Setting user as logged in: {}", authenticatedUsername);
+                model.addAttribute("isLoggedIn", true);
+                model.addAttribute("username", authenticatedUsername);
+                model.addAttribute("user", authenticatedUsername); // För Thymeleaf kompatibilitet
 
-                        model.addAttribute("isLoggedIn", true);
-                        model.addAttribute("username", authenticatedUsername);
-                        model.addAttribute("user", authenticatedUsername); // För Thymeleaf kompatibilitet
+                // Logga authenticated user activity
+                loggingService.logUserAction(authenticatedUsername, "AUTHENTICATED_ACCESS",
+                        "Authenticated user accessed home page");
 
-                        // Logga authenticated user activity
-                        loggingService.logUserAction(authenticatedUsername, "AUTHENTICATED_ACCESS",
-                                "Authenticated user accessed home page");
+                // Kontrollera admin-status
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(authority -> {
+                            String auth = authority.getAuthority();
+                            logger.trace("Checking authority: {}", auth);
+                            return "ROLE_ADMIN".equals(auth);
+                        });
 
-                        // Kontrollera admin-status
-                        boolean isAdmin = authentication.getAuthorities().stream()
-                                .anyMatch(authority -> {
-                                    String auth = authority.getAuthority();
-                                    logger.trace("Checking authority: {}", auth);
-                                    return "ROLE_ADMIN".equals(auth);
-                                });
+                logger.trace("User {} is admin: {}", authenticatedUsername, isAdmin);
+                model.addAttribute("isAdmin", isAdmin);
 
-                        logger.trace("User {} is admin: {}", authenticatedUsername, isAdmin);
-                        model.addAttribute("isAdmin", isAdmin);
-
-                        if (isAdmin) {
-                            loggingService.logUserAction(authenticatedUsername, "ADMIN_ACCESS",
-                                    "Admin user accessed home page");
-                        }
-
-                    } else {
-                        logger.trace("User not authenticated or is anonymous");
-                        model.addAttribute("isLoggedIn", false);
-                        model.addAttribute("isAdmin", false);
-                        loggingService.logUserAction("anonymous", "ANONYMOUS_ACCESS",
-                                "Anonymous user accessed home page");
-                    }
-                } else {
-                    logger.trace("No authentication found");
-                    model.addAttribute("isLoggedIn", false);
-                    model.addAttribute("isAdmin", false);
-                    loggingService.logUserAction("anonymous", "UNAUTHENTICATED_ACCESS",
-                            "Unauthenticated user accessed home page");
+                if (isAdmin) {
+                    loggingService.logUserAction(authenticatedUsername, "ADMIN_ACCESS",
+                            "Admin user accessed home page");
                 }
 
                 logger.trace("Model attributes before return: {}", model.asMap().keySet());

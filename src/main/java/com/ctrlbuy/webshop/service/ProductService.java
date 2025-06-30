@@ -13,8 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +28,108 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
+    // ================================
+    // BILDHANTERING - UNSPLASH INTEGRATION
+    // ================================
+
+    /**
+     * Förbättrar en produkt med kategori-baserad Unsplash-bild
+     * Ersätter 404-fel med snygga produktbilder
+     */
+    private Product enhanceProductWithImage(Product product) {
+        try {
+            // Om produkten redan har en fungerande bild-URL, behåll den
+            String currentImageUrl = product.getImageUrl();
+
+            // Kontrollera om bilden behöver ersättas (404-fel, tom, eller gamla /images/products/ paths)
+            if (currentImageUrl == null || currentImageUrl.trim().isEmpty() ||
+                    currentImageUrl.contains("404") || currentImageUrl.contains("placeholder") ||
+                    currentImageUrl.startsWith("/images/products/")) {
+
+                String categoryImageUrl = getCategoryImageUrl(product.getCategory());
+                product.setImageUrl(categoryImageUrl);
+
+                log.debug("🖼️ Ersatte bild för produkt '{}' (kategori: {}) med: {}",
+                        product.getName(), product.getCategory(), categoryImageUrl);
+            }
+
+            return product;
+        } catch (Exception e) {
+            log.warn("⚠️ Kunde inte förbättra bild för produkt '{}': {}",
+                    product.getName(), e.getMessage());
+            return product;
+        }
+    }
+
+    /**
+     * Hämtar kategori-specifik Unsplash-bild URL
+     * Använder direkta Unsplash URL:er för snabbare laddning
+     */
+    private String getCategoryImageUrl(String category) {
+        if (category == null || category.trim().isEmpty()) {
+            return getGenericProductImage();
+        }
+
+        String normalizedCategory = category.toLowerCase().trim();
+
+        // Direkta Unsplash-bilder för konsistenta resultat
+        return switch (normalizedCategory) {
+            case "smartphones", "telefoner", "mobiler" ->
+                    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop";
+
+            case "laptops", "datorer", "bärbara" ->
+                    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop";
+
+            case "gaming", "spel", "spelkonsoler" ->
+                    "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop";
+
+            case "tablets", "surfplattor" ->
+                    "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop";
+
+            case "accessories", "tillbehör", "headphones", "hörlurar" ->
+                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop";
+
+            case "watches", "klockor", "smartwatch", "smartwatches" ->
+                    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop";
+
+            case "cameras", "kameror", "fotografering" ->
+                    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop";
+
+            case "audio", "ljud", "speakers", "högtalare" ->
+                    "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop";
+
+            case "tv", "television", "monitors", "skärmar" ->
+                    "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=300&fit=crop";
+
+            case "wearables", "fitnesstracker" ->
+                    "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop";
+
+            case "smart-home", "smarta-hem" ->
+                    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop";
+
+            case "cables", "kablar", "chargers", "laddare" ->
+                    "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop";
+
+            case "storage", "lagring", "memory", "minne" ->
+                    "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop";
+
+            case "vr" ->
+                    "https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=400&h=300&fit=crop";
+
+            default -> {
+                log.debug("🖼️ Okänd kategori '{}', använder generisk teknikbild", category);
+                yield getGenericProductImage();
+            }
+        };
+    }
+
+    /**
+     * Generisk produktbild för okända kategorier
+     */
+    private String getGenericProductImage() {
+        return "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400&h=300&fit=crop";
+    }
 
     // ================================
     // BEFINTLIGA METODER - OFÖRÄNDRADE
@@ -54,7 +160,7 @@ public class ProductService {
                 log.warn("🔍 DEBUGGING: Repository count() returnerar: {}", count);
             }
 
-            return products;
+            return products.stream().map(this::enhanceProductWithImage).collect(Collectors.toList());
         } catch (Exception e) {
             log.error("🔍 DEBUGGING: Fel vid hämtning av produkter: {}", e.getMessage(), e);
             return List.of();
@@ -123,7 +229,7 @@ public class ProductService {
             // p.incrementViewCount();
             // productRepository.save(p);
             log.debug("Hämtade produkt: {}", p.getName());
-            return p;
+            return enhanceProductWithImage(p); // Lägg till bildförbättring
         }
 
         return null;
@@ -143,6 +249,7 @@ public class ProductService {
             // product.incrementViewCount();
             // productRepository.save(product);
             log.debug("Hämtade produkt: {}", product.getName());
+            return Optional.of(enhanceProductWithImage(product)); // Lägg till bildförbättring
         }
 
         return productOpt;
@@ -154,7 +261,10 @@ public class ProductService {
      */
     public List<Product> searchProducts(String keyword) {
         log.debug("Söker produkter med nyckelord: {}", keyword);
-        return productRepository.findByNameContainingOrDescriptionContainingIgnoreCase(keyword, keyword);
+        return productRepository.findByNameContainingOrDescriptionContainingIgnoreCase(keyword, keyword)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -163,7 +273,15 @@ public class ProductService {
      */
     public Page<Product> searchProducts(String keyword, Pageable pageable) {
         log.debug("Söker produkter med paginering för: {}", keyword);
-        return productRepository.searchProducts(keyword, pageable);
+        Page<Product> results = productRepository.searchProducts(keyword, pageable);
+
+        // Förbättra bilder för sökresultat
+        List<Product> enhancedProducts = results.getContent()
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(enhancedProducts, pageable, results.getTotalElements());
     }
 
     /**
@@ -181,7 +299,10 @@ public class ProductService {
      */
     public List<Product> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
         log.debug("Hämtar produkter inom prisintervall: {} - {}", minPrice, maxPrice);
-        return productRepository.findByPriceBetween(minPrice, maxPrice);
+        return productRepository.findByPriceBetween(minPrice, maxPrice)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -209,7 +330,10 @@ public class ProductService {
     public List<Product> getNewArrivals() {
         log.debug("Hämtar nyligen tillagda produkter (top 10 baserat på ID)");
         Pageable pageable = PageRequest.of(0, 10);
-        return productRepository.findNewestProductsByIdProxy(pageable);
+        return productRepository.findNewestProductsByIdProxy(pageable)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -267,7 +391,10 @@ public class ProductService {
      */
     public List<Product> getAllActiveProducts() {
         log.debug("Hämtar alla 'aktiva' produkter (proxy)");
-        return productRepository.findActiveProductsProxy();
+        return productRepository.findActiveProductsProxy()
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -284,7 +411,15 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // Använd findAll med sortering för nu
-        return productRepository.findAll(pageable);
+        Page<Product> results = productRepository.findAll(pageable);
+
+        // Förbättra bilder
+        List<Product> enhancedProducts = results.getContent()
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(enhancedProducts, pageable, results.getTotalElements());
     }
 
     /**
@@ -299,7 +434,8 @@ public class ProductService {
      */
     public Optional<Product> getProductByIdWithoutView(Long id) {
         log.debug("Hämtar produkt utan visningsräkning: {}", id);
-        return productRepository.findById(id);
+        Optional<Product> productOpt = productRepository.findById(id);
+        return productOpt.map(this::enhanceProductWithImage);
     }
 
     /**
@@ -310,11 +446,36 @@ public class ProductService {
     }
 
     /**
-     * Hämta produkter på rea (tillfällig proxy-metod)
+     * Hämta produkter på rea - ✅ FIXAT för tester
      */
     public List<Product> getProductsOnSale() {
-        log.debug("Hämtar produkter på 'rea' (proxy baserat på nyckelord)");
-        return productRepository.findSaleProductsProxy();
+        log.debug("🔥 Hämtar produkter på REA");
+        try {
+            // ✅ FIXA: Om produkterna har isOnSale() metod, filtrera med den
+            List<Product> allProducts = productRepository.findAll();
+            List<Product> saleProducts = allProducts.stream()
+                    .filter(product -> {
+                        try {
+                            return product.isOnSale() && product.isActive();
+                        } catch (Exception e) {
+                            // Om isOnSale() inte finns, kolla direktattribut
+                            return product.getOnSale() != null && product.getOnSale() &&
+                                    product.getActive() != null && product.getActive();
+                        }
+                    })
+                    .map(this::enhanceProductWithImage)
+                    .collect(Collectors.toList());
+
+            log.debug("🔥 Hittade {} produkter på rea", saleProducts.size());
+            return saleProducts;
+
+        } catch (Exception e) {
+            log.warn("🔥 Fallback till proxy-metod för rea-produkter: {}", e.getMessage());
+            return productRepository.findSaleProductsProxy()
+                    .stream()
+                    .map(this::enhanceProductWithImage)
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
@@ -323,7 +484,10 @@ public class ProductService {
     public List<Product> getPopularProducts(int limit) {
         log.debug("Hämtar {} populära produkter", limit);
         Pageable pageable = PageRequest.of(0, limit);
-        return productRepository.findRecentProductsAsPopular(pageable);
+        return productRepository.findRecentProductsAsPopular(pageable)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -332,7 +496,10 @@ public class ProductService {
     public List<Product> getNewestProducts(int limit) {
         log.debug("Hämtar {} nyaste produkter", limit);
         Pageable pageable = PageRequest.of(0, limit);
-        return productRepository.findNewestProductsByIdProxy(pageable);
+        return productRepository.findNewestProductsByIdProxy(pageable)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -340,7 +507,10 @@ public class ProductService {
      */
     public List<Product> getLowStockProducts(int threshold) {
         log.debug("Hämtar produkter med lager under {}", threshold);
-        return productRepository.findByStockQuantityLessThan(threshold);
+        return productRepository.findByStockQuantityLessThan(threshold)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
 
     // ================================
@@ -404,15 +574,25 @@ public class ProductService {
     }
 
     // ================================
-    // STATISTIK SOM FUNGERAR NU
+    // STATISTIK SOM FUNGERAR NU - ✅ FIXAT
     // ================================
 
     public long getTotalActiveProducts() {
         return productRepository.count(); // Alla produkter för nu
     }
 
+    /**
+     * ✅ FIXAT: Räknar produkter på REA korrekt
+     */
     public long getTotalProductsOnSale() {
-        return productRepository.findSaleProductsProxy().size(); // Proxy-metod
+        try {
+            List<Product> saleProducts = getProductsOnSale();
+            log.debug("🔥 getTotalProductsOnSale returnerar: {}", saleProducts.size());
+            return saleProducts.size();
+        } catch (Exception e) {
+            log.warn("🔥 Fallback count för REA-produkter: {}", e.getMessage());
+            return productRepository.findSaleProductsProxy().size(); // Fallback
+        }
     }
 
     public BigDecimal getAveragePrice() {
@@ -430,8 +610,16 @@ public class ProductService {
                                                  BigDecimal maxPrice, Boolean inStock,
                                                  String searchTerm, Pageable pageable) {
         log.debug("Avancerad sökning med filter");
-        return productRepository.findProductsWithFilters(category, minPrice, maxPrice,
+        Page<Product> results = productRepository.findProductsWithFilters(category, minPrice, maxPrice,
                 inStock, searchTerm, pageable);
+
+        // Förbättra bilder för filtrerade resultat
+        List<Product> enhancedProducts = results.getContent()
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(enhancedProducts, pageable, results.getTotalElements());
     }
 
     /**
@@ -440,28 +628,9 @@ public class ProductService {
     public List<Product> getRelatedProducts(String category, Long excludeId, int limit) {
         log.debug("Hämtar relaterade produkter i kategori: {}", category);
         Pageable pageable = PageRequest.of(0, limit);
-        return productRepository.findRelatedProductsByCategory(category, excludeId, pageable);
+        return productRepository.findRelatedProductsByCategory(category, excludeId, pageable)
+                .stream()
+                .map(this::enhanceProductWithImage)
+                .collect(Collectors.toList());
     }
-
-    // ================================
-    // METODER SOM KOMMER ATT AKTIVERAS
-    // När nya kolumner läggs till
-    // ================================
-
-    /*
-    // DESSA METODER AKTIVERAS AUTOMATISKT NÄR KOLUMNERNA LÄGGS TILL:
-
-    public Product setSalePrice(Long productId, BigDecimal salePrice) {
-        // Implementeras när sale_price kolumn läggs till
-    }
-
-    public Product removeSalePrice(Long productId) {
-        // Implementeras när sale_price kolumn läggs till
-    }
-
-    // Markera som inaktiv istället för att ta bort
-    public void deleteProduct(Long id) {
-        // Uppdateras för soft delete när is_active läggs till
-    }
-    */
 }

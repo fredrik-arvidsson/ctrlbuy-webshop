@@ -12,6 +12,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -282,7 +284,7 @@ public class OrderService {
     }
 
     /**
-     * Uppdatera orderstatus
+     * Uppdatera orderstatus (ursprunglig metod utan email-notifieringar)
      */
     public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
         Order order = orderRepository.findById(orderId)
@@ -390,6 +392,248 @@ public class OrderService {
      */
     public List<Order> getOrdersByUser(User user) {
         return findByUser(user); // Använder din befintliga metod
+    }
+
+    // ========================================
+    // NYA METODER FÖR ADMINCONTROLLER
+    // ========================================
+
+    /**
+     * Hämta alla beställningar med paginering (för admin)
+     */
+    public Page<Order> getAllOrders(Pageable pageable) {
+        log.info("Hämtar alla beställningar med paginering: page={}, size={}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        List<Order> allOrders = orderRepository.findAllByOrderByOrderDateDesc();
+
+        // Konvertera till Page manuellt
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allOrders.size());
+
+        List<Order> pageContent = allOrders.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, allOrders.size());
+    }
+
+    /**
+     * Hämta användarens beställningar med paginering (för kunder)
+     */
+    public Page<Order> getOrdersByUser(User user, Pageable pageable) {
+        log.info("Hämtar beställningar för användare: {}", user.getUsername());
+        return getOrdersByUserWithPagination(user, pageable.getPageNumber(), pageable.getPageSize());
+    }
+
+    /**
+     * Hämta beställning med ID (AdminController-kompatibel)
+     */
+    public Order getOrderById(Long orderId) {
+        log.info("Hämtar beställning med ID: {}", orderId);
+        return findOrderWithItemsById(orderId);
+    }
+
+    /**
+     * Räkna beställningar per status
+     */
+    public long countByStatus(Order.OrderStatus status) {
+        log.info("Räknar beställningar med status: {}", status);
+        List<Order> ordersWithStatus = orderRepository.findByStatusOrderByOrderDateDesc(status);
+        return ordersWithStatus.size();
+    }
+
+    /**
+     * Uppdatera orderstatus för AdminController (med email-notifieringar)
+     */
+    @Transactional
+    public void updateOrderStatusWithNotifications(Long orderId, Order.OrderStatus newStatus) {
+        log.info("Uppdaterar orderstatus för order {} till {}", orderId, newStatus);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+
+        Order.OrderStatus oldStatus = order.getStatus();
+        order.setStatus(newStatus);
+
+        Order savedOrder = orderRepository.save(order);
+
+        log.info("Orderstatus uppdaterad från {} till {} för order {}",
+                oldStatus, newStatus, orderId);
+
+        // Skicka notifikation via email om status ändras
+        try {
+            String customerEmail = savedOrder.getUser() != null ?
+                    savedOrder.getUser().getEmail() :
+                    "guest@ctrlbuy.se"; // Fallback för gäster
+
+            switch (newStatus) {
+                case CONFIRMED:
+                    emailService.sendOrderConfirmation(savedOrder, customerEmail);
+                    log.info("Bekräftelsemail skickat för order {}", orderId);
+                    break;
+                case SHIPPED:
+                    emailService.sendShippingNotification(savedOrder, customerEmail);
+                    log.info("Leveransnotifiering skickat för order {}", orderId);
+                    break;
+                case DELIVERED:
+                    emailService.sendDeliveryConfirmation(savedOrder, customerEmail);
+                    log.info("Leveransbekräftelse skickat för order {}", orderId);
+                    break;
+                case CANCELLED:
+                    emailService.sendOrderCancellation(savedOrder, customerEmail);
+                    log.info("Avbrytningsnotifiering skickat för order {}", orderId);
+                    break;
+                default:
+                    // Ingen email för PENDING
+                    break;
+            }
+        } catch (Exception emailError) {
+            log.error("Kunde inte skicka email för orderstatus-ändring: {}", emailError.getMessage());
+            // Låt inte email-fel påverka orderstatusändringen
+        }
+    }
+
+    /**
+     * Räkna användarens orders (AdminController-kompatibel)
+     */
+    public long countOrdersForUser(User user) {
+        Long count = countOrdersByUser(user);
+        return count != null ? count : 0L;
+    }
+
+    /**
+     * Hämta senaste beställningar för användare (begränsat antal)
+     */
+    public List<Order> getRecentOrdersForUser(User user) {
+        List<Order> allOrders = getOrdersByUser(user);
+        return allOrders.stream().limit(5).collect(Collectors.toList());
+    }
+
+    /**
+     * Hämta beställningar för idag
+     */
+    public List<Order> getTodaysOrders() {
+        List<Order> allOrders = findAll();
+        LocalDateTime today = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime tomorrow = today.plusDays(1);
+
+        return allOrders.stream()
+                .filter(order -> order.getOrderDate().isAfter(today) &&
+                        order.getOrderDate().isBefore(tomorrow))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Räkna idag's beställningar
+     */
+    public long countTodaysOrders() {
+        return getTodaysOrders().size();
+    }
+
+    /**
+     * Beräkna idag's försäljning
+     */
+    public BigDecimal calculateTodaysSales() {
+        List<Order> todaysOrders = getTodaysOrders();
+        return todaysOrders.stream()
+                .filter(order -> order.getStatus() != Order.OrderStatus.CANCELLED)
+                .map(order -> BigDecimal.valueOf(order.getTotalAmount()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Beräkna försäljning för en period
+     */
+    public BigDecimal calculateSalesBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> allOrders = findAll();
+        return allOrders.stream()
+                .filter(order -> order.getOrderDate().isAfter(startDate) &&
+                        order.getOrderDate().isBefore(endDate))
+                .filter(order -> order.getStatus() != Order.OrderStatus.CANCELLED)
+                .map(order -> BigDecimal.valueOf(order.getTotalAmount()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Hämta beställningar som behöver uppmärksamhet
+     */
+    public List<Order> getPendingOrdersOlderThan(int days) {
+        List<Order> pendingOrders = orderRepository.findByStatusOrderByOrderDateDesc(Order.OrderStatus.PENDING);
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+
+        return pendingOrders.stream()
+                .filter(order -> order.getOrderDate().isBefore(cutoffDate))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Sök beställningar
+     */
+    public Page<Order> searchOrders(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllOrders(pageable);
+        }
+
+        List<Order> searchResults = orderRepository.searchByOrderNumber(keyword.trim());
+
+        // Konvertera till Page
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), searchResults.size());
+
+        List<Order> pageContent = searchResults.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, searchResults.size());
+    }
+
+    /**
+     * Hämta beställningar per status med paginering
+     */
+    public Page<Order> getOrdersByStatus(Order.OrderStatus status, Pageable pageable) {
+        List<Order> ordersWithStatus = orderRepository.findByStatusOrderByOrderDateDesc(status);
+
+        // Konvertera till Page
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), ordersWithStatus.size());
+
+        List<Order> pageContent = ordersWithStatus.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, ordersWithStatus.size());
+    }
+
+    /**
+     * Avbryt beställning (endast om PENDING) - för kunder
+     */
+    @Transactional
+    public boolean cancelOrder(Long orderId, User user) {
+        log.info("Försöker avbryta beställning {} för användare {}", orderId, user.getUsername());
+
+        Optional<Order> orderOpt = getOrderByIdAndUser(orderId, user);
+        if (!orderOpt.isPresent()) {
+            log.warn("Beställning {} hittades inte eller tillhör inte användare {}", orderId, user.getUsername());
+            return false;
+        }
+
+        Order order = orderOpt.get();
+
+        // Kan bara avbryta väntande beställningar
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
+            log.warn("Kan inte avbryta beställning {} med status {}", orderId, order.getStatus());
+            return false;
+        }
+
+        order.setStatus(Order.OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        log.info("Beställning {} avbruten av användare {}", orderId, user.getUsername());
+
+        // Skicka avbrytningsnotifiering
+        try {
+            String customerEmail = user.getEmail();
+            emailService.sendOrderCancellation(order, customerEmail);
+        } catch (Exception emailError) {
+            log.error("Kunde inte skicka avbrytningsnotifiering: {}", emailError.getMessage());
+        }
+
+        return true;
     }
 
     // DTO klasser för beställningsdata

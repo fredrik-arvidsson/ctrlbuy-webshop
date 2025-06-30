@@ -141,12 +141,14 @@ public class CheckoutController {
 
             log.info("Order created successfully with ID: {}", savedOrder.getId());
 
-            // ✅ NYTT: SKICKA ORDERBEKRÄFTELSE VIA EMAIL
+            // ✅ FIXAD: SKICKA ORDERBEKRÄFTELSE VIA EMAIL
             try {
-                log.info("📧 Attempting to send order confirmation email to: {}", email);
+                // Logga båda emails för debugging
+                log.info("📧 Form email: {}, User email: {}", email, currentUser.getEmail());
+                log.info("📧 Attempting to send order confirmation email to: {}", currentUser.getEmail());
 
-                // Använd EmailServiceImpl:s sendOrderConfirmation metod
-                boolean emailSent = emailService.sendOrderConfirmation(email, savedOrder);
+                // FIXAT: Använd currentUser.getEmail() istället för formulärets email
+                boolean emailSent = emailService.sendOrderConfirmation(currentUser.getEmail(), savedOrder);
 
                 if (emailSent) {
                     log.info("✅ Order confirmation email sent successfully for order: {}", savedOrder.getId());
@@ -165,7 +167,8 @@ public class CheckoutController {
 
             // Success meddelande med ordernummer
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Beställning genomförd! Ordernummer: " + savedOrder.getOrderNumber());
+                    "Beställning genomförd! Ordernummer: " + savedOrder.getOrderNumber() +
+                            ". En bekräftelse har skickats till " + currentUser.getEmail());
 
             return "redirect:/checkout/confirmation/" + savedOrder.getId();
 

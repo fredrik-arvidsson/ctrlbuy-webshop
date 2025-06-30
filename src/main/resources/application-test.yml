@@ -1,0 +1,48 @@
+# =======================================
+# TEST MILJÖ - TESTCONTAINERS MySQL
+# =======================================
+# Använder Testcontainers för integration tests
+# Inga fler H2-krångel i tester heller!
+# =======================================
+
+spring:
+  # Testcontainers sätter automatiskt datasource properties
+  # Ingen manuell konfiguration behövs
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Fresh database för varje test
+    show-sql: true  # Debug SQL i tester
+
+  # Test-specifika inställningar
+  mail:
+    host: localhost  # GreenMail för email-tester
+    port: 3025
+
+# =======================================
+# TEST LOGGING
+# =======================================
+logging:
+  level:
+    root: INFO
+    com.ctrlbuy.webshop: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.testcontainers: INFO
+
+# =======================================
+# TEST SETTINGS
+# =======================================
+app:
+  email:
+    enabled: false  # Disable email i tester (använd GreenMail)
+  base:
+    url: http://localhost:8080
+
+# =======================================
+# TEST INFO
+# =======================================
+info:
+  app:
+    environment: Test (Testcontainers MySQL)
+    database:
+      provider: Testcontainers MySQL 8.0

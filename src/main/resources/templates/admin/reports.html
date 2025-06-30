@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapporter - CTRLBUY Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .admin-header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      color: #7f8c8d;
+      font-size: 1.2rem;
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .reports-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .report-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .report-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .report-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .report-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .report-description {
+      color: #7f8c8d;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .report-action {
+      display: inline-block;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .report-action:hover {
+      background: linear-gradient(135deg, #2980b9, #1f5582);
+      transform: translateY(-2px);
+      text-decoration: none;
+      color: white;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      margin-bottom: 1rem;
+      transition: background 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      text-decoration: none;
+      color: white;
+    }
+
+    /* Färgteman för olika rapporter */
+    .sales-card .report-icon { color: #e74c3c; }
+    .products-card .report-icon { color: #f39c12; }
+    .users-card .report-icon { color: #9b59b6; }
+    .coverage-card .report-icon { color: #1abc9c; }
+    .deployment-card .report-icon { color: #34495e; }
+
+    @media (max-width: 768px) {
+      .reports-grid {
+        grid-template-columns: 1fr;
+      }
+      .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .quick-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-header">
+  <div class="header-content">
+    <a href="/admin/dashboard" class="logo">
+      <i class="fas fa-cog"></i> CTRLBUY Admin
+    </a>
+    <nav class="nav-links">
+      <a href="/admin/dashboard">Dashboard</a>
+      <a href="/admin/products">Produkter</a>
+      <a href="/admin/orders">Beställningar</a>
+      <a href="/admin/users">Användare</a>
+      <a href="/admin/reports" class="active">Rapporter</a>
+      <a href="/">Tillbaka till Shop</a>
+    </nav>
+  </div>
+</div>
+
+<div class="container">
+  <a href="/admin/dashboard" class="back-button">
+    <i class="fas fa-arrow-left"></i> Tillbaka till Dashboard
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title">📊 Rapporter & Analytics</h1>
+    <p class="page-subtitle">Detaljerad analys och insikter för din webshop - <span th:text="${reportDate}"></span></p>
+  </div>
+
+  <div class="quick-stats">
+    <div class="stat-card">
+      <div class="stat-icon">🛍️</div>
+      <div class="stat-value" th:text="${totalProducts}">0</div>
+      <div class="stat-label">Totalt Produkter</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value" th:text="${totalUsers}">0</div>
+      <div class="stat-label">Registrerade Användare</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-value" th:text="${onSaleProducts}">0</div>
+      <div class="stat-label">Produkter på REA</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value" th:text="${totalRevenue + ' kr'}">0 kr</div>
+      <div class="stat-label">Total Intäkt (Potential)</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💸</div>
+      <div class="stat-value" th:text="${totalSavings + ' kr'}">0 kr</div>
+      <div class="stat-label">Totala Besparingar</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" th:text="${activeProducts}">0</div>
+      <div class="stat-label">Aktiva Produkter</div>
+    </div>
+  </div>
+
+  <div class="reports-grid">
+    <a href="/admin/reports/sales" class="report-card sales-card">
+      <div class="report-icon">📈</div>
+      <h3 class="report-title">Försäljningsrapport</h3>
+      <p class="report-description">
+        Detaljerad analys av försäljning, intäkter och REA-aktivitet.
+        Inkluderar kategorivisning och topprodukter.
+      </p>
+      <span class="report-action">Visa Rapport</span>
+    </a>
+
+    <a href="/admin/reports/products" class="report-card products-card">
+      <div class="report-icon">📦</div>
+      <h3 class="report-title">Produktrapport</h3>
+      <p class="report-description">
+        Komplett översikt över produktkatalog, prisanalys,
+        kategoristats och lagerhantering.
+      </p>
+      <span class="report-action">Visa Rapport</span>
+    </a>
+
+    <a href="/admin/reports/users" class="report-card users-card">
+      <div class="report-icon">👤</div>
+      <h3 class="report-title">Användarrapport</h3>
+      <p class="report-description">
+        Användarstatistik, registreringstrender,
+        e-postdomäner och administratörsöversikt.
+      </p>
+      <span class="report-action">Visa Rapport</span>
+    </a>
+
+    <a href="/admin/reports/coverage" class="report-card coverage-card">
+      <div class="report-icon">🧪</div>
+      <h3 class="report-title">Code Coverage</h3>
+      <p class="report-description">
+        Live kodtäckning och kvalitetsmetrik med
+        JaCoCo integration och GitHub Actions.
+      </p>
+      <span class="report-action">Visa Rapport</span>
+    </a>
+
+    <a href="/admin/reports/deployment" class="report-card deployment-card">
+      <div class="report-icon">🌍</div>
+      <h3 class="report-title">Deployment Status</h3>
+      <p class="report-description">
+        Multi-cloud deployment status för Railway,
+        AWS och GitHub Pages miljöer.
+      </p>
+      <span class="report-action">Visa Rapport</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

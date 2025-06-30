@@ -1,6 +1,6 @@
 branch-defaults:
   main:
-    environment: webshop-secure
+    environment: webshop-working
     group_suffix: null
 environment-defaults:
   production:

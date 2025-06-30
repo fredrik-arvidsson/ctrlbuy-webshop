@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orderdetaljer - CTRLBUY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .page-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+    }
+    .order-card {
+      border: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .order-header {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 2rem;
+    }
+    .status-badge {
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+    }
+    .btn-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      border-radius: 25px;
+      padding: 0.75rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .btn-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e9ecef;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+    }
+    .timeline-item.completed {
+      opacity: 1;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -23px;
+      top: 5px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #e9ecef;
+      border: 3px solid white;
+    }
+    .timeline-item.completed::before {
+      background: #28a745;
+    }
+    .breadcrumb-item a {
+      text-decoration: none;
+      color: #667eea;
+    }
+    .breadcrumb-item a:hover {
+      color: #764ba2;
+    }
+    .product-item {
+      transition: all 0.3s ease;
+      border-radius: 10px;
+    }
+    .product-item:hover {
+      background: #f8f9fa !important;
+      transform: translateX(5px);
+    }
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">
+      <i class="fas fa-gamepad me-2"></i>CTRLBUY
+    </a>
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Hem</a>
+      <a class="nav-link" href="/products"><i class="fas fa-shopping-bag me-1"></i>Produkter</a>
+      <a class="nav-link" href="/orders"><i class="fas fa-receipt me-1"></i>Mina Beställningar</a>
+      <a class="nav-link" href="/support"><i class="fas fa-headset me-1"></i>Support</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="container mt-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/"><i class="fas fa-home me-1"></i>Hem</a></li>
+      <li class="breadcrumb-item"><a href="/orders"><i class="fas fa-receipt me-1"></i>Mina Beställningar</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Orderdetaljer</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1><i class="fas fa-file-invoice me-3"></i>Orderdetaljer</h1>
+        <p class="lead mb-0">Komplett översikt av din beställning</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <a href="/orders" class="btn btn-light btn-lg">
+          <i class="fas fa-arrow-left me-2"></i>Tillbaka till beställningar
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Alert Messages -->
+  <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${param.error}">Error message</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${success}">Success message</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Order Header Card -->
+  <div class="card order-card">
+    <div class="order-header">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h2 class="mb-1">
+            <i class="fas fa-hashtag me-2"></i>Order <span th:text="${order.orderNumber}"></span>
+          </h2>
+          <p class="mb-0 opacity-75">
+            Beställd <span th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy, HH:mm')}"></span>
+          </p>
+        </div>
+        <div class="col-md-3 text-center">
+                        <span class="badge status-badge"
+                              th:classappend="${order.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                             ${order.status.name() == 'CONFIRMED'} ? 'bg-info' :
+                                             ${order.status.name() == 'SHIPPED'} ? 'bg-primary' :
+                                             ${order.status.name() == 'DELIVERED'} ? 'bg-success' : 'bg-danger'"
+                              th:text="${order.status.name() == 'PENDING'} ? 'Väntande' :
+                                       ${order.status.name() == 'CONFIRMED'} ? 'Bekräftad' :
+                                       ${order.status.name() == 'SHIPPED'} ? 'Skickad' :
+                                       ${order.status.name() == 'DELIVERED'} ? 'Levererad' : 'Avbruten'">
+                        </span>
+        </div>
+        <div class="col-md-3 text-end">
+          <h3 class="mb-0" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' kr'"></h3>
+          <small class="opacity-75">Totalt belopp</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Order Items -->
+    <div class="col-lg-8">
+      <div class="card order-card">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">
+            <i class="fas fa-box me-2 text-primary"></i>Beställda produkter
+          </h5>
+        </div>
+        <div class="card-body">
+          <div th:if="${order.orderItems and not #lists.isEmpty(order.orderItems)}">
+            <div th:each="item : ${order.orderItems}" class="product-item bg-light p-3 mb-3 rounded">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <h6 class="mb-1" th:text="${item.productName}">Produktnamn</h6>
+                  <small class="text-muted">Artikelnummer: <span th:text="${item.product?.id ?: 'N/A'}"></span></small>
+                </div>
+                <div class="col-md-2 text-center">
+                  <span class="fw-bold" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' kr'">0 kr</span>
+                  <small class="d-block text-muted">Styckpris</small>
+                </div>
+                <div class="col-md-2 text-center">
+                  <span class="fw-bold" th:text="${item.quantity}">1</span>
+                  <small class="d-block text-muted">Antal</small>
+                </div>
+                <div class="col-md-2 text-end">
+                  <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' kr'">0 kr</span>
+                  <small class="d-block text-muted">Totalt</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="border-top pt-3 mt-3">
+              <div class="row">
+                <div class="col-md-8"></div>
+                <div class="col-md-4">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Delsumma:</span>
+                    <span th:text="${#numbers.formatDecimal(order.totalAmount - 49, 0, 'COMMA', 0, 'POINT')} + ' kr'">0 kr</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Frakt:</span>
+                    <span>49 kr</span>
+                  </div>
+                  <hr>
+                  <div class="d-flex justify-content-between fw-bold h5">
+                    <span>Totalt:</span>
+                    <span class="text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' kr'">0 kr</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${order.orderItems == null or #lists.isEmpty(order.orderItems)}" class="text-center py-4">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Inga produkter att visa för denna beställning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Info Sidebar -->
+    <div class="col-lg-4">
+      <!-- Delivery Information -->
+      <div class="card order-card mb-3">
+        <div class="card-header bg-white">
+          <h6 class="mb-0">
+            <i class="fas fa-truck me-2 text-primary"></i>Leveransinformation
+          </h6>
+        </div>
+        <div class="card-body">
+          <div th:if="${order.deliveryName}">
+            <p class="mb-1"><strong th:text="${order.deliveryName}">Namn</strong></p>
+            <p class="mb-1" th:text="${order.deliveryAddress}">Adress</p>
+            <p class="mb-1">
+              <span th:text="${order.deliveryPostalCode}">Postnummer</span>
+              <span th:text="${order.deliveryCity}">Stad</span>
+            </p>
+            <p class="mb-0 text-muted" th:if="${order.deliveryPhone}">
+              <i class="fas fa-phone me-1"></i><span th:text="${order.deliveryPhone}">Telefon</span>
+            </p>
+          </div>
+          <div th:unless="${order.deliveryName}">
+            <p class="text-muted">Ingen leveransinformation tillgänglig</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="card order-card mb-3" th:if="${order.paymentMethod}">
+        <div class="card-header bg-white">
+          <h6 class="mb-0">
+            <i class="fas fa-credit-card me-2 text-primary"></i>Betalningsinformation
+          </h6>
+        </div>
+        <div class="card-body">
+          <p class="mb-0" th:text="${order.paymentMethod}">Betalningsmetod</p>
+        </div>
+      </div>
+
+      <!-- Order Timeline -->
+      <div class="card order-card mb-3">
+        <div class="card-header bg-white">
+          <h6 class="mb-0">
+            <i class="fas fa-clock me-2 text-primary"></i>Orderstatus
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <i class="fas fa-shopping-cart text-success me-2"></i>
+              <strong>Beställning mottagen</strong>
+              <small class="d-block text-muted" th:text="${#temporals.format(order.orderDate, 'dd MMM yyyy, HH:mm')}">Datum</small>
+            </div>
+            <div class="timeline-item"
+                 th:classappend="${order.status.name() == 'CONFIRMED' || order.status.name() == 'SHIPPED' || order.status.name() == 'DELIVERED'} ? 'completed'">
+              <i class="fas fa-check me-2" th:classappend="${order.status.name() == 'CONFIRMED' || order.status.name() == 'SHIPPED' || order.status.name() == 'DELIVERED'} ? 'text-success' : 'text-muted'"></i>
+              <strong>Bekräftad</strong>
+              <small class="d-block text-muted">Väntar på behandling</small>
+            </div>
+            <div class="timeline-item"
+                 th:classappend="${order.status.name() == 'SHIPPED' || order.status.name() == 'DELIVERED'} ? 'completed'">
+              <i class="fas fa-truck me-2" th:classappend="${order.status.name() == 'SHIPPED' || order.status.name() == 'DELIVERED'} ? 'text-success' : 'text-muted'"></i>
+              <strong>Skickad</strong>
+              <small class="d-block text-muted">På väg till dig</small>
+            </div>
+            <div class="timeline-item"
+                 th:classappend="${order.status.name() == 'DELIVERED'} ? 'completed'">
+              <i class="fas fa-box me-2" th:classappend="${order.status.name() == 'DELIVERED'} ? 'text-success' : 'text-muted'"></i>
+              <strong>Levererad</strong>
+              <small class="d-block text-muted">Beställning slutförd</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="card order-card">
+        <div class="card-body action-buttons">
+          <a href="/orders" class="btn btn-custom w-100 mb-2">
+            <i class="fas fa-arrow-left me-2"></i>Tillbaka till beställningar
+          </a>
+
+          <button class="btn btn-outline-secondary w-100 mb-2" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Skriv ut kvitto
+          </button>
+
+          <button th:if="${order.status.name() == 'PENDING'}"
+                  type="button"
+                  class="btn btn-outline-danger w-100"
+                  data-bs-toggle="modal"
+                  data-bs-target="#cancelModal">
+            <i class="fas fa-times me-2"></i>Avbryt beställning
+          </button>
+
+          <a href="/support" class="btn btn-outline-info w-100 mt-2">
+            <i class="fas fa-headset me-2"></i>Kontakta support
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" th:if="${order.status.name() == 'PENDING'}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>Avbryt beställning
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Är du säker på att du vill avbryta beställning <strong th:text="${order.orderNumber}"></strong>?</p>
+        <div class="alert alert-warning">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Obs!</strong> Denna åtgärd kan inte ångras. Beställningen kommer att markeras som avbruten.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Nej, behåll
+        </button>
+        <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" class="d-inline">
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-ban me-1"></i>Ja, avbryt beställning
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5 py-4">
+  <div class="container text-center">
+    <p>&copy; 2025 CTRLBUY - Din pålitliga teknikpartner</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
