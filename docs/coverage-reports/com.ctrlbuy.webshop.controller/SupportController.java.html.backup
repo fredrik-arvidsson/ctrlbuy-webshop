@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SupportController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">SupportController.java</span></div><h1>SupportController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Controller
+@RequestMapping(&quot;/support&quot;)
+<span class="fc" id="L12">public class SupportController {</span>
+
+<span class="fc" id="L14">    private static final Logger logger = LoggerFactory.getLogger(SupportController.class);</span>
+
+    @GetMapping(&quot;&quot;)
+    public String support(Model model) {
+<span class="fc" id="L18">        logger.debug(&quot;Support main page requested&quot;);</span>
+<span class="fc" id="L19">        model.addAttribute(&quot;title&quot;, &quot;Support - CtrlBuy&quot;);</span>
+<span class="fc" id="L20">        return &quot;support&quot;;</span>
+    }
+
+    @GetMapping(&quot;/spara-bestallning&quot;)
+    public String sparaBestallning(Model model) {
+<span class="fc" id="L25">        logger.debug(&quot;Track order page requested&quot;);</span>
+<span class="fc" id="L26">        model.addAttribute(&quot;pageTitle&quot;, &quot;Spåra beställning - CtrlBuy&quot;);</span>
+<span class="fc" id="L27">        model.addAttribute(&quot;feature&quot;, &quot;Spåra beställning&quot;);</span>
+<span class="fc" id="L28">        model.addAttribute(&quot;icon&quot;, &quot;shipping-fast&quot;);</span>
+<span class="fc" id="L29">        model.addAttribute(&quot;message&quot;, &quot;Följ dina paket i realtid med detaljerad spårningsinformation.&quot;);</span>
+<span class="fc" id="L30">        model.addAttribute(&quot;details&quot;, &quot;Snart kommer du att kunna spåra alla dina beställningar direkt här. Du får automatiska uppdateringar via email och SMS.&quot;);</span>
+<span class="fc" id="L31">        model.addAttribute(&quot;returnUrl&quot;, &quot;/support&quot;);</span>
+<span class="fc" id="L32">        return &quot;coming-soon&quot;;</span>
+    }
+
+    @GetMapping(&quot;/returer&quot;)
+    public String returer(Model model) {
+<span class="fc" id="L37">        logger.debug(&quot;Returns page requested&quot;);</span>
+<span class="fc" id="L38">        model.addAttribute(&quot;pageTitle&quot;, &quot;Returer - CtrlBuy&quot;);</span>
+<span class="fc" id="L39">        model.addAttribute(&quot;feature&quot;, &quot;Returer&quot;);</span>
+<span class="fc" id="L40">        model.addAttribute(&quot;icon&quot;, &quot;undo-alt&quot;);</span>
+<span class="fc" id="L41">        model.addAttribute(&quot;message&quot;, &quot;Enkel och smidig returprocess direkt online.&quot;);</span>
+<span class="fc" id="L42">        model.addAttribute(&quot;details&quot;, &quot;Vi utvecklar ett enkelt system för att hantera returer. Du kommer att kunna starta returprocessen direkt här utan att behöva kontakta kundtjänst.&quot;);</span>
+<span class="fc" id="L43">        model.addAttribute(&quot;returnUrl&quot;, &quot;/support&quot;);</span>
+<span class="fc" id="L44">        return &quot;coming-soon&quot;;</span>
+    }
+
+    @GetMapping(&quot;/garantivillkor&quot;)
+    public String garantivillkor(Model model) {
+<span class="fc" id="L49">        logger.debug(&quot;Warranty page requested&quot;);</span>
+<span class="fc" id="L50">        model.addAttribute(&quot;pageTitle&quot;, &quot;Garantivillkor - CtrlBuy&quot;);</span>
+<span class="fc" id="L51">        model.addAttribute(&quot;feature&quot;, &quot;Garantivillkor&quot;);</span>
+<span class="fc" id="L52">        model.addAttribute(&quot;icon&quot;, &quot;shield-alt&quot;);</span>
+<span class="fc" id="L53">        model.addAttribute(&quot;message&quot;, &quot;Digital garantihantering och villkor för dina produkter.&quot;);</span>
+<span class="fc" id="L54">        model.addAttribute(&quot;details&quot;, &quot;Här kommer du att kunna hantera garantier för alla dina köp. Vi sparar automatiskt kvitton och garantiinformation.&quot;);</span>
+<span class="fc" id="L55">        model.addAttribute(&quot;returnUrl&quot;, &quot;/support&quot;);</span>
+<span class="fc" id="L56">        return &quot;coming-soon&quot;;</span>
+    }
+
+    @GetMapping(&quot;/kundtjanst&quot;)
+    public String kundtjanst(Model model) {
+<span class="fc" id="L61">        logger.debug(&quot;Customer service page requested&quot;);</span>
+<span class="fc" id="L62">        model.addAttribute(&quot;pageTitle&quot;, &quot;Kundtjänst - CtrlBuy&quot;);</span>
+<span class="fc" id="L63">        model.addAttribute(&quot;feature&quot;, &quot;Kundtjänst&quot;);</span>
+<span class="fc" id="L64">        model.addAttribute(&quot;icon&quot;, &quot;headset&quot;);</span>
+<span class="fc" id="L65">        model.addAttribute(&quot;message&quot;, &quot;Direktkontakt med vår kundtjänst för personlig hjälp och support.&quot;);</span>
+<span class="fc" id="L66">        model.addAttribute(&quot;details&quot;, &quot;Vi bygger ett avancerat supportsystem med live-chat, ticket-system och FAQ. Snart kan du få hjälp dygnet runt.&quot;);</span>
+<span class="fc" id="L67">        model.addAttribute(&quot;returnUrl&quot;, &quot;/support&quot;);</span>
+<span class="fc" id="L68">        return &quot;coming-soon&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

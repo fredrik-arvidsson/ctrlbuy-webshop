@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">PaymentService.java</span></div><h1>PaymentService.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
+
+import com.ctrlbuy.webshop.exception.PaymentException;
+import com.ctrlbuy.webshop.model.*;
+import com.ctrlbuy.webshop.enums.PaymentStatus;
+import com.ctrlbuy.webshop.enums.PaymentType;import com.ctrlbuy.webshop.repository.OrderRepository;
+import com.ctrlbuy.webshop.repository.PaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.regex.Pattern;
+
+@Service
+@Transactional
+<span class="fc" id="L21">public class PaymentService {</span>
+
+<span class="fc" id="L23">    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);</span>
+
+    // Regex för olika korttyper
+<span class="fc" id="L26">    private static final Pattern VISA_PATTERN = Pattern.compile(&quot;^4[0-9]{12}(?:[0-9]{3})?$&quot;);</span>
+<span class="fc" id="L27">    private static final Pattern MASTERCARD_PATTERN = Pattern.compile(&quot;^5[1-5][0-9]{14}$&quot;);</span>
+<span class="fc" id="L28">    private static final Pattern AMEX_PATTERN = Pattern.compile(&quot;^3[47][0-9]{13}$&quot;);</span>
+
+    @Autowired
+    private PaymentGateway paymentGateway;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    /**
+     * Bearbetar betalning för en order
+     */
+    public PaymentResult processPaymentForOrder(Order order, PaymentInfo paymentInfo) {
+<span class="fc" id="L43">        logger.info(&quot;Bearbetar betalning för order: {}&quot;, order.getOrderNumber());</span>
+
+        // Validera att belopp matchar
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (!paymentInfo.getAmount().equals(BigDecimal.valueOf(order.getTotalAmount()))) {</span>
+<span class="fc" id="L47">            throw new PaymentException(&quot;Belopp matchar inte order. Order: &quot; +</span>
+<span class="fc" id="L48">                    BigDecimal.valueOf(order.getTotalAmount()) + &quot;, Betalning: &quot; + paymentInfo.getAmount());</span>
+        }
+
+        // Validera betalningsinformation
+<span class="fc" id="L52">        validatePaymentInfo(paymentInfo);</span>
+
+        try {
+            // Bearbeta betalning
+<span class="fc" id="L56">            PaymentResult result = processPayment(paymentInfo);</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            if (result.isSuccess()) {</span>
+                // Uppdatera order med betalningsinformation
+<span class="fc" id="L60">                order.setPaymentStatus(PaymentStatus.COMPLETED);</span>
+<span class="fc" id="L61">                order.setTransactionId(result.getTransactionId());</span>
+<span class="fc" id="L62">                orderRepository.save(order);</span>
+
+                // Spara betalningsrecord
+<span class="fc" id="L65">                Payment payment = createPaymentRecord(order, paymentInfo, result);</span>
+<span class="fc" id="L66">                paymentRepository.save(payment);</span>
+
+<span class="fc" id="L68">                logger.info(&quot;Betalning genomförd för order {}: {}&quot;,</span>
+<span class="fc" id="L69">                        order.getOrderNumber(), result.getTransactionId());</span>
+<span class="fc" id="L70">            } else {</span>
+<span class="fc" id="L71">                order.setPaymentStatus(PaymentStatus.FAILED);</span>
+<span class="fc" id="L72">                orderRepository.save(order);</span>
+
+<span class="fc" id="L74">                logger.warn(&quot;Betalning misslyckades för order {}: {}&quot;,</span>
+<span class="fc" id="L75">                        order.getOrderNumber(), result.getErrorMessage());</span>
+            }
+
+<span class="fc" id="L78">            return result;</span>
+
+<span class="fc" id="L80">        } catch (Exception e) {</span>
+<span class="fc" id="L81">            order.setPaymentStatus(PaymentStatus.FAILED);</span>
+<span class="fc" id="L82">            orderRepository.save(order);</span>
+
+<span class="fc" id="L84">            logger.error(&quot;Fel vid betalningsbearbetning för order {}: {}&quot;,</span>
+<span class="fc" id="L85">                    order.getOrderNumber(), e.getMessage());</span>
+<span class="fc" id="L86">            throw new PaymentException(&quot;Payment gateway fel: &quot; + e.getMessage(), e);</span>
+        }
+    }
+
+    /**
+     * Bearbetar betalning (generisk metod)
+     */
+    public PaymentResult processPayment(PaymentInfo paymentInfo) {
+<span class="fc" id="L94">        logger.debug(&quot;Bearbetar betalning för belopp: {}&quot;, paymentInfo.getAmount());</span>
+
+        // Validera betalningsinformation
+<span class="fc" id="L97">        validatePaymentInfo(paymentInfo);</span>
+
+        try {
+            // Maskera kortnummer för loggar
+<span class="fc" id="L101">            PaymentInfo maskedInfo = maskPaymentInfo(paymentInfo);</span>
+<span class="fc" id="L102">            logger.info(&quot;Skickar betalning till gateway: {}&quot;, maskedInfo.getCardType());</span>
+
+            // Anropa payment gateway med retry-logik
+<span class="fc" id="L105">            PaymentResult result = processWithRetry(paymentInfo, 3);</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            if (result.isSuccess()) {</span>
+<span class="fc" id="L108">                logger.info(&quot;Betalning godkänd: {}&quot;, result.getTransactionId());</span>
+            } else {
+<span class="fc" id="L110">                logger.warn(&quot;Betalning avvisad: {}&quot;, result.getErrorMessage());</span>
+            }
+
+<span class="fc" id="L113">            return result;</span>
+
+<span class="fc" id="L115">        } catch (Exception e) {</span>
+<span class="fc" id="L116">            logger.error(&quot;Payment gateway error: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L117">            throw new PaymentException(&quot;Payment gateway timeout eller fel&quot;, e);</span>
+        }
+    }
+
+    /**
+     * Återbetalar en order
+     */
+    public boolean refundPayment(Order order) {
+<span class="fc" id="L125">        logger.info(&quot;Bearbetar återbetalning för order: {}&quot;, order.getOrderNumber());</span>
+
+        // Kontrollera att order kan återbetalas
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (order.getPaymentStatus() == PaymentStatus.REFUNDED) {</span>
+<span class="fc" id="L129">            throw new PaymentException(&quot;Order är redan återbetald&quot;);</span>
+        }
+
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (order.getPaymentStatus() != PaymentStatus.COMPLETED) {</span>
+<span class="fc" id="L133">            throw new PaymentException(&quot;Endast betalda orders kan återbetalas&quot;);</span>
+        }
+
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (order.getTransactionId() == null) {</span>
+<span class="fc" id="L137">            throw new PaymentException(&quot;Ingen transaktions-ID hittad för återbetalning&quot;);</span>
+        }
+
+        try {
+            // Anropa payment gateway för återbetalning
+<span class="fc" id="L142">            boolean success = paymentGateway.refund(order.getTransactionId(), BigDecimal.valueOf(order.getTotalAmount()));</span>
+
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            if (success) {</span>
+<span class="fc" id="L145">                order.setPaymentStatus(PaymentStatus.REFUNDED);</span>
+<span class="fc" id="L146">                order.setRefundedAt(LocalDateTime.now());</span>
+<span class="fc" id="L147">                orderRepository.save(order);</span>
+
+                // Skapa återbetalningsrecord
+<span class="fc" id="L150">                createRefundRecord(order);</span>
+
+<span class="fc" id="L152">                logger.info(&quot;Återbetalning genomförd för order {}&quot;, order.getOrderNumber());</span>
+            } else {
+<span class="fc" id="L154">                logger.error(&quot;Återbetalning misslyckades för order {}&quot;, order.getOrderNumber());</span>
+            }
+
+<span class="fc" id="L157">            return success;</span>
+
+<span class="nc" id="L159">        } catch (Exception e) {</span>
+<span class="nc" id="L160">            logger.error(&quot;Fel vid återbetalning för order {}: {}&quot;,</span>
+<span class="nc" id="L161">                    order.getOrderNumber(), e.getMessage());</span>
+<span class="nc" id="L162">            throw new PaymentException(&quot;Återbetalning misslyckades: &quot; + e.getMessage(), e);</span>
+        }
+    }
+
+    /**
+     * Validerar betalningsinformation
+     */
+    public boolean validatePaymentInfo(PaymentInfo paymentInfo) {
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (paymentInfo == null) {</span>
+<span class="fc" id="L171">            throw new PaymentException(&quot;Betalningsinformation saknas&quot;);</span>
+        }
+
+        // Validera kortnummer
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (!validateCardNumber(paymentInfo.getCardNumber())) {</span>
+<span class="fc" id="L176">            throw new PaymentException(&quot;Ogiltigt kortnummer&quot;);</span>
+        }
+
+        // Validera utgångsdatum
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (!validateExpiryDate(paymentInfo.getExpiryMonth().toString(), paymentInfo.getExpiryYear().toString())) {</span>
+<span class="fc" id="L181">            throw new PaymentException(&quot;Kortet har gått ut eller ogiltigt utgångsdatum&quot;);</span>
+        }
+
+        // Validera CVV
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if (!validateCVV(paymentInfo.getCvv())) {</span>
+<span class="fc" id="L186">            throw new PaymentException(&quot;Ogiltig CVV-kod&quot;);</span>
+        }
+
+        // Validera belopp
+<span class="pc bpc" id="L190" title="1 of 4 branches missed.">        if (paymentInfo.getAmount() == null || paymentInfo.getAmount().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="fc" id="L191">            throw new PaymentException(&quot;Ogiltigt belopp&quot;);</span>
+        }
+
+<span class="fc" id="L194">        return true;</span>
+    }
+
+    /**
+     * Validerar kortnummer med Luhn-algoritmen
+     */
+    public boolean validateCardNumber(String cardNumber) {
+<span class="fc bfc" id="L201" title="All 4 branches covered.">        if (cardNumber == null || cardNumber.trim().isEmpty()) {</span>
+<span class="fc" id="L202">            return false;</span>
+        }
+
+        // Ta bort mellanslag och bindestreck
+<span class="fc" id="L206">        String cleanNumber = cardNumber.replaceAll(&quot;[\\s-]&quot;, &quot;&quot;);</span>
+
+        // Kontrollera att det bara innehåller siffror
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (!cleanNumber.matches(&quot;\\d+&quot;)) {</span>
+<span class="fc" id="L210">            return false;</span>
+        }
+
+        // Kontrollera längd (13-19 siffror är vanligt)
+<span class="fc bfc" id="L214" title="All 4 branches covered.">        if (cleanNumber.length() &lt; 13 || cleanNumber.length() &gt; 19) {</span>
+<span class="fc" id="L215">            return false;</span>
+        }
+
+        // Luhn-algoritm för validering
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">        return luhnCheck(cleanNumber) &amp;&amp; validateCardType(cleanNumber);</span>
+    }
+
+    /**
+     * Validerar utgångsdatum
+     */
+    public boolean validateExpiryDate(String month, String year) {
+<span class="fc bfc" id="L226" title="All 4 branches covered.">        if (month == null || year == null) {</span>
+<span class="fc" id="L227">            return false;</span>
+        }
+
+        try {
+<span class="fc" id="L231">            int monthInt = Integer.parseInt(month);</span>
+<span class="fc" id="L232">            int yearInt = Integer.parseInt(year);</span>
+
+            // Kontrollera giltiga månad
+<span class="fc bfc" id="L235" title="All 4 branches covered.">            if (monthInt &lt; 1 || monthInt &gt; 12) {</span>
+<span class="fc" id="L236">                return false;</span>
+            }
+
+            // Hantera 2-siffriga år
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            if (yearInt &lt; 100) {</span>
+<span class="fc" id="L241">                yearInt += 2000;</span>
+            }
+
+<span class="fc" id="L244">            YearMonth cardExpiry = YearMonth.of(yearInt, monthInt);</span>
+<span class="fc" id="L245">            YearMonth currentMonth = YearMonth.now();</span>
+
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            return !cardExpiry.isBefore(currentMonth);</span>
+
+<span class="fc" id="L249">        } catch (NumberFormatException e) {</span>
+<span class="fc" id="L250">            return false;</span>
+        }
+    }
+
+    /**
+     * Validerar CVV
+     */
+    public boolean validateCVV(String cvv) {
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if (cvv == null) {</span>
+<span class="fc" id="L259">            return false;</span>
+        }
+
+        // CVV ska vara 3-4 siffror
+<span class="fc" id="L263">        return cvv.matches(&quot;\\d{3,4}&quot;);</span>
+    }
+
+    /**
+     * Förbereder betalningsinformation för säker lagring
+     */
+    public PaymentInfo preparForStorage(PaymentInfo paymentInfo) {
+<span class="fc" id="L270">        PaymentInfo sanitized = new PaymentInfo();</span>
+
+        // Maskera kortnummer (visa bara sista 4 siffror)
+<span class="fc" id="L273">        String cardNumber = paymentInfo.getCardNumber();</span>
+<span class="fc bfc" id="L274" title="All 4 branches covered.">        if (cardNumber != null &amp;&amp; cardNumber.length() &gt; 4) {</span>
+<span class="fc" id="L275">            sanitized.setCardNumber(&quot;****-****-****-&quot; + cardNumber.substring(cardNumber.length() - 4));</span>
+        }
+
+<span class="fc" id="L278">        sanitized.setCardType(paymentInfo.getCardType());</span>
+<span class="fc" id="L279">        sanitized.setAmount(paymentInfo.getAmount());</span>
+<span class="fc" id="L280">        sanitized.setExpiryMonth(paymentInfo.getExpiryMonth());</span>
+<span class="fc" id="L281">        sanitized.setExpiryYear(paymentInfo.getExpiryYear());</span>
+
+        // Ta ALDRIG med CVV i lagring
+<span class="fc" id="L284">        sanitized.setCvv(null);</span>
+
+<span class="fc" id="L286">        return sanitized;</span>
+    }
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    private PaymentResult processWithRetry(PaymentInfo paymentInfo, int maxRetries) {
+<span class="fc" id="L292">        Exception lastException = null;</span>
+
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        for (int attempt = 1; attempt &lt;= maxRetries; attempt++) {</span>
+            try {
+<span class="fc" id="L296">                return paymentGateway.processPayment(paymentInfo);</span>
+<span class="fc" id="L297">            } catch (Exception e) {</span>
+<span class="fc" id="L298">                lastException = e;</span>
+<span class="fc" id="L299">                logger.warn(&quot;Betalningsförsök {} misslyckades: {}&quot;, attempt, e.getMessage());</span>
+
+<span class="fc bfc" id="L301" title="All 2 branches covered.">                if (attempt &lt; maxRetries) {</span>
+                    // Vänta lite mellan försök
+                    try {
+<span class="fc" id="L304">                        Thread.sleep(1000 * attempt); // Exponential backoff</span>
+<span class="nc" id="L305">                    } catch (InterruptedException ie) {</span>
+<span class="nc" id="L306">                        Thread.currentThread().interrupt();</span>
+<span class="nc" id="L307">                        break;</span>
+<span class="fc" id="L308">                    }</span>
+                }
+            }
+        }
+
+<span class="fc" id="L313">        throw new PaymentException(&quot;Payment gateway timeout efter &quot; + maxRetries + &quot; försök&quot;, lastException);</span>
+    }
+
+    private boolean luhnCheck(String cardNumber) {
+<span class="fc" id="L317">        int sum = 0;</span>
+<span class="fc" id="L318">        boolean alternate = false;</span>
+
+<span class="fc bfc" id="L320" title="All 2 branches covered.">        for (int i = cardNumber.length() - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L321">            int digit = Character.getNumericValue(cardNumber.charAt(i));</span>
+
+<span class="fc bfc" id="L323" title="All 2 branches covered.">            if (alternate) {</span>
+<span class="fc" id="L324">                digit *= 2;</span>
+<span class="fc bfc" id="L325" title="All 2 branches covered.">                if (digit &gt; 9) {</span>
+<span class="fc" id="L326">                    digit = (digit % 10) + 1;</span>
+                }
+            }
+
+<span class="fc" id="L330">            sum += digit;</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">            alternate = !alternate;</span>
+        }
+
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        return (sum % 10) == 0;</span>
+    }
+
+    private boolean validateCardType(String cardNumber) {
+        // Identifiera korttyp och validera format
+<span class="fc bfc" id="L339" title="All 2 branches covered.">        if (VISA_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="fc" id="L340">            return true;</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        } else if (MASTERCARD_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="fc" id="L342">            return true;</span>
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">        } else if (AMEX_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="fc" id="L344">            return true;</span>
+        }
+
+        // Acceptera andra korttyper med grundläggande validering
+<span class="nc bnc" id="L348" title="All 4 branches missed.">        return cardNumber.length() &gt;= 13 &amp;&amp; cardNumber.length() &lt;= 19;</span>
+    }
+
+    private String detectCardType(String cardNumber) {
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">        if (VISA_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="fc" id="L353">            return &quot;VISA&quot;;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        } else if (MASTERCARD_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="nc" id="L355">            return &quot;MASTERCARD&quot;;</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        } else if (AMEX_PATTERN.matcher(cardNumber).matches()) {</span>
+<span class="nc" id="L357">            return &quot;AMEX&quot;;</span>
+        } else {
+<span class="nc" id="L359">            return &quot;UNKNOWN&quot;;</span>
+        }
+    }
+
+    private PaymentInfo maskPaymentInfo(PaymentInfo paymentInfo) {
+<span class="fc" id="L364">        PaymentInfo masked = new PaymentInfo();</span>
+<span class="fc" id="L365">        masked.setCardType(detectCardType(paymentInfo.getCardNumber()));</span>
+<span class="fc" id="L366">        masked.setAmount(paymentInfo.getAmount());</span>
+        // Kortnummer visas inte i loggar
+<span class="fc" id="L368">        return masked;</span>
+    }
+
+    private Payment createPaymentRecord(Order order, PaymentInfo paymentInfo, PaymentResult result) {
+<span class="fc" id="L372">        Payment payment = new Payment();</span>
+<span class="fc" id="L373">        payment.setOrder(order);</span>
+<span class="fc" id="L374">        payment.setAmount(paymentInfo.getAmount());</span>
+<span class="fc" id="L375">        payment.setCardType(detectCardType(paymentInfo.getCardNumber()));</span>
+<span class="fc" id="L376">        payment.setTransactionId(result.getTransactionId());</span>
+<span class="fc" id="L377">        payment.setStatus(PaymentStatus.COMPLETED);</span>
+<span class="fc" id="L378">        payment.setProcessedAt(LocalDateTime.now());</span>
+
+        // Maskera kortnummer
+<span class="fc" id="L381">        payment.setMaskedCardNumber(&quot;****-****-****-&quot; +</span>
+<span class="fc" id="L382">                paymentInfo.getCardNumber().substring(paymentInfo.getCardNumber().length() - 4));</span>
+
+<span class="fc" id="L384">        return payment;</span>
+    }
+
+    private void createRefundRecord(Order order) {
+<span class="fc" id="L388">        Payment refund = new Payment();</span>
+<span class="fc" id="L389">        refund.setOrder(order);</span>
+<span class="fc" id="L390">        refund.setAmount(BigDecimal.valueOf(order.getTotalAmount()).negate()); // Negativt belopp för återbetalning</span>
+<span class="fc" id="L391">        refund.setTransactionId(order.getTransactionId() + &quot;-REFUND&quot;);</span>
+<span class="fc" id="L392">        refund.setStatus(PaymentStatus.REFUNDED);</span>
+<span class="fc" id="L393">        refund.setProcessedAt(LocalDateTime.now());</span>
+<span class="fc" id="L394">        refund.setType(com.ctrlbuy.webshop.enums.PaymentType.REFUND);</span>
+
+<span class="fc" id="L396">        paymentRepository.save(refund);</span>
+<span class="fc" id="L397">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.security.filter</a> &gt; <span class="el_source">JwtAuthenticationFilter.java</span></div><h1>JwtAuthenticationFilter.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.security.filter;
+
+import com.ctrlbuy.webshop.security.JwtService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    // Lista över URL:er som inte kräver autentisering
+<span class="nc" id="L29">    private final List&lt;String&gt; publicUrls = Arrays.asList(</span>
+            &quot;/&quot;, &quot;/home&quot;, &quot;/welcome&quot;, &quot;/about&quot;, &quot;/contact&quot;, &quot;/products&quot;,
+            &quot;/login&quot;, &quot;/login-process&quot;, &quot;/logout-process&quot;, &quot;/register&quot;,
+            &quot;/static&quot;, &quot;/css&quot;, &quot;/js&quot;, &quot;/images&quot;,
+            &quot;/api/auth&quot;, &quot;/api/register&quot;
+    );
+
+<span class="nc" id="L36">    public JwtAuthenticationFilter(@NonNull JwtService jwtService, @NonNull UserDetailsService userDetailsService) {</span>
+<span class="nc" id="L37">        this.jwtService = jwtService;</span>
+<span class="nc" id="L38">        this.userDetailsService = userDetailsService;</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+<span class="nc" id="L43">        String path = request.getRequestURI();</span>
+<span class="nc" id="L44">        return publicUrls.stream().anyMatch(path::startsWith);</span>
+    }
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
+
+<span class="nc" id="L53">        final String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+
+<span class="nc bnc" id="L55" title="All 4 branches missed.">        if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="nc" id="L56">            filterChain.doFilter(request, response);</span>
+<span class="nc" id="L57">            return;</span>
+        }
+
+<span class="nc" id="L60">        final String jwt = authHeader.substring(7);</span>
+<span class="nc" id="L61">        Optional&lt;String&gt; usernameOptional = jwtService.extractUsername(jwt);</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (usernameOptional.isEmpty()) {</span>
+<span class="nc" id="L64">            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, &quot;Invalid token.&quot;);</span>
+<span class="nc" id="L65">            return;</span>
+        }
+
+<span class="nc" id="L68">        String username = usernameOptional.get();</span>
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (SecurityContextHolder.getContext().getAuthentication() == null) {</span>
+<span class="nc" id="L71">            UserDetails userDetails = userDetailsService.loadUserByUsername(username);</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            if (jwtService.isTokenValid(jwt, username)) {</span>
+<span class="nc" id="L74">                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(</span>
+<span class="nc" id="L75">                        userDetails, null, userDetails.getAuthorities());</span>
+<span class="nc" id="L76">                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+
+<span class="nc" id="L78">                SecurityContextHolder.getContext().setAuthentication(authToken);</span>
+<span class="nc" id="L79">            } else {</span>
+<span class="nc" id="L80">                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, &quot;Invalid token.&quot;);</span>
+<span class="nc" id="L81">                return;</span>
+            }
+        }
+
+<span class="nc" id="L85">        filterChain.doFilter(request, response);</span>
+<span class="nc" id="L86">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

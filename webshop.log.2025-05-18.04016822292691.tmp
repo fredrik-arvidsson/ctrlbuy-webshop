@@ -1,0 +1,7 @@
+2025-05-18T22:01:20.739+02:00 DEBUG 8637 --- [SpringApplicationShutdownHook] o.s.b.a.ApplicationAvailabilityBean      : Application availability state ReadinessState changed from ACCEPTING_TRAFFIC to REFUSING_TRAFFIC
+2025-05-18T22:01:20.749+02:00 DEBUG 8637 --- [SpringApplicationShutdownHook] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@7829b776, started on Sun May 18 21:44:20 CEST 2025
+2025-05-18T22:01:20.765+02:00  INFO 8637 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-18T22:01:20.765+02:00 TRACE 8637 --- [SpringApplicationShutdownHook] o.h.type.spi.TypeConfiguration$Scope     : Handling #sessionFactoryClosed from [org.hibernate.internal.SessionFactoryImpl@2cf88901] for TypeConfiguration
+2025-05-18T22:01:20.765+02:00 DEBUG 8637 --- [SpringApplicationShutdownHook] o.h.type.spi.TypeConfiguration$Scope     : Un-scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration$Scope@248135ff] from SessionFactory [org.hibernate.internal.SessionFactoryImpl@2cf88901]
+2025-05-18T22:01:20.767+02:00  INFO 8637 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-18T22:01:20.773+02:00  INFO 8637 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

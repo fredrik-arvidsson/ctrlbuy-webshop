@@ -1,0 +1,8 @@
+Jun 24 20:15:19 ip-172-31-15-173 crond[2313]: (CRON) INFO (RANDOM_DELAY will be scaled with factor 4% if used.)
+Jun 24 20:15:19 ip-172-31-15-173 crond[2313]: (CRON) INFO (running with inotify support)
+Jun 24 20:20:01 ip-172-31-15-173 CROND[5436]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Jun 24 20:30:01 ip-172-31-15-173 CROND[8146]: (root) CMD (/opt/elasticbeanstalk/bin/publishlogs -type publish)
+Jun 24 20:30:01 ip-172-31-15-173 CROND[8147]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Jun 24 20:40:01 ip-172-31-15-173 CROND[10071]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Jun 24 20:53:48 ip-172-31-15-173 crond[11786]: (root) INFO (Job execution of per-minute job scheduled for 20:50 delayed into subsequent minute 20:53. Skipping job run.)
+Jun 24 20:53:49 ip-172-31-15-173 CROND[11791]: (root) CMD (/opt/elasticbeanstalk/bin/publishlogs -type publish)

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.model</a> &gt; <span class="el_source">PaymentInfo.java</span></div><h1>PaymentInfo.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.model;
+
+import com.ctrlbuy.webshop.enums.PaymentStatus;
+import com.ctrlbuy.webshop.enums.PaymentType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+<span class="pc bnc" id="L13" title="All 142 branches missed.">@Data</span>
+<span class="nc" id="L14">@Builder</span>
+<span class="fc" id="L15">@NoArgsConstructor</span>
+<span class="nc" id="L16">@AllArgsConstructor</span>
+public class PaymentInfo {
+
+<span class="nc" id="L19">    private String paymentId;</span>
+<span class="nc" id="L20">    private Long orderId;</span>
+<span class="fc" id="L21">    private BigDecimal amount;</span>
+<span class="nc" id="L22">    private PaymentType paymentType;</span>
+    private PaymentStatus paymentStatus;
+    private String transactionId;
+<span class="nc" id="L25">    private String description;</span>
+<span class="nc" id="L26">    private String customerEmail;</span>
+<span class="nc" id="L27">    private String customerName;</span>
+<span class="nc" id="L28">    private LocalDateTime createdAt;</span>
+<span class="nc" id="L29">    private LocalDateTime processedAt;</span>
+
+    // Credit card fields
+    private String cardNumber;
+    private String cardType;
+    private Integer expiryMonth;
+    private Integer expiryYear;
+    private String cvv;
+<span class="nc" id="L37">    private String cardHolderName;</span>
+
+    // Saknade metoder som PaymentService behöver
+    public PaymentStatus getPaymentStatus() {
+<span class="nc" id="L41">        return paymentStatus;</span>
+    }
+
+    public PaymentInfo setPaymentStatus(PaymentStatus paymentStatus) {
+<span class="nc" id="L45">        this.paymentStatus = paymentStatus;</span>
+<span class="nc" id="L46">        return this;</span>
+    }
+
+    public String getTransactionId() {
+<span class="nc" id="L50">        return transactionId;</span>
+    }
+
+    public PaymentInfo setTransactionId(String transactionId) {
+<span class="nc" id="L54">        this.transactionId = transactionId;</span>
+<span class="nc" id="L55">        return this;</span>
+    }
+
+    // Credit card getters and setters
+    public String getCardNumber() {
+<span class="fc" id="L60">        return cardNumber;</span>
+    }
+
+    public void setCardNumber(String cardNumber) {
+<span class="fc" id="L64">        this.cardNumber = cardNumber;</span>
+<span class="fc" id="L65">    }</span>
+
+    public String getCardType() {
+<span class="fc" id="L68">        return cardType;</span>
+    }
+
+    public void setCardType(String cardType) {
+<span class="fc" id="L72">        this.cardType = cardType;</span>
+<span class="fc" id="L73">    }</span>
+
+    public Integer getExpiryMonth() {
+<span class="fc" id="L76">        return expiryMonth;</span>
+    }
+
+    public void setExpiryMonth(Integer expiryMonth) {
+<span class="fc" id="L80">        this.expiryMonth = expiryMonth;</span>
+<span class="fc" id="L81">    }</span>
+
+    public Integer getExpiryYear() {
+<span class="fc" id="L84">        return expiryYear;</span>
+    }
+
+    public void setExpiryYear(Integer expiryYear) {
+<span class="fc" id="L88">        this.expiryYear = expiryYear;</span>
+<span class="fc" id="L89">    }</span>
+
+    public String getCvv() {
+<span class="fc" id="L92">        return cvv;</span>
+    }
+
+    public void setCvv(String cvv) {
+<span class="fc" id="L96">        this.cvv = cvv;</span>
+<span class="fc" id="L97">    }</span>
+
+    // Builder pattern helpers
+    public static PaymentInfo createForOrder(Long orderId, BigDecimal amount, PaymentType type) {
+<span class="nc" id="L101">        return PaymentInfo.builder()</span>
+<span class="nc" id="L102">                .orderId(orderId)</span>
+<span class="nc" id="L103">                .amount(amount)</span>
+<span class="nc" id="L104">                .paymentType(type)</span>
+<span class="nc" id="L105">                .paymentStatus(PaymentStatus.PENDING)</span>
+<span class="nc" id="L106">                .createdAt(LocalDateTime.now())</span>
+<span class="nc" id="L107">                .build();</span>
+    }
+
+    // Validation methods
+    public boolean isValid() {
+<span class="nc bnc" id="L112" title="All 6 branches missed.">        return paymentId != null &amp;&amp;</span>
+                orderId != null &amp;&amp;
+                amount != null &amp;&amp;
+<span class="nc bnc" id="L115" title="All 4 branches missed.">                amount.compareTo(BigDecimal.ZERO) &gt; 0 &amp;&amp;</span>
+                paymentType != null;
+    }
+
+    // Status check methods
+    public boolean isPending() {
+<span class="nc" id="L121">        return PaymentStatus.PENDING.equals(paymentStatus);</span>
+    }
+
+    public boolean isCompleted() {
+<span class="nc" id="L125">        return PaymentStatus.COMPLETED.equals(paymentStatus);</span>
+    }
+
+    public boolean isFailed() {
+<span class="nc" id="L129">        return PaymentStatus.FAILED.equals(paymentStatus);</span>
+    }
+
+    // Convert to Payment entity - fix type conversion
+    public Payment toPaymentEntity() {
+<span class="nc" id="L134">        return Payment.builder()</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                .id(this.paymentId != null ? Long.parseLong(this.paymentId) : null)</span>
+<span class="nc" id="L136">                .amount(this.amount)</span>
+<span class="nc" id="L137">                .type(this.paymentType)</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                .status(this.paymentStatus != null ? this.paymentStatus : PaymentStatus.PENDING)</span>
+<span class="nc" id="L139">                .gatewayTransactionId(this.transactionId)</span>
+<span class="nc" id="L140">                .cardType(this.cardType)</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                .createdAt(this.createdAt != null ? this.createdAt : LocalDateTime.now())</span>
+<span class="nc" id="L142">                .build();</span>
+    }
+
+    // Create from Payment entity - fix type conversion
+    public static PaymentInfo fromPaymentEntity(Payment payment) {
+<span class="nc" id="L147">        return PaymentInfo.builder()</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                .paymentId(payment.getPaymentId() != null ? payment.getPaymentId().toString() : null)</span>
+<span class="nc" id="L149">                .orderId(payment.getOrderId())</span>
+<span class="nc" id="L150">                .amount(payment.getAmount())</span>
+<span class="nc" id="L151">                .paymentType(payment.getType())</span>
+<span class="nc" id="L152">                .paymentStatus(payment.getStatus())</span>
+<span class="nc" id="L153">                .transactionId(payment.getGatewayTransactionId())</span>
+<span class="nc" id="L154">                .cardType(payment.getCardType())</span>
+<span class="nc" id="L155">                .createdAt(payment.getCreatedAt())</span>
+<span class="nc" id="L156">                .processedAt(payment.getProcessedAt())</span>
+<span class="nc" id="L157">                .build();</span>
+    }
+
+    // Utility method for masking card number
+    public String getMaskedCardNumber() {
+<span class="nc bnc" id="L162" title="All 4 branches missed.">        if (cardNumber == null || cardNumber.length() &lt; 4) {</span>
+<span class="nc" id="L163">            return &quot;****&quot;;</span>
+        }
+<span class="nc" id="L165">        return &quot;**** **** **** &quot; + cardNumber.substring(cardNumber.length() - 4);</span>
+    }
+
+    // Helper method to create a sanitized copy without sensitive data
+    public PaymentInfo createSanitizedCopy() {
+<span class="nc" id="L170">        PaymentInfo sanitized = PaymentInfo.builder()</span>
+<span class="nc" id="L171">                .paymentId(this.paymentId)</span>
+<span class="nc" id="L172">                .orderId(this.orderId)</span>
+<span class="nc" id="L173">                .amount(this.amount)</span>
+<span class="nc" id="L174">                .paymentType(this.paymentType)</span>
+<span class="nc" id="L175">                .paymentStatus(this.paymentStatus)</span>
+<span class="nc" id="L176">                .transactionId(this.transactionId)</span>
+<span class="nc" id="L177">                .description(this.description)</span>
+<span class="nc" id="L178">                .customerEmail(this.customerEmail)</span>
+<span class="nc" id="L179">                .customerName(this.customerName)</span>
+<span class="nc" id="L180">                .createdAt(this.createdAt)</span>
+<span class="nc" id="L181">                .processedAt(this.processedAt)</span>
+<span class="nc" id="L182">                .cardType(this.cardType)</span>
+<span class="nc" id="L183">                .expiryMonth(this.expiryMonth)</span>
+<span class="nc" id="L184">                .expiryYear(this.expiryYear)</span>
+<span class="nc" id="L185">                .cardHolderName(this.cardHolderName)</span>
+<span class="nc" id="L186">                .build();</span>
+
+        // Set masked card number instead of real one
+<span class="nc" id="L189">        sanitized.setCardNumber(getMaskedCardNumber());</span>
+        // Clear CVV for security
+<span class="nc" id="L191">        sanitized.setCvv(null);</span>
+
+<span class="nc" id="L193">        return sanitized;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

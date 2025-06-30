@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CartController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.controller</a> &gt; <span class="el_source">CartController.java</span></div><h1>CartController.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.controller;
+
+import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Controller
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L24">@Slf4j</span>
+public class CartController {
+
+    private final ProductService productService;
+    private static final String CART_SESSION_KEY = &quot;shopping_cart&quot;;
+
+    // Visa kundvagn - ENGELSKA URL
+    @GetMapping(&quot;/cart&quot;)
+    public String viewCart(HttpSession session, Model model, Authentication auth) {
+<span class="fc" id="L33">        return viewCartSwedish(session, model, auth);</span>
+    }
+
+    // SVENSK URL - DIREKT MAPPING (inte under /cart)
+    @GetMapping(&quot;/varukorg&quot;)
+    public String viewCartSwedish(HttpSession session, Model model, Authentication auth) {
+<span class="fc" id="L39">        log.debug(&quot;Visar kundvagn via svensk URL för användare: {}&quot;,</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">                auth != null ? auth.getName() : &quot;anonym&quot;);</span>
+
+        try {
+<span class="fc" id="L43">            List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+            // VIKTIGT: Beräkna totaler för templaten
+<span class="fc" id="L46">            BigDecimal subtotal = cartItems.stream()</span>
+<span class="fc" id="L47">                    .map(CartItem::getTotalPrice)</span>
+<span class="fc" id="L48">                    .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+            // Frakt: 49 kr om under 499 kr, annars gratis
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            BigDecimal shipping = subtotal.compareTo(new BigDecimal(&quot;499&quot;)) &gt;= 0 ?</span>
+<span class="pc" id="L52">                    BigDecimal.ZERO : new BigDecimal(&quot;49&quot;);</span>
+
+<span class="fc" id="L54">            BigDecimal total = subtotal.add(shipping);</span>
+
+<span class="fc" id="L56">            int cartItemCount = cartItems.stream()</span>
+<span class="fc" id="L57">                    .mapToInt(CartItem::getQuantity)</span>
+<span class="fc" id="L58">                    .sum();</span>
+
+            // Lägg till EXAKT det som templaten förväntar sig
+<span class="fc" id="L61">            model.addAttribute(&quot;cartItems&quot;, cartItems);</span>
+<span class="fc" id="L62">            model.addAttribute(&quot;subtotal&quot;, subtotal);      // För templaten</span>
+<span class="fc" id="L63">            model.addAttribute(&quot;shipping&quot;, shipping);      // För templaten</span>
+<span class="fc" id="L64">            model.addAttribute(&quot;total&quot;, total);           // För templaten</span>
+<span class="fc" id="L65">            model.addAttribute(&quot;cartTotal&quot;, total);       // Backup</span>
+<span class="fc" id="L66">            model.addAttribute(&quot;cartItemCount&quot;, cartItemCount);</span>
+
+<span class="fc" id="L68">            log.debug(&quot;Cart contains {} items, subtotal: {} kr, shipping: {} kr, total: {} kr&quot;,</span>
+<span class="fc" id="L69">                    cartItemCount, subtotal, shipping, total);</span>
+
+<span class="nc" id="L71">        } catch (Exception e) {</span>
+<span class="nc" id="L72">            log.error(&quot;Error loading cart&quot;, e);</span>
+<span class="nc" id="L73">            model.addAttribute(&quot;errorMessage&quot;, &quot;Ett fel uppstod vid hämtning av kundvagnen.&quot;);</span>
+<span class="nc" id="L74">            model.addAttribute(&quot;cartItems&quot;, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L75">            model.addAttribute(&quot;subtotal&quot;, BigDecimal.ZERO);</span>
+<span class="nc" id="L76">            model.addAttribute(&quot;shipping&quot;, BigDecimal.ZERO);</span>
+<span class="nc" id="L77">            model.addAttribute(&quot;total&quot;, BigDecimal.ZERO);</span>
+<span class="nc" id="L78">            model.addAttribute(&quot;cartItemCount&quot;, 0);</span>
+<span class="fc" id="L79">        }</span>
+
+<span class="fc" id="L81">        return &quot;cart/view&quot;;</span>
+    }
+
+    // Lägg till produkt i kundvagn - STÖDER BÅDE FORM OCH AJAX
+    @PostMapping(&quot;/cart/add&quot;)
+    public String addToCart(
+            @RequestParam Long productId,
+            @RequestParam(defaultValue = &quot;1&quot;) Integer quantity,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+<span class="fc" id="L92">        log.debug(&quot;Lägger till produkt {} i kundvagn, kvantitet: {}&quot;, productId, quantity);</span>
+
+        try {
+<span class="fc" id="L95">            Optional&lt;Product&gt; productOpt = productService.getProductByIdWithoutView(productId);</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            if (productOpt.isEmpty()) {</span>
+<span class="fc" id="L98">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Produkten hittades inte&quot;);</span>
+<span class="fc" id="L99">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+<span class="fc" id="L102">            Product product = productOpt.get();</span>
+
+            // Kontrollera lager
+<span class="pc bpc" id="L105" title="2 of 4 branches missed.">            if (product.getStockQuantity() == null || product.getStockQuantity() &lt; quantity) {</span>
+<span class="nc" id="L106">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;,</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                        &quot;Otillräckligt lager. Endast &quot; + (product.getStockQuantity() != null ? product.getStockQuantity() : 0) + &quot; tillgängliga&quot;);</span>
+<span class="nc" id="L108">                return &quot;redirect:/produkter&quot;; // Tillbaka till produktsidan så man kan fortsätta handla</span>
+            }
+
+            // Lägg till i kundvagn
+<span class="fc" id="L112">            List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+            // Hitta befintlig item eller skapa ny
+<span class="fc" id="L115">            CartItem existingItem = cartItems.stream()</span>
+<span class="pc" id="L116">                    .filter(item -&gt; item.getProduct().getId().equals(productId))</span>
+<span class="fc" id="L117">                    .findFirst()</span>
+<span class="fc" id="L118">                    .orElse(null);</span>
+
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">            if (existingItem != null) {</span>
+<span class="nc" id="L121">                int newQuantity = existingItem.getQuantity() + quantity;</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                if (newQuantity &gt; product.getStockQuantity()) {</span>
+<span class="nc" id="L123">                    redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;,</span>
+<span class="nc" id="L124">                            &quot;Kan inte lägga till fler. Max &quot; + product.getStockQuantity() + &quot; tillgängliga&quot;);</span>
+<span class="nc" id="L125">                    return &quot;redirect:/produkter&quot;; // Tillbaka till produktsidan</span>
+                }
+<span class="nc" id="L127">                existingItem.setQuantity(newQuantity);</span>
+<span class="nc" id="L128">                existingItem.updatePrice();</span>
+<span class="nc" id="L129">            } else {</span>
+<span class="fc" id="L130">                cartItems.add(new CartItem(product, quantity));</span>
+            }
+
+            // Spara i session
+<span class="fc" id="L134">            session.setAttribute(CART_SESSION_KEY, cartItems);</span>
+
+<span class="fc" id="L136">            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;,</span>
+<span class="fc" id="L137">                    product.getName() + &quot; har lagts till i kundvagnen&quot;);</span>
+
+<span class="fc" id="L139">            log.info(&quot;Produkt {} tillagd i kundvagn&quot;, product.getName());</span>
+
+<span class="nc" id="L141">        } catch (Exception e) {</span>
+<span class="nc" id="L142">            log.error(&quot;Fel vid tillägg i kundvagn för produkt: &quot; + productId, e);</span>
+<span class="nc" id="L143">            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Ett fel uppstod vid tillägg i kundvagn&quot;);</span>
+<span class="fc" id="L144">        }</span>
+
+        // VIKTIGT: Redirect till produktsidan så man kan fortsätta handla
+<span class="fc" id="L147">        return &quot;redirect:/produkter&quot;;</span>
+    }
+
+    // Uppdatera kvantitet - FORM-BASERAD
+    @PostMapping(&quot;/cart/update&quot;)
+    public String updateQuantity(
+            @RequestParam Long productId,
+            @RequestParam Integer quantity,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+<span class="fc" id="L158">        log.debug(&quot;Uppdaterar kvantitet för produkt {} till {}&quot;, productId, quantity);</span>
+
+        try {
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">            if (quantity &lt;= 0) {</span>
+<span class="nc" id="L162">                return removeFromCart(productId, session, redirectAttributes);</span>
+            }
+
+<span class="fc" id="L165">            List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+<span class="fc" id="L167">            CartItem item = cartItems.stream()</span>
+<span class="fc" id="L168">                    .filter(cartItem -&gt; cartItem.getProduct().getId().equals(productId))</span>
+<span class="fc" id="L169">                    .findFirst()</span>
+<span class="fc" id="L170">                    .orElse(null);</span>
+
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">            if (item == null) {</span>
+<span class="nc" id="L173">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Produkten finns inte i kundvagnen&quot;);</span>
+<span class="nc" id="L174">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+            // Kontrollera lager
+<span class="fc" id="L178">            Optional&lt;Product&gt; productOpt = productService.getProductByIdWithoutView(productId);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">            if (productOpt.isEmpty()) {</span>
+<span class="fc" id="L180">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Produkten hittades inte&quot;);</span>
+<span class="fc" id="L181">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+<span class="nc" id="L184">            Product product = productOpt.get();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">            if (quantity &gt; product.getStockQuantity()) {</span>
+<span class="nc" id="L186">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;,</span>
+<span class="nc" id="L187">                        &quot;Otillräckligt lager. Max &quot; + product.getStockQuantity() + &quot; tillgängliga&quot;);</span>
+<span class="nc" id="L188">                return &quot;redirect:/varukorg&quot;;</span>
+            }
+
+            // Uppdatera kvantitet
+<span class="nc" id="L192">            item.setQuantity(quantity);</span>
+<span class="nc" id="L193">            item.updatePrice();</span>
+
+<span class="nc" id="L195">            session.setAttribute(CART_SESSION_KEY, cartItems);</span>
+
+<span class="nc" id="L197">            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Kvantiteten har uppdaterats&quot;);</span>
+
+<span class="nc" id="L199">        } catch (Exception e) {</span>
+<span class="nc" id="L200">            log.error(&quot;Fel vid uppdatering av kundvagn för produkt: &quot; + productId, e);</span>
+<span class="nc" id="L201">            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Ett fel uppstod vid uppdatering&quot;);</span>
+<span class="nc" id="L202">        }</span>
+
+<span class="nc" id="L204">        return &quot;redirect:/varukorg&quot;;</span>
+    }
+
+    // Ta bort från kundvagn - FORM-BASERAD
+    @PostMapping(&quot;/cart/remove&quot;)
+    public String removeFromCart(
+            @RequestParam Long productId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+<span class="fc" id="L214">        log.debug(&quot;Tar bort produkt {} från kundvagn&quot;, productId);</span>
+
+        try {
+<span class="fc" id="L217">            List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+<span class="fc" id="L219">            boolean removed = cartItems.removeIf(item -&gt; item.getProduct().getId().equals(productId));</span>
+
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">            if (removed) {</span>
+<span class="fc" id="L222">                session.setAttribute(CART_SESSION_KEY, cartItems);</span>
+<span class="fc" id="L223">                redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Produkten har tagits bort från kundvagnen&quot;);</span>
+            } else {
+<span class="nc" id="L225">                redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Produkten fanns inte i kundvagnen&quot;);</span>
+            }
+
+<span class="nc" id="L228">        } catch (Exception e) {</span>
+<span class="nc" id="L229">            log.error(&quot;Fel vid borttagning från kundvagn för produkt: &quot; + productId, e);</span>
+<span class="nc" id="L230">            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Ett fel uppstod vid borttagning&quot;);</span>
+<span class="fc" id="L231">        }</span>
+
+<span class="fc" id="L233">        return &quot;redirect:/varukorg&quot;;</span>
+    }
+
+    // Rensa kundvagn
+    @PostMapping(&quot;/cart/clear&quot;)
+    public String clearCart(HttpSession session, RedirectAttributes redirectAttributes) {
+<span class="fc" id="L239">        log.debug(&quot;Rensar kundvagn&quot;);</span>
+
+        try {
+<span class="fc" id="L242">            session.removeAttribute(CART_SESSION_KEY);</span>
+<span class="fc" id="L243">            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Kundvagnen har rensats&quot;);</span>
+
+<span class="nc" id="L245">        } catch (Exception e) {</span>
+<span class="nc" id="L246">            log.error(&quot;Fel vid rensning av kundvagn&quot;, e);</span>
+<span class="nc" id="L247">            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, &quot;Ett fel uppstod vid rensning av kundvagn&quot;);</span>
+<span class="fc" id="L248">        }</span>
+
+<span class="fc" id="L250">        return &quot;redirect:/varukorg&quot;;</span>
+    }
+
+    // AJAX-ENDPOINTS FÖR MODERN FUNKTIONALITET
+
+    // Lägg till produkt i kundvagn (AJAX)
+    @PostMapping(&quot;/cart/add/{productId}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; addToCartAjax(
+            @PathVariable Long productId,
+            @RequestParam(defaultValue = &quot;1&quot;) Integer quantity,
+            HttpSession session) {
+
+<span class="fc" id="L263">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+
+        try {
+<span class="fc" id="L266">            Optional&lt;Product&gt; productOpt = productService.getProductByIdWithoutView(productId);</span>
+
+<span class="fc bfc" id="L268" title="All 2 branches covered.">            if (productOpt.isEmpty()) {</span>
+<span class="fc" id="L269">                response.put(&quot;success&quot;, false);</span>
+<span class="fc" id="L270">                response.put(&quot;message&quot;, &quot;Produkten hittades inte&quot;);</span>
+<span class="fc" id="L271">                return ResponseEntity.badRequest().body(response);</span>
+            }
+
+<span class="fc" id="L274">            Product product = productOpt.get();</span>
+
+<span class="pc bpc" id="L276" title="2 of 4 branches missed.">            if (product.getStockQuantity() == null || product.getStockQuantity() &lt; quantity) {</span>
+<span class="nc" id="L277">                response.put(&quot;success&quot;, false);</span>
+<span class="nc" id="L278">                response.put(&quot;message&quot;, &quot;Otillräckligt lager&quot;);</span>
+<span class="nc" id="L279">                response.put(&quot;availableStock&quot;, product.getStockQuantity());</span>
+<span class="nc" id="L280">                return ResponseEntity.badRequest().body(response);</span>
+            }
+
+<span class="fc" id="L283">            List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+<span class="fc" id="L285">            CartItem existingItem = cartItems.stream()</span>
+<span class="pc" id="L286">                    .filter(item -&gt; item.getProduct().getId().equals(productId))</span>
+<span class="fc" id="L287">                    .findFirst()</span>
+<span class="fc" id="L288">                    .orElse(null);</span>
+
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            if (existingItem != null) {</span>
+<span class="nc" id="L291">                int newQuantity = existingItem.getQuantity() + quantity;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (newQuantity &gt; product.getStockQuantity()) {</span>
+<span class="nc" id="L293">                    response.put(&quot;success&quot;, false);</span>
+<span class="nc" id="L294">                    response.put(&quot;message&quot;, &quot;Kan inte lägga till fler. Max &quot; + product.getStockQuantity() + &quot; tillgängliga&quot;);</span>
+<span class="nc" id="L295">                    return ResponseEntity.badRequest().body(response);</span>
+                }
+<span class="nc" id="L297">                existingItem.setQuantity(newQuantity);</span>
+<span class="nc" id="L298">                existingItem.updatePrice();</span>
+<span class="nc" id="L299">            } else {</span>
+<span class="fc" id="L300">                cartItems.add(new CartItem(product, quantity));</span>
+            }
+
+<span class="fc" id="L303">            session.setAttribute(CART_SESSION_KEY, cartItems);</span>
+
+            // Beräkna nya totaler
+<span class="fc" id="L306">            int totalItems = cartItems.stream()</span>
+<span class="fc" id="L307">                    .mapToInt(CartItem::getQuantity)</span>
+<span class="fc" id="L308">                    .sum();</span>
+
+<span class="fc" id="L310">            BigDecimal total = cartItems.stream()</span>
+<span class="fc" id="L311">                    .map(CartItem::getTotalPrice)</span>
+<span class="fc" id="L312">                    .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="fc" id="L314">            response.put(&quot;success&quot;, true);</span>
+<span class="fc" id="L315">            response.put(&quot;message&quot;, &quot;Produkten har lagts till i kundvagnen&quot;);</span>
+<span class="fc" id="L316">            response.put(&quot;cartCount&quot;, totalItems);</span>
+<span class="fc" id="L317">            response.put(&quot;cartTotal&quot;, total);</span>
+
+<span class="nc" id="L319">        } catch (Exception e) {</span>
+<span class="nc" id="L320">            log.error(&quot;Fel vid AJAX-tillägg i kundvagn för produkt: &quot; + productId, e);</span>
+<span class="nc" id="L321">            response.put(&quot;success&quot;, false);</span>
+<span class="nc" id="L322">            response.put(&quot;message&quot;, &quot;Ett fel uppstod vid tillägg i kundvagn&quot;);</span>
+<span class="nc" id="L323">            return ResponseEntity.internalServerError().body(response);</span>
+<span class="fc" id="L324">        }</span>
+
+<span class="fc" id="L326">        return ResponseEntity.ok(response);</span>
+    }
+
+    // Hämta antal items i kundvagn (AJAX)
+    @GetMapping(&quot;/cart/count&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getCartCount(HttpSession session) {
+<span class="fc" id="L333">        List&lt;CartItem&gt; cartItems = getCartItemsFromSession(session);</span>
+
+<span class="fc" id="L335">        int totalItems = cartItems.stream()</span>
+<span class="fc" id="L336">                .mapToInt(CartItem::getQuantity)</span>
+<span class="fc" id="L337">                .sum();</span>
+
+<span class="fc" id="L339">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L340">        response.put(&quot;count&quot;, totalItems);</span>
+
+<span class="fc" id="L342">        return ResponseEntity.ok(response);</span>
+    }
+
+    // Helper metod för att hämta cart items från session
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private List&lt;CartItem&gt; getCartItemsFromSession(HttpSession session) {
+<span class="fc" id="L348">        List&lt;CartItem&gt; cartItems = (List&lt;CartItem&gt;) session.getAttribute(CART_SESSION_KEY);</span>
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        if (cartItems == null) {</span>
+<span class="nc" id="L350">            cartItems = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L351">            session.setAttribute(CART_SESSION_KEY, cartItems);</span>
+        }
+<span class="fc" id="L353">        return cartItems;</span>
+    }
+
+    // CartItem class som är kompatibel med din template
+    public static class CartItem {
+        private Product product;
+        private Integer quantity;
+        private BigDecimal unitPrice;
+        private BigDecimal totalPrice;
+
+<span class="fc" id="L363">        public CartItem(Product product, Integer quantity) {</span>
+<span class="fc" id="L364">            this.product = product;</span>
+<span class="fc" id="L365">            this.quantity = quantity;</span>
+<span class="fc" id="L366">            this.unitPrice = product.getPrice();</span>
+<span class="fc" id="L367">            updatePrice();</span>
+<span class="fc" id="L368">        }</span>
+
+        public void updatePrice() {
+<span class="fc" id="L371">            this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));</span>
+<span class="fc" id="L372">        }</span>
+
+        // Getters and setters
+<span class="fc" id="L375">        public Product getProduct() { return product; }</span>
+<span class="nc" id="L376">        public void setProduct(Product product) { this.product = product; }</span>
+
+<span class="fc" id="L378">        public Integer getQuantity() { return quantity; }</span>
+        public void setQuantity(Integer quantity) {
+<span class="nc" id="L380">            this.quantity = quantity;</span>
+<span class="nc" id="L381">            updatePrice();</span>
+<span class="nc" id="L382">        }</span>
+
+<span class="fc" id="L384">        public BigDecimal getUnitPrice() { return unitPrice; }</span>
+        public void setUnitPrice(BigDecimal unitPrice) {
+<span class="nc" id="L386">            this.unitPrice = unitPrice;</span>
+<span class="nc" id="L387">            updatePrice();</span>
+<span class="nc" id="L388">        }</span>
+
+<span class="fc" id="L390">        public BigDecimal getTotalPrice() { return totalPrice; }</span>
+<span class="fc" id="L391">        public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">PaymentType.java</span></div><h1>PaymentType.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
+
+<span class="nc" id="L3">public enum PaymentType {</span>
+<span class="nc" id="L4">    CREDIT_CARD(&quot;Credit Card Payment&quot;, true),</span>
+<span class="nc" id="L5">    DEBIT_CARD(&quot;Debit Card Payment&quot;, true),</span>
+<span class="nc" id="L6">    PAYPAL(&quot;PayPal Payment&quot;, false),</span>
+<span class="nc" id="L7">    STRIPE(&quot;Stripe Payment&quot;, true),</span>
+<span class="nc" id="L8">    BANK_TRANSFER(&quot;Bank Transfer&quot;, false),</span>
+<span class="nc" id="L9">    CASH(&quot;Cash Payment&quot;, false),</span>
+<span class="nc" id="L10">    CRYPTOCURRENCY(&quot;Cryptocurrency Payment&quot;, false),</span>
+<span class="nc" id="L11">    MOBILE_PAYMENT(&quot;Mobile Payment&quot;, true),</span>
+<span class="nc" id="L12">    GIFT_CARD(&quot;Gift Card Payment&quot;, false);</span>
+
+    private final String displayName;
+    private final boolean requiresCardDetails;
+
+<span class="nc" id="L17">    PaymentType(String displayName, boolean requiresCardDetails) {</span>
+<span class="nc" id="L18">        this.displayName = displayName;</span>
+<span class="nc" id="L19">        this.requiresCardDetails = requiresCardDetails;</span>
+<span class="nc" id="L20">    }</span>
+
+    public String getDisplayName() {
+<span class="nc" id="L23">        return displayName;</span>
+    }
+
+    public boolean requiresCardDetails() {
+<span class="nc" id="L27">        return requiresCardDetails;</span>
+    }
+
+    // Helper methods
+    public boolean isCardPayment() {
+<span class="nc bnc" id="L32" title="All 4 branches missed.">        return this == CREDIT_CARD || this == DEBIT_CARD;</span>
+    }
+
+    public boolean isDigitalWallet() {
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        return this == PAYPAL || this == MOBILE_PAYMENT;</span>
+    }
+
+    public boolean isInstantPayment() {
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        return requiresCardDetails || isDigitalWallet();</span>
+    }
+
+    public boolean requiresManualVerification() {
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        return this == BANK_TRANSFER || this == CRYPTOCURRENCY;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

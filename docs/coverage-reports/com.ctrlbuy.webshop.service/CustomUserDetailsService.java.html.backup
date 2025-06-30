@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="sv"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomUserDetailsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">webshop</a> &gt; <a href="index.source.html" class="el_package">com.ctrlbuy.webshop.service</a> &gt; <span class="el_source">CustomUserDetailsService.java</span></div><h1>CustomUserDetailsService.java</h1><pre class="source lang-java linenums">package com.ctrlbuy.webshop.service;
+
+import com.ctrlbuy.webshop.security.entity.User;
+import com.ctrlbuy.webshop.security.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+@Primary
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Autowired
+<span class="nc" id="L19">    public CustomUserDetailsService(UserRepository userRepository) {</span>
+<span class="nc" id="L20">        this.userRepository = userRepository;</span>
+<span class="nc" id="L21">    }</span>
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+<span class="nc" id="L25">        System.out.println(&quot;DEBUG: Attempting to load user: &quot; + username);</span>
+
+        // Sök efter användare med username ELLER email
+<span class="nc" id="L28">        User user = userRepository.findByUsername(username)</span>
+<span class="nc" id="L29">                .or(() -&gt; userRepository.findByEmail(username))</span>
+<span class="nc" id="L30">                .orElseThrow(() -&gt; {</span>
+<span class="nc" id="L31">                    System.out.println(&quot;DEBUG: User not found: &quot; + username);</span>
+<span class="nc" id="L32">                    return new UsernameNotFoundException(&quot;User not found: &quot; + username);</span>
+                });
+
+<span class="nc" id="L35">        System.out.println(&quot;DEBUG: User found: &quot; + user.getUsername());</span>
+<span class="nc" id="L36">        System.out.println(&quot;DEBUG: User active: &quot; + user.isActive());</span>
+<span class="nc" id="L37">        System.out.println(&quot;DEBUG: User email verified: &quot; + user.isEmailVerified());</span>
+<span class="nc" id="L38">        System.out.println(&quot;DEBUG: User roles: &quot; + user.getRoles());</span>
+
+<span class="nc" id="L40">        return createUserDetails(user);</span>
+    }
+
+    private UserDetails createUserDetails(User user) {
+        // VIKTIGT: Admin-användare ska alltid kunna logga in
+<span class="nc" id="L45">        boolean isAdmin = user.getRoles().contains(&quot;ROLE_ADMIN&quot;);</span>
+
+<span class="nc" id="L47">        System.out.println(&quot;DEBUG: Is admin user: &quot; + isAdmin);</span>
+
+<span class="nc" id="L49">        return org.springframework.security.core.userdetails.User</span>
+<span class="nc" id="L50">                .withUsername(user.getUsername())</span>
+<span class="nc" id="L51">                .password(user.getPassword())</span>
+<span class="nc" id="L52">                .authorities(user.getRoles().toArray(new String[0]))</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                .accountExpired(false)</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                .accountLocked(!isAdmin &amp;&amp; !user.isEmailVerified())  // Admin aldrig låst, andra låsta om ej verifierade</span>
+<span class="nc" id="L55">                .credentialsExpired(false)</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                .disabled(!user.isActive())</span>
+<span class="nc" id="L57">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
