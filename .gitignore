@@ -121,3 +121,6 @@ src/main/resources/application-dev.properties
 .elasticbeanstalk/logs/
 *.jar
 webshop-1.0-SNAPSHOT.jar
+application-local.yml
+application-local.properties
+.env
