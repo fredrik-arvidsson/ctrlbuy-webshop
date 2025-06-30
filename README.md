@@ -5,29 +5,20 @@
 [![Maven](https://img.shields.io/badge/Maven-3.9.5-blue.svg)](https://maven.apache.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Tests-352%20Passing-brightgreen.svg)](https://github.com/fredrik-arvidsson/ctrlbuy-webshop)
 
-🔴 **LIVE DEMO:** [Railway Production](https://ctrlbuy-webshop-production.up.railway.app) | [AWS Production](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com) | [Coverage Reports](https://fredrik-arvidsson.github.io/ctrlbuy-webshop)
+📊 **LIVE COVERAGE:** [Test Reports & Coverage](https://fredrik-arvidsson.github.io/ctrlbuy-webshop)
 
-> En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot. Professionell kvalitet med automatiserade tester, fullständig admin-panel och live coverage-rapporter.
+> En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot. Professionell kvalitet med 352 automatiserade tester, fullständig admin-panel och live coverage-rapporter.
 
-## 🌐 Live Demo - Testa Nu!
+## 🎯 Project Highlights
 
-### 🚄 Railway Demo (Primary Production)
-**URL:** https://ctrlbuy-webshop-production.up.railway.app
-- 🛒 Fullständig e-handelsfunktionalitet med varukorg och checkout
-- 📱 58+ produkter (iPhone, Samsung, MacBook, Gaming, VR, Audio)
-- 🎛️ Komplett Admin-panel med produkthantering
-- 🇸🇪 Svensk gränssnitt med lokaliserade routes
-
-### ☁️ AWS Demo (Production Ready)
-**URL:** http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com
-- ☁️ Elastic Beanstalk deployment med auto-scaling
-- 🌍 Stockholm region (eu-north-1)
-- 🔧 Production-ready konfiguration
-
-### 🔑 Test-användare för live demo:
-- **Admin:** `backup.admin` / `AdminPass123!`
-- **User:** `test.user` / `TestPass123!`
+- ✅ **352 Tests Passing** - 100% green build med omfattande testning
+- 🛒 **Complete E-commerce** - Fullständig webshop med varukorg och checkout
+- 🎛️ **Professional Admin Panel** - CRUD för produkter, användare, order
+- 📊 **Live Coverage Reports** - Automatisk testrapportering via GitHub Pages
+- 🐳 **Docker Ready** - Komplett containeriserad utvecklingsmiljö
+- 🇸🇪 **Swedish Localization** - Lokaliserat gränssnitt och routes
 
 ## ⚡ Quick Start (30 sekunder)
 
@@ -47,6 +38,11 @@ open http://localhost:8080
 ```
 
 🎉 **Klart!** Hela stacken (MySQL + MailHog + Webshop) körs nu lokalt.
+
+## 🔑 Test-användare
+
+- **Admin:** `backup.admin` / `AdminPass123!`
+- **User:** `test.user` / `TestPass123!`
 
 ## 🎛️ Avancerad Admin-Panel
 
@@ -71,35 +67,41 @@ Komplett administrationsgränssnitt med professionell CRUD-funktionalitet:
 - ✅ **Användarrapporter** med registreringar och aktivitet
 - ✅ **REA-analys** för kampanjframgång
 
-## 🚀 Multi-Platform Deployment
-
-| Platform | Status | URL | Features |
-|----------|--------|-----|----------|
-| 🚄 Railway | ✅ LIVE | [ctrlbuy-webshop-production.up.railway.app](https://ctrlbuy-webshop-production.up.railway.app) | MySQL, Auto-deploy, Admin Panel |
-| ☁️ AWS | ✅ LIVE | [webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com) | Elastic Beanstalk + Docker |
-| 📊 GitHub Pages | ✅ LIVE | [fredrik-arvidsson.github.io/ctrlbuy-webshop](https://fredrik-arvidsson.github.io/ctrlbuy-webshop) | Coverage Reports |
-| 🐳 Docker | ✅ Ready | `docker-compose up` | Complete stack |
-
 ## 🧪 Live Testing & Coverage
 
 🔴 **LIVE COVERAGE RAPPORTER** - Uppdateras automatiskt vid varje commit:
 
-**Coverage Dashboard:** https://fredrik-arvidsson.github.io/ctrlbuy-webshop
+**📊 Coverage Dashboard:** https://fredrik-arvidsson.github.io/ctrlbuy-webshop
 
 ### Test Results (Senaste körning):
-- **352 tester** genomförda
+- **352 tester** genomförda ✅
 - **0 Failures** ❌
 - **0 Errors** ❌
 - **3 Skipped** ⏭️ (normalt)
 - **BUILD SUCCESS** ✅
 
 ### Testsuiter som passerar:
-- ✅ CustomErrorControllerTest (8 tester)
-- ✅ ProductControllerTest (14 tester)
-- ✅ UserServiceTest (30 tester)
-- ✅ ProductServiceTest (41 tester)
-- ✅ OrderServiceTest (32 tester)
-- ✅ PaymentServiceTest (50 tester)
+- ✅ **CustomErrorControllerTest** (8 tester)
+- ✅ **ProductControllerTest** (14 tester)
+- ✅ **UserServiceTest** (30 tester)
+- ✅ **ProductServiceTest** (41 tester)
+- ✅ **OrderServiceTest** (32 tester)
+- ✅ **PaymentServiceTest** (50 tester)
+- ✅ **CartControllerTest** (10 tester)
+- ✅ **CheckoutControllerTest** (8 tester)
+
+## 🏗️ Development Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Spring Boot** | 3.3.5 | Backend Framework |
+| **Java** | 21 | Programming Language |
+| **MySQL** | 8.0 | Database |
+| **Maven** | 3.9.5 | Build Tool |
+| **Docker** | Latest | Containerization |
+| **JaCoCo** | 0.8.12 | Coverage Analysis |
+| **JUnit** | 5.x | Testing Framework |
+| **Bootstrap** | 5.3 | Frontend Framework |
 
 ## 🗄️ Database Configuration
 
@@ -186,7 +188,7 @@ Port 8080 was already in use
 docker-compose logs -f webshop-app
 ```
 
-## 🎯 Development Status & Roadmap
+## 🎯 Project Features & Status
 
 ### ✅ Current Features (Production Ready)
 - 🛒 **Fullständig e-handelsfunktionalitet** - Komplett webshop
@@ -197,22 +199,30 @@ docker-compose logs -f webshop-app
 - 📊 **Avancerade rapporter** - Försäljning, produkter, användare
 - 🎨 **Responsiv design** med Bootstrap
 - 🇸🇪 **Svensk lokalisering**
-- 🚄 **Multi-platform deployment** (Railway + AWS)
+- 🧪 **352 automatiserade tester** med live coverage
+- 🐳 **Docker containerization**
 
-### 🔄 Upcoming Enhancements
+### 🔄 Future Enhancements
 - 🔄 **Payment Integration** - Stripe/Klarna
 - 🔄 **Advanced Search** - Elasticsearch
 - 🔄 **Email Templates** - Professionella HTML-templates
 - 🔄 **Analytics Dashboard** - Google Analytics integration
-- 🔄 **Kubernetes** - Container orchestration
+- 🔄 **Cloud Deployment** - AWS/Railway production
 
-## 🌍 Live Links
+## 📊 Code Quality & Metrics
 
-- 🛒 **Railway Production:** https://ctrlbuy-webshop-production.up.railway.app
-- ☁️ **AWS Production:** http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com
-- 🎛️ **Admin Panel:** `/admin/dashboard` (använd test-användare ovan)
-- 📊 **Coverage Dashboard:** https://fredrik-arvidsson.github.io/ctrlbuy-webshop
+- **Test Coverage:** Live reports på GitHub Pages
+- **Code Quality:** Spring Boot best practices
+- **Security:** CSRF protection, SQL injection prevention
+- **Performance:** Optimized queries och caching
+- **Documentation:** Comprehensive README och comments
+
+## 🌍 Links & Resources
+
 - 📁 **GitHub Repository:** https://github.com/fredrik-arvidsson/ctrlbuy-webshop
+- 📊 **Coverage Dashboard:** https://fredrik-arvidsson.github.io/ctrlbuy-webshop
+- 🎛️ **Local Admin Panel:** http://localhost:8080/admin/dashboard
+- 📧 **Local MailHog:** http://localhost:8025
 
 ## 📄 Licens
 
@@ -231,9 +241,9 @@ För kommersiella licenser: fredrik.arvidsson.dev@gmail.com
 ---
 
 **🔗 Quick Links:**  
-[🚄 Railway](https://ctrlbuy-webshop-production.up.railway.app) |
-[☁️ AWS](http://webshop-final.eba-yzy7qfze.eu-north-1.elasticbeanstalk.com) |
-[🎛️ Admin](https://ctrlbuy-webshop-production.up.railway.app/admin/dashboard) |
-[📊 Coverage](https://fredrik-arvidsson.github.io/ctrlbuy-webshop)
+[📁 Repository](https://github.com/fredrik-arvidsson/ctrlbuy-webshop) |
+[📊 Coverage](https://fredrik-arvidsson.github.io/ctrlbuy-webshop) |
+[🎛️ Local Admin](http://localhost:8080/admin/dashboard) |
+[📧 MailHog](http://localhost:8025)
 
 **Made with ❤️ in Sweden**
