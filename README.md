@@ -11,6 +11,18 @@
 
 > En modern, skalbar och fullständigt testad e-handelsplattform byggd med Spring Boot. Professionell kvalitet med 352 automatiserade tester, fullständig admin-panel och live coverage-rapporter.
 
+## 🌍 Live Applications
+
+### ✅ Available Now
+- 📊 **Coverage Dashboard:** https://fredrik-arvidsson.github.io/ctrlbuy-webshop
+- 🐳 **Local Development:** `docker-compose up` (full e-commerce experience)
+- 🎛️ **Local Admin Panel:** http://localhost:8080/admin/dashboard
+
+### 🔄 Deployment Status
+- 🚄 **Railway Demo** - Under development
+- ☁️ **AWS Demo** - Deployment in progress
+- 💯 **Full functionality available locally** via Docker setup
+
 ## 🎯 Project Highlights
 
 - ✅ **352 Tests Passing** - 100% green build med omfattande testning
@@ -224,6 +236,20 @@ docker-compose logs -f webshop-app
 - 🎛️ **Local Admin Panel:** http://localhost:8080/admin/dashboard
 - 📧 **Local MailHog:** http://localhost:8025
 
+## 💻 Local Demo Experience
+
+**Start the complete e-commerce platform locally:**
+```bash
+docker-compose up -d
+./mvnw spring-boot:run
+```
+
+**Then explore:**
+- 🛒 **Webshop:** http://localhost:8080
+- 🎛️ **Admin Panel:** http://localhost:8080/admin/dashboard
+- 📧 **Email Testing:** http://localhost:8025
+- 🗄️ **Database:** MySQL on port 3306
+
 ## 📄 Licens
 
 **CtrlBuy Webshop** är ett proprietärt projekt utvecklat av Fredrik Arvidsson.
@@ -243,7 +269,7 @@ För kommersiella licenser: fredrik.arvidsson.dev@gmail.com
 **🔗 Quick Links:**  
 [📁 Repository](https://github.com/fredrik-arvidsson/ctrlbuy-webshop) |
 [📊 Coverage](https://fredrik-arvidsson.github.io/ctrlbuy-webshop) |
-[🎛️ Local Admin](http://localhost:8080/admin/dashboard) |
+[🐳 Local Setup](#quick-start-30-sekunder) |
 [📧 MailHog](http://localhost:8025)
 
 **Made with ❤️ in Sweden**
