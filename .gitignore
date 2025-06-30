@@ -9,3 +9,8 @@ webshop-1.0-SNAPSHOT.jar
 application-local.properties
 application-local.yml
 *.swp
+
+# AWS Elastic Beanstalk
+.elasticbeanstalk/app_versions/
+.elasticbeanstalk/logs/
+
