@@ -778,17 +778,3 @@ class ProductServiceTest {
         verify(productRepository).findAll();
     }
 }
-    @Test
-    void testConditionalLogic() {
-        // Test if/else branches
-        Product product = new Product();
-        product.setStockQuantity(5);
-        
-        // Detta skapar branches som JaCoCo kan mäta
-        boolean inStock = product.getStockQuantity() > 0;
-        assertTrue(inStock);
-        
-        product.setStockQuantity(0);
-        boolean outOfStock = product.getStockQuantity() <= 0;
-        assertTrue(outOfStock);
-    }
