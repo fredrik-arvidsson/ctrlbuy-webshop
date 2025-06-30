@@ -9,14 +9,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // BEFINTLIGA METODER (oförändrade)
+    // GRUNDLÄGGANDE METODER
     Order findByOrderNumberAndUser(String orderNumber, User user);
+    Order findByOrderNumber(String orderNumber);
     List<Order> findByUserOrderByOrderDateDesc(User user);
     List<Order> findAllByOrderByOrderDateDesc();
     Long countByUser(User user);
@@ -26,54 +29,81 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.orderNumber LIKE %:search% ORDER BY o.orderDate DESC")
     List<Order> searchByOrderNumber(@Param("search") String search);
 
-    Order findByOrderNumber(String orderNumber);
-
-    // NYA METODER FÖR ORDERHISTORIK
-    /**
-     * Paginering för orderhistorik
-     */
+    // PAGINERING
+    Page<Order> findAllByOrderByOrderDateDesc(Pageable pageable);
     Page<Order> findByUser(User user, Pageable pageable);
+    Page<Order> findByUserOrderByOrderDateDesc(User user, Pageable pageable);
+    Page<Order> findByStatusOrderByOrderDateDesc(Order.OrderStatus status, Pageable pageable);
 
-    /**
-     * Säker hämtning av order (kontrollerar ägarskap)
-     */
+    // SÄKER HÄMTNING
     Optional<Order> findByIdAndUser(Long id, User user);
 
-    /**
-     * Beräkna total summa för användares alla orders
-     */
+    // BERÄKNINGAR
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.user = :user")
     Double sumTotalAmountByUser(@Param("user") User user);
 
-    // NYA METODER FÖR ATT LÖSA LAZY INITIALIZATION PROBLEM
-
-    /**
-     * Hämta order med orderItems eager loaded för att undvika LazyInitializationException
-     */
+    // EAGER LOADING METODER
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
     Optional<Order> findByIdWithItems(@Param("orderId") Long orderId);
 
-    /**
-     * Hämta order med orderItems eager loaded och kontrollera ägarskap
-     */
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId AND o.user = :user")
     Optional<Order> findByIdAndUserWithItems(@Param("orderId") Long orderId, @Param("user") User user);
 
-    /**
-     * Hämta alla orders för en användare med orderItems eager loaded
-     */
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.user = :user ORDER BY o.orderDate DESC")
     List<Order> findByUserWithItems(@Param("user") User user);
 
-    /**
-     * Hämta order med orderItems baserat på ordernummer
-     */
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.orderNumber = :orderNumber")
     Optional<Order> findByOrderNumberWithItems(@Param("orderNumber") String orderNumber);
 
-    /**
-     * Hämta order med orderItems baserat på ordernummer och användare
-     */
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.orderNumber = :orderNumber AND o.user = :user")
     Optional<Order> findByOrderNumberAndUserWithItems(@Param("orderNumber") String orderNumber, @Param("user") User user);
+
+    // ADMIN METODER
+    long countByStatus(Order.OrderStatus status);
+
+    @Query("SELECT o FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate ORDER BY o.orderDate DESC")
+    Page<Order> findByOrderDateBetweenOrderByOrderDateDesc(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+
+    Page<Order> findByUserAndStatusOrderByOrderDateDesc(
+            User user,
+            Order.OrderStatus status,
+            Pageable pageable
+    );
+
+    // UPPDATERAD SEARCH MED KORREKT FÄLTNAMN
+    @Query("SELECT o FROM Order o WHERE o.user.email LIKE %:keyword% OR o.user.username LIKE %:keyword% ORDER BY o.orderDate DESC")
+    Page<Order> findByCustomerKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT o FROM Order o WHERE o.totalAmount > :amount ORDER BY o.orderDate DESC")
+    Page<Order> findByTotalAmountGreaterThanOrderByOrderDateDesc(
+            @Param("amount") BigDecimal amount,
+            Pageable pageable
+    );
+
+    List<Order> findTop5ByUserOrderByOrderDateDesc(User user);
+
+    @Query("SELECT o FROM Order o WHERE DATE(o.orderDate) = CURRENT_DATE ORDER BY o.orderDate DESC")
+    List<Order> findTodaysOrders();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE DATE(o.orderDate) = CURRENT_DATE")
+    long countTodaysOrders();
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate AND o.status != 'CANCELLED'")
+    BigDecimal calculateTotalSalesBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE DATE(o.orderDate) = CURRENT_DATE AND o.status != 'CANCELLED'")
+    BigDecimal calculateTodaysSales();
+
+    @Query("SELECT o FROM Order o WHERE o.status = 'PENDING' AND o.orderDate < :cutoffDate ORDER BY o.orderDate ASC")
+    List<Order> findPendingOrdersOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    @Query("SELECT COUNT(o) FROM Order o")
+    long countAllOrders();
+
+    @Query("SELECT o FROM Order o WHERE o.orderNumber LIKE %:search% ORDER BY o.orderDate DESC")
+    Page<Order> searchByOrderNumber(@Param("search") String search, Pageable pageable);
 }

@@ -105,6 +105,31 @@ public interface EmailService {
      */
     void sendAccountReactivationNotification(User reactivatedUser, String adminUsername);
 
+    // ========================================
+    // NYA METODER FÖR ORDERHANTERING
+    // ========================================
+
+    /**
+     * Send shipping notification when order status changes to SHIPPED
+     * @param order The order that has been shipped
+     * @param customerEmail Customer's email address
+     */
+    void sendShippingNotification(Order order, String customerEmail);
+
+    /**
+     * Send delivery confirmation when order status changes to DELIVERED
+     * @param order The order that has been delivered
+     * @param customerEmail Customer's email address
+     */
+    void sendDeliveryConfirmation(Order order, String customerEmail);
+
+    /**
+     * Send order cancellation notification when order is cancelled
+     * @param order The order that has been cancelled
+     * @param customerEmail Customer's email address
+     */
+    void sendOrderCancellation(Order order, String customerEmail);
+
     /**
      * Test email connection
      * @return true if connection works

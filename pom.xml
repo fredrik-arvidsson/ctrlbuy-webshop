@@ -85,13 +85,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 Database endast för testning -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- ===== UTILITY DEPENDENCIES ===== -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -151,6 +144,18 @@
             <groupId>com.icegreen</groupId>
             <artifactId>greenmail</artifactId>
             <version>1.6.15</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ===== TESTCONTAINERS FÖR MySQL INTEGRATION TESTS ===== -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
             <scope>test</scope>
         </dependency>
 

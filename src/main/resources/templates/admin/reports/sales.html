@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Försäljningsrapport - CTRLBUY Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .report-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .report-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .category-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .category-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .category-count {
+            background: #3498db;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .top-products {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        .product-item:hover {
+            background: #f8f9fa;
+        }
+
+        .product-info h4 {
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
+        }
+
+        .product-category {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .product-price {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+
+        .sale-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Debug sektion */
+        .debug-section {
+            background: #ff4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-header">
+    <div class="header-content">
+        <a href="/admin/dashboard" class="logo">
+            <i class="fas fa-cog"></i> CTRLBUY Admin
+        </a>
+        <nav class="nav-links">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/products">Produkter</a>
+            <a href="/admin/orders">Beställningar</a>
+            <a href="/admin/users">Användare</a>
+            <a href="/admin/reports" class="active">Rapporter</a>
+            <a href="/">Tillbaka till Shop</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/admin/reports" class="back-button">
+        <i class="fas fa-arrow-left"></i> Tillbaka till Rapporter
+    </a>
+
+    <div class="report-header">
+        <h1 class="report-title">📊 Försäljningsrapport</h1>
+        <p class="report-subtitle">Detaljerad analys av försäljning och intäkter</p>
+    </div>
+
+    <!-- 🔍 DEBUG SEKTION -->
+    <div class="debug-section">
+        <h4>🔍 DEBUG - Värden från ReportsController:</h4>
+        <div>totalProducts: <span th:text="${totalProducts}">UNDEFINED</span></div>
+        <div>saleProducts: <span th:text="${saleProducts}">UNDEFINED</span></div>
+        <div>totalSavings: <span th:text="${totalSavings}">UNDEFINED</span> kr</div>
+        <div>totalRevenue: <span th:text="${totalRevenue}">UNDEFINED</span> kr</div>
+        <div>avgDiscount: <span th:text="${avgDiscount}">UNDEFINED</span>%</div>
+        <div>totalOrders: <span th:text="${totalOrders}">UNDEFINED</span></div>
+        <div>productsByCategory size: <span th:text="${productsByCategory != null ? productsByCategory.size() : 'NULL'}">UNDEFINED</span></div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-value" th:text="${totalProducts ?: '0'}">0</div>
+            <div class="stat-label">Totalt Produkter</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏷️</div>
+            <div class="stat-value" th:text="${saleProducts ?: '0'}">0</div>
+            <div class="stat-label">Produkter på REA</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" th:text="${totalRevenue != null ? (#numbers.formatDecimal(totalRevenue, 0, 2) + ' kr') : '0 kr'}">0 kr</div>
+            <div class="stat-label">Total Intäkt (Potential)</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💸</div>
+            <div class="stat-value" th:text="${totalSavings != null ? (#numbers.formatDecimal(totalSavings, 0, 2) + ' kr') : '0 kr'}">0 kr</div>
+            <div class="stat-label">Totala Besparingar</div>
+        </div>
+    </div>
+
+    <div class="charts-section">
+        <div class="chart-card">
+            <h3 class="chart-title">📈 Produkter per Kategori</h3>
+            <div th:if="${productsByCategory != null and not #maps.isEmpty(productsByCategory)}">
+                <div th:each="category : ${productsByCategory}" class="category-bar">
+                    <span class="category-name" th:text="${category.key}">Kategori</span>
+                    <span class="category-count" th:text="${category.value + ' st'}">0 st</span>
+                </div>
+            </div>
+            <div th:if="${productsByCategory == null or #maps.isEmpty(productsByCategory)}">
+                <p class="text-muted">Ingen kategoridata tillgänglig</p>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3 class="chart-title">🎯 Försäljningsöversikt</h3>
+            <div class="category-bar">
+                <span class="category-name">Aktiva Produkter</span>
+                <span class="category-count" th:text="${totalProducts ?: '0'} + ' st'">0 st</span>
+            </div>
+            <div class="category-bar">
+                <span class="category-name">REA-Produkter</span>
+                <span class="category-count" th:text="${saleProducts ?: '0'} + ' st'">0 st</span>
+            </div>
+            <div class="category-bar">
+                <span class="category-name">Genomsnittlig REA</span>
+                <span class="category-count" th:text="${avgDiscount != null ? (#numbers.formatDecimal(avgDiscount, 0, 1) + '%') : '0%'}">0%</span>
+            </div>
+            <div class="category-bar">
+                <span class="category-name">Totala Beställningar</span>
+                <span class="category-count" th:text="${totalOrders ?: '0'} + ' st'">0 st</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-products">
+        <h3 class="chart-title">🏆 Aktiva REA-Erbjudanden</h3>
+        <div th:if="${activeDeals != null and not #lists.isEmpty(activeDeals)}">
+            <div th:each="product : ${activeDeals}" class="product-item">
+                <div class="product-info">
+                    <h4 th:text="${product.name}">Produktnamn</h4>
+                    <span class="product-category" th:text="${product.category}">Kategori</span>
+                </div>
+                <div>
+                    <span class="product-price" th:text="${product.currentPrice != null ? (#numbers.formatDecimal(product.currentPrice, 0, 2) + ' kr') : '0 kr'}">0 kr</span>
+                    <span th:if="${product.onSale}" class="sale-badge">REA</span>
+                    <span th:if="${product.discountPercentage != null}" class="sale-badge" th:text="'-' + ${#numbers.formatDecimal(product.discountPercentage, 0, 0)} + '%'">-10%</span>
+                </div>
+            </div>
+        </div>
+        <div th:if="${activeDeals == null or #lists.isEmpty(activeDeals)}">
+            <p class="text-muted text-center">Inga aktiva REA-erbjudanden just nu</p>
+        </div>
+    </div>
+
+    <!-- REA-produkter per kategori -->
+    <div class="top-products" th:if="${saleProductsByCategory != null and not #maps.isEmpty(saleProductsByCategory)}">
+        <h3 class="chart-title">🔥 REA-produkter per Kategori</h3>
+        <div th:each="category : ${saleProductsByCategory}" class="category-bar">
+            <span class="category-name" th:text="${category.key}">Kategori</span>
+            <span class="category-count" th:text="${category.value + ' st på REA'}">0 st på REA</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

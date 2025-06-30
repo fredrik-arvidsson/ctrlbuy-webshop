@@ -1,0 +1,23 @@
+
+    // Lägg till denna metod i ProductService.java
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> getAllProducts() {
+        log.info("🔍 DEBUGGING: Hämtar alla produkter från databas");
+        try {
+            List<Product> products = productRepository.findAll();
+            log.info("🔍 DEBUGGING: Repository returnerade {} produkter", products.size());
+            
+            // FIXA ALLA PRODUKTBILDER
+            List<Product> fixedProducts = products.stream()
+                    .map(this::enhanceProductWithImage)
+                    .collect(Collectors.toList());
+            
+            log.info("🖼️ Korrigerade bilder för {} produkter", fixedProducts.size());
+            return fixedProducts;
+            
+        } catch (Exception e) {
+            log.error("🔍 DEBUGGING: Fel vid hämtning av produkter: {}", e.getMessage(), e);
+            return List.of();
+        }
+    }

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Användarrapport - CTRLBUY Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .admin-header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .report-header {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .report-title {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .report-subtitle {
+      color: #7f8c8d;
+      font-size: 1.2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .analysis-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .analysis-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      text-align: center;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 0.5rem;
+    }
+
+    .domain-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .domain-name {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .domain-badge {
+      background: #9b59b6;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .role-distribution {
+      text-align: center;
+    }
+
+    .role-item {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .role-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .role-count {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .role-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .users-table {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
+    .table-title {
+      font-size: 1.3rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    .user-name {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .user-email {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .role-admin {
+      background: #e74c3c;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    .role-customer {
+      background: #27ae60;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    .user-id {
+      color: #7f8c8d;
+      font-family: monospace;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      margin-bottom: 1rem;
+      transition: background 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .summary-box {
+      background: linear-gradient(135deg, #3498db, #9b59b6);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .summary-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .analysis-section {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-header">
+  <div class="header-content">
+    <a href="/admin/dashboard" class="logo">
+      <i class="fas fa-cog"></i> CTRLBUY Admin
+    </a>
+    <nav class="nav-links">
+      <a href="/admin/dashboard">Dashboard</a>
+      <a href="/admin/products">Produkter</a>
+      <a href="/admin/orders">Beställningar</a>
+      <a href="/admin/users">Användare</a>
+      <a href="/admin/reports/users" class="active">Rapporter</a>
+      <a href="/">Tillbaka till Shop</a>
+    </nav>
+  </div>
+</div>
+
+<div class="container">
+  <a href="/admin/reports" class="back-button">
+    <i class="fas fa-arrow-left"></i> Tillbaka till Rapporter
+  </a>
+
+  <div class="report-header">
+    <h1 class="report-title">👥 Användarrapport</h1>
+    <p class="report-subtitle">Detaljerad analys av användarbas och engagement - <span th:text="${reportDate}"></span></p>
+  </div>
+
+  <div class="summary-box">
+    <p class="summary-text">
+      CTRLBUY har för närvarande <strong th:text="${totalUsers}">0</strong> registrerade användare,
+      varav <strong th:text="${adminCount}">0</strong> administratörer och <strong th:text="${customerCount}">0</strong> kunder.
+      Systemet visar en stabil användarfördelning med god administrativ täckning.
+    </p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value" th:text="${totalUsers}">0</div>
+      <div class="stat-label">Totalt Användare</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">👨‍💼</div>
+      <div class="stat-value" th:text="${adminCount}">0</div>
+      <div class="stat-label">Administratörer</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🛍️</div>
+      <div class="stat-value" th:text="${customerCount}">0</div>
+      <div class="stat-label">Kunder</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📧</div>
+      <div class="stat-value" th:text="${emailDomains.size()}">0</div>
+      <div class="stat-label">Unika Domäner</div>
+    </div>
+  </div>
+
+  <div class="analysis-section">
+    <div class="analysis-card">
+      <h3 class="card-title">📊 Rollfördelning</h3>
+      <div class="role-distribution">
+        <div class="role-item">
+          <div class="role-icon">👨‍💼</div>
+          <div class="role-count" th:text="${adminCount}">0</div>
+          <div class="role-label">Administratörer</div>
+        </div>
+
+        <div class="role-item">
+          <div class="role-icon">🛍️</div>
+          <div class="role-count" th:text="${customerCount}">0</div>
+          <div class="role-label">Kunder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-card">
+      <h3 class="card-title">🌐 E-postdomäner</h3>
+      <div th:each="domain : ${emailDomains}">
+        <div class="domain-item">
+          <span class="domain-name" th:text="${domain.key}">domain.com</span>
+          <span class="domain-badge" th:text="${domain.value + ' st'}">0 st</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="users-table">
+    <h3 class="table-title">📋 Alla Användare</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Namn</th>
+        <th>E-post</th>
+        <th>Roll</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="user : ${recentUsers}">
+        <td class="user-id" th:text="${user.id}">#000</td>
+        <td>
+          <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}">Förnamn Efternamn</div>
+        </td>
+        <td class="user-email" th:text="${user.email}">email@domain.com</td>
+        <td>
+          <span th:if="${user.role == 'ADMIN'}" class="role-admin">ADMIN</span>
+          <span th:if="${user.role == 'CUSTOMER'}" class="role-customer">KUND</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

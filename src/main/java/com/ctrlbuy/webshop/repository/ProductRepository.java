@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,6 +96,120 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      */
     List<Product> findAllByOrderByNameAsc();
     List<Product> findAllByOrderByNameDesc();
+
+    // ================================
+    // 🔥 NYA REA-METODER
+    // ================================
+
+    /**
+     * Hämta alla produkter som är markerade som på REA och aktiva
+     */
+    List<Product> findByOnSaleTrueAndActiveTrue();
+
+    /**
+     * Hämta alla produkter som är på REA (oavsett active-status)
+     */
+    List<Product> findByOnSaleTrue();
+
+    /**
+     * Hämta aktiva REA:or inom datumintervall
+     */
+    List<Product> findByOnSaleTrueAndActiveTrueAndSaleStartDateLessThanEqualAndSaleEndDateGreaterThanEqual(
+            LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * Hämta kommande REA:or
+     */
+    List<Product> findByOnSaleTrueAndActiveTrueAndSaleStartDateGreaterThan(LocalDateTime now);
+
+    /**
+     * Hämta utgångna REA:or
+     */
+    List<Product> findByOnSaleTrueAndActiveTrueAndSaleEndDateLessThan(LocalDateTime now);
+
+    /**
+     * Hämta REA-produkter sorterade efter rabatt (högst rabatt först)
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
+            "ORDER BY ((p.originalPrice - p.salePrice) / p.originalPrice) DESC")
+    List<Product> findSaleProductsOrderByDiscountDesc();
+
+    /**
+     * Hämta REA-produkter i en specifik kategori
+     */
+    List<Product> findByOnSaleTrueAndActiveTrueAndCategory(String category);
+
+    /**
+     * Hämta REA-produkter med rabatt över en viss procent
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
+            "AND ((p.originalPrice - p.salePrice) / p.originalPrice * 100) >= :minDiscountPercent")
+    List<Product> findSaleProductsWithMinimumDiscount(@Param("minDiscountPercent") BigDecimal minDiscountPercent);
+
+    /**
+     * Hämta REA-produkter som sparar mer än ett visst belopp
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
+            "AND (p.originalPrice - p.salePrice) >= :minSavings")
+    List<Product> findSaleProductsWithMinimumSavings(@Param("minSavings") BigDecimal minSavings);
+
+    /**
+     * Hämta de bästa REA-erbjudandena (högsta rabatter)
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
+            "ORDER BY ((p.originalPrice - p.salePrice) / p.originalPrice) DESC")
+    List<Product> findTopSaleDeals(Pageable pageable);
+
+    /**
+     * Räkna antal produkter på REA
+     */
+    long countByOnSaleTrueAndActiveTrue();
+
+    /**
+     * Hämta REA-produkter som slutar inom X dagar
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND p.saleEndDate IS NOT NULL " +
+            "AND p.saleEndDate BETWEEN :now AND :endDate")
+    List<Product> findSalesEndingSoon(@Param("now") LocalDateTime now,
+                                      @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Söka bland REA-produkter
+     */
+    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+            "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(p.category) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+    List<Product> searchSaleProducts(@Param("searchTerm") String searchTerm);
+
+    /**
+     * Hämta REA-produkter grupperade efter kategori
+     */
+    @Query("SELECT p.category, COUNT(p) FROM Product p " +
+            "WHERE p.onSale = true AND p.active = true " +
+            "GROUP BY p.category ORDER BY COUNT(p) DESC")
+    List<Object[]> findSaleProductCountByCategory();
+
+    /**
+     * Beräkna totala besparingar för alla REA-produkter
+     */
+    @Query("SELECT SUM(p.originalPrice - p.salePrice) FROM Product p " +
+            "WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL")
+    BigDecimal calculateTotalSavingsFromSales();
+
+    /**
+     * Hämta genomsnittlig rabattprocent
+     */
+    @Query("SELECT AVG((p.originalPrice - p.salePrice) / p.originalPrice * 100) FROM Product p " +
+            "WHERE p.onSale = true AND p.active = true " +
+            "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL")
+    BigDecimal calculateAverageDiscountPercentage();
 
     // ================================
     // METODER SOM KRÄVER NYA KOLUMNER
@@ -256,4 +371,61 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "ORDER BY p.name ASC")
     List<Product> findByNameContainingIgnoreCase(@Param("keyword") String keyword);
+
+    // ================================
+    // 🚀 NYA METODER FÖR ATT HÄMTA ALLA 58 PRODUKTER
+    // ================================
+
+    /**
+     * HÄMTA ALLA PRODUKTER - UTAN PAGINERING
+     * Garanterar att vi får alla 58 produkter från databasen
+     */
+    @Query("SELECT p FROM Product p ORDER BY p.id ASC")
+    List<Product> findAllProductsNoPaging();
+
+    /**
+     * Native SQL för att vara 100% säker på att vi får alla produkter
+     */
+    @Query(value = "SELECT * FROM products ORDER BY id ASC", nativeQuery = true)
+    List<Product> findAllProductsNative();
+
+    /**
+     * Räkna alla produkter med native SQL
+     */
+    @Query(value = "SELECT COUNT(*) FROM products", nativeQuery = true)
+    Long countAllProductsNative();
+
+    /**
+     * Hämta alla produkter oavsett status med JPQL
+     */
+    @Query("SELECT p FROM Product p")
+    List<Product> findEveryProduct();
+
+    // ================================
+    // 🆕 NYA NATIVE SQL METODER FÖR PRISSTATISTIK
+    // ================================
+
+    /**
+     * Hämta högsta pris med native SQL
+     */
+    @Query(value = "SELECT MAX(price) FROM products", nativeQuery = true)
+    BigDecimal findMaxPriceNative();
+
+    /**
+     * Hämta lägsta pris med native SQL
+     */
+    @Query(value = "SELECT MIN(price) FROM products", nativeQuery = true)
+    BigDecimal findMinPriceNative();
+
+    /**
+     * Hämta dyraste produkten med native SQL
+     */
+    @Query(value = "SELECT * FROM products ORDER BY price DESC LIMIT 1", nativeQuery = true)
+    Product findMostExpensiveProductNative();
+
+    /**
+     * Hämta billigaste produkten med native SQL
+     */
+    @Query(value = "SELECT * FROM products ORDER BY price ASC LIMIT 1", nativeQuery = true)
+    Product findCheapestProductNative();
 }

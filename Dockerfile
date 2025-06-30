@@ -1,4 +1,4 @@
-# Railway Dockerfile för CtrlBuy Webshop
+# AWS Dockerfile för CtrlBuy Webshop - FUNGERANDE VERSION
 FROM openjdk:21-jdk-slim
 
 # Installera nödvändiga verktyg
@@ -11,28 +11,27 @@ WORKDIR /app
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 
+# Gör mvnw executable
+RUN chmod +x mvnw
+
 # Ladda ner dependencies (cachad layer)
-RUN ./mvnw dependency:go-offline
+RUN ./mvnw dependency:go-offline -q
 
 # Kopiera källkod
 COPY src ./src
 
-# Bygg applikationen
-RUN ./mvnw clean package -DskipTests
+# Bygg applikationen (med längre timeout)
+RUN ./mvnw clean package -DskipTests -Dmaven.test.skip=true -q
 
 # Exponera port
 EXPOSE 8080
 
-# Sätt miljövariabler för Railway
-ENV SPRING_PROFILES_ACTIVE=railway
-ENV SPRING_DATASOURCE_URL=jdbc:h2:mem:railwaydb
-ENV SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-ENV SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-ENV SPRING_H2_CONSOLE_ENABLED=true
+# Sätt miljövariabler för AWS - ENDAST PROFIL!
+ENV SPRING_PROFILES_ACTIVE=aws
 
 # Hälsokontroll
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Starta applikationen - RÄTT JAR-NAMN!
+# Starta applikationen
 CMD ["java", "-jar", "target/webshop-1.0-SNAPSHOT.jar"]

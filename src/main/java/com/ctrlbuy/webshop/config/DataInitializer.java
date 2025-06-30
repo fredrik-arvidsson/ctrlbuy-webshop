@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -60,14 +61,19 @@ public class DataInitializer {
                     userRepository.save(admin);
                     logger.info("✅ Skapad: Admin-användare (admin/admin123)");
 
-                    // SUPERADMIN användare - FULLA RÄTTIGHETER (SÄKER VERSION)
+                    // SUPERADMIN användare - SÄKER VERSION (KRÄVER MILJÖVARIABLER)
+                    String superAdminPassword = System.getenv("SUPERADMIN_PASSWORD");
+                    if (superAdminPassword == null || superAdminPassword.trim().isEmpty()) {
+                        logger.error("🚨 SÄKERHETSFEL: SUPERADMIN_PASSWORD miljövariabel saknas!");
+                        logger.error("🔒 Sätt: export SUPERADMIN_PASSWORD='DittSäkraLösenord'");
+                        throw new IllegalStateException("SUPERADMIN_PASSWORD miljövariabel måste sättas för säkerhet!");
+                    }
+
                     User superAdmin = User.builder()
                             .username("superadmin")
                             .email(System.getenv("SUPERADMIN_EMAIL") != null ?
                                     System.getenv("SUPERADMIN_EMAIL") : "admin@company.com")
-                            .password(passwordEncoder.encode(
-                                    System.getenv("SUPERADMIN_PASSWORD") != null ?
-                                            System.getenv("SUPERADMIN_PASSWORD") : "ChangeMe123"))
+                            .password(passwordEncoder.encode(superAdminPassword))
                             .firstName(System.getenv("SUPERADMIN_FIRSTNAME") != null ?
                                     System.getenv("SUPERADMIN_FIRSTNAME") : "Super")
                             .lastName(System.getenv("SUPERADMIN_LASTNAME") != null ?
@@ -77,7 +83,7 @@ public class DataInitializer {
                             .emailVerified(true)
                             .build();
                     userRepository.save(superAdmin);
-                    logger.info("✅ Skapad: SuperAdmin-användare (säker version med miljövariabler)");
+                    logger.info("✅ Skapad: SuperAdmin-användare (SÄKER VERSION - miljövariabler krävs)");
 
                     // Test användare
                     User testUser = User.builder()
@@ -136,9 +142,16 @@ public class DataInitializer {
                 Product iphone = new Product("iPhone 15 Pro Max", "Smartphones", new BigDecimal("14999"), 25, "Den mest avancerade iPhone hittills med titanium-design och A17 Pro-chip.");
                 iphone.setImageUrl("https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400");
                 iphone.setFeatured(true);
+                // 🔥 REA-SETUP för iPhone
+                iphone.setOnSale(true);
                 iphone.setSalePrice(new BigDecimal("13499"));
+                iphone.setOriginalPrice(new BigDecimal("14999"));
+                iphone.setSaleDescription("Premium REA! Spara 1500 kr på iPhone 15 Pro Max!");
+                iphone.setSaleStartDate(LocalDateTime.now().minusDays(1));
+                iphone.setSaleEndDate(LocalDateTime.now().plusDays(30));
                 productRepository.save(iphone);
-                logger.info("✅ Skapad: iPhone 15 Pro Max");
+                logger.info("🏷️ PÅ REA: iPhone 15 Pro Max - {}kr → {}kr ({}% rabatt)",
+                        iphone.getOriginalPrice(), iphone.getSalePrice(), iphone.getDiscountPercentage().intValue());
 
                 Product samsung = new Product("Samsung Galaxy S24 Ultra", "Smartphones", new BigDecimal("13999"), 18, "Galaxy AI och S Pen för ultimat produktivitet. 200MP kamera och 6.8 Dynamic AMOLED 2X.");
                 samsung.setImageUrl("https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400");
@@ -155,9 +168,16 @@ public class DataInitializer {
 
                 Product gaming = new Product("ASUS ROG Strix Gaming Laptop", "Laptops", new BigDecimal("24999"), 8, "RTX 4070, AMD Ryzen 9, 32GB RAM. Perfekt för gaming och kreativt arbete.");
                 gaming.setImageUrl("https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400");
+                // 🔥 REA-SETUP för Gaming Laptop
+                gaming.setOnSale(true);
                 gaming.setSalePrice(new BigDecimal("21999"));
+                gaming.setOriginalPrice(new BigDecimal("24999"));
+                gaming.setSaleDescription("Gaming REA! 3000 kr rabatt på ROG Strix!");
+                gaming.setSaleStartDate(LocalDateTime.now().minusHours(12));
+                gaming.setSaleEndDate(LocalDateTime.now().plusDays(14));
                 productRepository.save(gaming);
-                logger.info("✅ Skapad: ASUS ROG Strix Gaming Laptop");
+                logger.info("🏷️ PÅ REA: ASUS ROG Gaming - {}kr → {}kr ({}% rabatt)",
+                        gaming.getOriginalPrice(), gaming.getSalePrice(), gaming.getDiscountPercentage().intValue());
 
                 // 🎧 AUDIO
                 Product airpods = new Product("AirPods Pro (3:e gen)", "Audio", new BigDecimal("2799"), 45, "Adaptiv transparens, personlig spatial audio och H2-chip för kristallklar ljudkvalitet.");
@@ -192,9 +212,16 @@ public class DataInitializer {
 
                 Product meta = new Product("Meta Quest 3", "VR", new BigDecimal("5999"), 12, "Mixed Reality med 4K+ Infinite Display och Touch Plus-kontroller.");
                 meta.setImageUrl("https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=400");
+                // 🔥 REA-SETUP för Meta Quest
+                meta.setOnSale(true);
                 meta.setSalePrice(new BigDecimal("4999"));
+                meta.setOriginalPrice(new BigDecimal("5999"));
+                meta.setSaleDescription("VR REA! 1000 kr billigare på Quest 3!");
+                meta.setSaleStartDate(LocalDateTime.now().minusDays(2));
+                meta.setSaleEndDate(LocalDateTime.now().plusDays(21));
                 productRepository.save(meta);
-                logger.info("✅ Skapad: Meta Quest 3");
+                logger.info("🏷️ PÅ REA: Meta Quest 3 - {}kr → {}kr ({}% rabatt)",
+                        meta.getOriginalPrice(), meta.getSalePrice(), meta.getDiscountPercentage().intValue());
 
                 // ⌚ SMARTWATCHES
                 Product watch = new Product("Apple Watch Ultra 2", "Smartwatches", new BigDecimal("9999"), 20, "Extremt hållbar för äventyr. Precision Dual-Frequency GPS och 36 timmars batteritid.");
@@ -205,14 +232,55 @@ public class DataInitializer {
                 // 🖥️ MONITORS
                 Product monitor = new Product("Samsung 49 Odyssey G9", "Monitors", new BigDecimal("19999"), 6, "Curved gaming-monitor med 240Hz och 1ms responstid. Ultimat gaming-upplevelse.");
                 monitor.setImageUrl("https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400");
+                // 🔥 REA-SETUP för Samsung Monitor
+                monitor.setOnSale(true);
                 monitor.setSalePrice(new BigDecimal("16999"));
+                monitor.setOriginalPrice(new BigDecimal("19999"));
+                monitor.setSaleDescription("Gaming Monitor REA! 3000 kr rabatt på Odyssey G9!");
+                monitor.setSaleStartDate(LocalDateTime.now().minusHours(6));
+                monitor.setSaleEndDate(LocalDateTime.now().plusDays(7));
                 productRepository.save(monitor);
-                logger.info("✅ Skapad: Samsung Odyssey G9");
+                logger.info("🏷️ PÅ REA: Samsung Odyssey G9 - {}kr → {}kr ({}% rabatt)",
+                        monitor.getOriginalPrice(), monitor.getSalePrice(), monitor.getDiscountPercentage().intValue());
 
+                // 🎯 RÄKNA REA-PRODUKTER (NU MED RIKTIGA REPOSITORY-METODER!)
                 long finalCount = productRepository.count();
+                long saleProductCount = productRepository.countByOnSaleTrueAndActiveTrue();
+
                 logger.info("🎉 KLART! Skapat {} fantastiska produkter!", finalCount);
+                logger.info("🏷️ REA-PRODUKTER: {} st på rea!", saleProductCount);
+
+                // Beräkna totala besparingar med din smarta repository-metod
+                BigDecimal totalSavings = productRepository.calculateTotalSavingsFromSales();
+                if (totalSavings != null) {
+                    logger.info("💰 Totala besparingar: {}kr", totalSavings);
+                } else {
+                    logger.info("💰 Totala besparingar: Beräknas efter första REA-köpet!");
+                }
+
+                // Bonus: Visa genomsnittlig rabatt
+                BigDecimal avgDiscount = productRepository.calculateAverageDiscountPercentage();
+                if (avgDiscount != null) {
+                    logger.info("📊 Genomsnittlig rabatt: {}%", avgDiscount.setScale(1, BigDecimal.ROUND_HALF_UP));
+                }
+
             } else {
                 logger.info("⚠️ Produkter finns redan ({}st), hoppar över", productCount);
+
+                // Visa REA-status även om produkter redan finns
+                try {
+                    long saleProductCount = productRepository.countByOnSaleTrueAndActiveTrue();
+                    logger.info("🏷️ Befintliga REA-PRODUKTER: {} st", saleProductCount);
+
+                    if (saleProductCount > 0) {
+                        BigDecimal totalSavings = productRepository.calculateTotalSavingsFromSales();
+                        if (totalSavings != null) {
+                            logger.info("💰 Totala besparingar på REA: {}kr", totalSavings);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn("⚠️ Kunde inte räkna REA-produkter: {}", e.getMessage());
+                }
             }
 
         } catch (Exception e) {

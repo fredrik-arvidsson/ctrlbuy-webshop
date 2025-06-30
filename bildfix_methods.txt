@@ -1,0 +1,27 @@
+
+    // ================================
+    // BILDFIX-METODER
+    // ================================
+    
+    private Product enhanceProductWithImage(Product originalProduct) {
+        String correctImageUrl = getCategoryImage(originalProduct.getCategory());
+        originalProduct.setImageUrl(correctImageUrl);
+        log.debug("🔄 Korrigerad bild för {}: {}", originalProduct.getName(), correctImageUrl);
+        return originalProduct;
+    }
+    
+    private String getCategoryImage(String category) {
+        if (category == null) return "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400";
+        
+        String lower = category.toLowerCase();
+        if (lower.contains("smartphone") || lower.contains("phone")) {
+            return "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400";
+        } else if (lower.contains("laptop") || lower.contains("computer")) {
+            return "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400";
+        } else if (lower.contains("gaming") || lower.contains("console")) {
+            return "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400";
+        } else if (lower.contains("audio") || lower.contains("headphones")) {
+            return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400";
+        }
+        return "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400";
+    }

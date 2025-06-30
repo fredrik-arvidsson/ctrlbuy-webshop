@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRLBUY Admin - Orderhantering</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand { font-weight: bold; color: #28a745 !important; }
+        .table-responsive { border-radius: 8px; }
+        .badge { font-size: 0.8em; }
+        .btn-sm { font-size: 0.8em; }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/admin">
+            <i class="bi bi-gear-fill"></i> CTRLBUY Admin
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin">Dashboard</a>
+            <a class="nav-link" href="/admin/products">Produkter</a>
+            <a class="nav-link active" href="/admin/orders">Beställningar</a>
+            <a class="nav-link" href="/admin/users">Användare</a>
+            <a class="nav-link" href="/">Tillbaka till Shop</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-box-seam"></i> Orderhantering</h2>
+                <div>
+                    <span class="badge bg-primary fs-6" th:text="'Totalt: ' + ${ordersPage.totalElements} + ' beställningar'">
+                        Totalt: 0 beställningar
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pagination Info -->
+            <div class="row mb-3" th:if="${ordersPage.totalElements > 0}">
+                <div class="col-12">
+                    <nav aria-label="Order pagination">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                Visar <span th:text="${ordersPage.number * ordersPage.size + 1}">1</span>-<span th:text="${ordersPage.number * ordersPage.size + ordersPage.numberOfElements}">10</span>
+                                av <span th:text="${ordersPage.totalElements}">100</span> beställningar
+                            </span>
+
+                            <!-- Pagination Controls -->
+                            <ul class="pagination pagination-sm mb-0" th:if="${ordersPage.totalPages > 1}">
+                                <li class="page-item" th:classappend="${ordersPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/orders(page=0)}" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:classappend="${ordersPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number - 1})}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page numbers -->
+                                <th:block th:each="pageNum : ${#numbers.sequence(0, ordersPage.totalPages - 1)}">
+                                    <li class="page-item"
+                                        th:if="${pageNum >= ordersPage.number - 2 and pageNum <= ordersPage.number + 2}"
+                                        th:classappend="${pageNum == ordersPage.number} ? 'active'">
+                                        <a class="page-link" th:href="@{/admin/orders(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                                    </li>
+                                </th:block>
+
+                                <li class="page-item" th:classappend="${ordersPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number + 1})}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:classappend="${ordersPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.totalPages - 1})}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Alla Beställningar</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th><i class="bi bi-hash"></i> Order ID</th>
+                                <th><i class="bi bi-person"></i> Kund</th>
+                                <th><i class="bi bi-calendar"></i> Datum</th>
+                                <th><i class="bi bi-info-circle"></i> Status</th>
+                                <th><i class="bi bi-currency-euro"></i> Totalt</th>
+                                <th><i class="bi bi-tools"></i> Åtgärder</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Loop through orders with null safety -->
+                            <th:block th:if="${ordersPage != null and ordersPage.content != null and !ordersPage.content.isEmpty()}">
+                                <tr th:each="order : ${ordersPage.content}">
+                                    <td>
+                                        <strong th:text="${order.id}">#1</strong>
+                                        <br>
+                                        <small class="text-muted" th:text="${order.orderNumber != null ? order.orderNumber : 'ORD-' + order.id}">ORD-001</small>
+                                    </td>
+                                    <td>
+                                        <div th:text="${order.user != null ? order.user.email : 'Okänd'}">kund@example.com</div>
+                                        <small class="text-muted" th:text="${order.user != null ? order.user.username : 'N/A'}">användare</small>
+                                    </td>
+                                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+                                    <td>
+                                        <span class="badge bg-warning" th:if="${order.status.name()} == 'PENDING'" th:text="${order.status}">PENDING</span>
+                                        <span class="badge bg-info" th:if="${order.status.name()} == 'CONFIRMED'" th:text="${order.status}">CONFIRMED</span>
+                                        <span class="badge bg-primary" th:if="${order.status.name()} == 'SHIPPED'" th:text="${order.status}">SHIPPED</span>
+                                        <span class="badge bg-success" th:if="${order.status.name()} == 'DELIVERED'" th:text="${order.status}">DELIVERED</span>
+                                        <span class="badge bg-success" th:if="${order.status.name()} == 'COMPLETED'" th:text="${order.status}">COMPLETED</span>
+                                        <span class="badge bg-danger" th:if="${order.status.name()} == 'CANCELLED'" th:text="${order.status}">CANCELLED</span>
+                                        <span class="badge bg-secondary" th:unless="${order.status.name()} == 'PENDING' or ${order.status.name()} == 'CONFIRMED' or ${order.status.name()} == 'SHIPPED' or ${order.status.name()} == 'DELIVERED' or ${order.status.name()} == 'COMPLETED' or ${order.status.name()} == 'CANCELLED'" th:text="${order.status}">UNKNOWN</span>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${order.totalAmount} + ' kr'">1000 kr</strong>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{/admin/orders/{id}(id=${order.id})}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> Visa
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-success"
+                                                    th:if="${order.status.name()} == 'PENDING'"
+                                                    th:onclick="'updateOrderStatus(' + ${order.id} + ', \'CONFIRMED\')'">
+                                                <i class="bi bi-check"></i> Bekräfta
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info"
+                                                    th:if="${order.status.name()} == 'CONFIRMED'"
+                                                    th:onclick="'updateOrderStatus(' + ${order.id} + ', \'SHIPPED\')'">
+                                                <i class="bi bi-truck"></i> Skicka
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    th:if="${order.status.name()} == 'SHIPPED'"
+                                                    th:onclick="'updateOrderStatus(' + ${order.id} + ', \'DELIVERED\')'">
+                                                <i class="bi bi-check2-all"></i> Levererad
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </th:block>
+
+                            <!-- No orders message -->
+                            <tr th:if="${ordersPage == null or ordersPage.content == null or ordersPage.content.isEmpty()}">
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="bi bi-inbox display-4 text-muted"></i>
+                                    <p class="text-muted mt-2">Inga beställningar att visa</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function updateOrderStatus(orderId, newStatus) {
+        if (confirm('Är du säker på att du vill ändra orderstatus?')) {
+            fetch('/admin/orders/' + orderId + '/status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Fel vid uppdatering av orderstatus');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Fel vid uppdatering av orderstatus');
+                });
+        }
+    }
+</script>
+</body>
+</html>

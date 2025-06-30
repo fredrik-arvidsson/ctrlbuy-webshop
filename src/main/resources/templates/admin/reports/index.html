@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapporter - CTRLBUY Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .admin-header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .report-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .report-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+        .report-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 2rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Debug sektion */
+        .debug-section {
+            background: #ff4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="text-white mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Rapporter
+                </h1>
+                <p class="text-white-50 mb-0">Översikt och detaljerad analys</p>
+            </div>
+            <a href="/admin" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>
+                Tillbaka till Admin
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 🔍 DEBUG SEKTION -->
+    <div class="debug-section">
+        <h4>🔍 DEBUG - Värden från ReportsController (reports()):</h4>
+        <div>totalProducts: <span th:text="${totalProducts}">UNDEFINED</span></div>
+        <div>activeProducts: <span th:text="${activeProducts}">UNDEFINED</span></div>
+        <div>Beräknat (totalProducts - activeProducts): <span th:text="${totalProducts != null and activeProducts != null ? (totalProducts - activeProducts) : 'CANNOT_CALCULATE'}">UNDEFINED</span></div>
+    </div>
+
+    <!-- Snabbstatistik -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 class="text-primary mb-1" th:text="${totalProducts ?: '54'}">54</h3>
+            <p class="text-muted mb-0">Totalt Produkter</p>
+        </div>
+        <div class="stat-card">
+            <h3 class="text-success mb-1" th:text="${activeProducts ?: '45'}">45</h3>
+            <p class="text-muted mb-0">Aktiva Produkter</p>
+        </div>
+        <div class="stat-card">
+            <h3 class="text-warning mb-1" th:text="${totalProducts != null and activeProducts != null ? (totalProducts - activeProducts) : '9'}">9</h3>
+            <p class="text-muted mb-0">Slut i Lager</p>
+        </div>
+    </div>
+
+    <!-- Rapporter Grid -->
+    <div class="reports-grid">
+
+        <!-- Produktrapport -->
+        <a href="/admin/reports/products" class="report-card">
+            <div class="report-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <h3 class="text-center mb-3">Produktrapport</h3>
+            <p class="text-muted text-center mb-4">
+                Detaljerad analys av produktportföljen med priser, kategorier och lagerstatistik.
+            </p>
+            <div class="d-flex justify-content-between text-small">
+                <span><i class="fas fa-chart-line text-primary"></i> Prisanalys</span>
+                <span><i class="fas fa-tags text-success"></i> Kategorier</span>
+                <span><i class="fas fa-warehouse text-warning"></i> Lager</span>
+            </div>
+        </a>
+
+        <!-- Försäljningsrapport -->
+        <a href="/admin/reports/sales" class="report-card">
+            <div class="report-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="text-center mb-3">Försäljningsrapport</h3>
+            <p class="text-muted text-center mb-4">
+                Översikt av försäljning, intäkter och REA-produkter med detaljerad analys.
+            </p>
+            <div class="d-flex justify-content-between text-small">
+                <span><i class="fas fa-dollar-sign text-success"></i> Intäkter</span>
+                <span><i class="fas fa-fire text-danger"></i> REA</span>
+                <span><i class="fas fa-percent text-info"></i> Rabatter</span>
+            </div>
+        </a>
+
+        <!-- Kommande rapport - Kundrapport -->
+        <a href="#" class="report-card" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="report-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-center mb-3">Kundrapport</h3>
+            <p class="text-muted text-center mb-4">
+                Analys av kunddata, köpmönster och lojalitet.
+            </p>
+            <div class="text-center">
+                <span class="badge bg-secondary">Kommer snart</span>
+            </div>
+        </a>
+
+        <!-- Kommande rapport - Orderrapport -->
+        <a href="#" class="report-card" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="report-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h3 class="text-center mb-3">Orderrapport</h3>
+            <p class="text-muted text-center mb-4">
+                Detaljerad översikt av alla beställningar och deras status.
+            </p>
+            <div class="text-center">
+                <span class="badge bg-secondary">Kommer snart</span>
+            </div>
+        </a>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

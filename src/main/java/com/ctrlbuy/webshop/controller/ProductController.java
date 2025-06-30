@@ -59,10 +59,9 @@ public class ProductController {
         }
 
         log.info("=== PRODUKTCONTROLLER DEBUG END ===");
-        return "products"; // 🔥 FIXAT: Använder products template för lista
+        return "products";
     }
 
-    // 🔥 FIXAT: Produktdetaljer använder nu product-detail template
     @GetMapping("/{id}")
     public String viewProduct(@PathVariable Long id,
                               Model model,
@@ -86,9 +85,8 @@ public class ProductController {
             model.addAttribute("product", product);
             model.addAttribute("title", product.getName() + " - CTRL+BUY Solutions");
 
-            // 🔥 FIXAT: Bättre null-kontroll för recensioner
+            // Recensioner (placeholder)
             try {
-                // Placeholder för framtida recensioner
                 model.addAttribute("reviews", List.of());
                 model.addAttribute("reviewCount", 0);
                 model.addAttribute("averageRating", 0.0);
@@ -100,7 +98,7 @@ public class ProductController {
                 model.addAttribute("averageRating", 0.0);
             }
 
-            // 🔥 FÖRBÄTTRAT: Relaterade produkter med bättre felhantering
+            // Relaterade produkter
             if (product.getCategory() != null && !product.getCategory().trim().isEmpty()) {
                 try {
                     List<Product> relatedProducts = productService.getProductsByCategory(product.getCategory())
@@ -119,39 +117,56 @@ public class ProductController {
                 model.addAttribute("relatedProducts", List.of());
             }
 
-            // 🔥 FÖRBÄTTRAT: Rea-logik med bättre null-kontroller
+            // ✅ REA-LOGIK - kompatibel med befintlig databas
             boolean isOnSale = false;
-            if (product.getName() != null) {
-                String nameLower = product.getName().toLowerCase();
-                String descLower = product.getDescription() != null ? product.getDescription().toLowerCase() : "";
-
-                isOnSale = nameLower.contains("rea") ||
-                        nameLower.contains("sale") ||
-                        nameLower.contains("kampanj") ||
-                        descLower.contains("kampanj") ||
-                        descLower.contains("rea");
+            try {
+                // Försök med nya metoder först
+                isOnSale = product.isOnSale();
+            } catch (Exception e) {
+                // Fallback: kolla direktattribut
+                isOnSale = product.getOnSale() != null && product.getOnSale();
             }
 
-            if (isOnSale && product.getPrice() != null) {
-                BigDecimal salePrice = product.getPrice().multiply(new BigDecimal("0.8"));
-                BigDecimal savings = product.getPrice().subtract(salePrice);
-                BigDecimal discountPercentage = new BigDecimal("20");
+            model.addAttribute("onSale", isOnSale);
 
-                model.addAttribute("discountPercentage", discountPercentage);
-                model.addAttribute("savings", savings);
-                model.addAttribute("salePrice", salePrice);
-                log.info("Produkt på rea: {} - Ordinarie: {} kr, Rea: {} kr",
-                        product.getName(), product.getPrice(), salePrice);
+            if (isOnSale) {
+                try {
+                    // Försök använda nya REA-metoderna först
+                    BigDecimal currentPrice = product.getCurrentPrice();
+                    BigDecimal originalPrice = product.getOriginalDisplayPrice();
+                    BigDecimal savings = product.getSavings();
+                    BigDecimal discountPercentage = product.getDiscountPercentage();
+
+                    model.addAttribute("currentPrice", currentPrice);
+                    model.addAttribute("originalPrice", originalPrice);
+                    model.addAttribute("salePrice", currentPrice);
+                    model.addAttribute("savings", savings);
+                    model.addAttribute("discountPercentage", discountPercentage);
+                    model.addAttribute("saleDescription", product.getSaleDescription());
+
+                    log.info("Produkt på rea: {} - Ordinarie: {} kr, Rea: {} kr, Rabatt: {}%",
+                            product.getName(), originalPrice, currentPrice, discountPercentage);
+                } catch (Exception e) {
+                    // Fallback: använd grundläggande fält
+                    log.warn("Använder fallback REA-logik för {}: {}", product.getName(), e.getMessage());
+
+                    BigDecimal currentPrice = product.getPrice();
+                    BigDecimal salePrice = product.getSalePrice();
+                    BigDecimal displayPrice = salePrice != null ? salePrice : currentPrice;
+
+                    model.addAttribute("currentPrice", displayPrice);
+                    model.addAttribute("originalPrice", product.getOriginalPrice());
+                    model.addAttribute("salePrice", displayPrice);
+                }
             }
 
-            // 🔥 FÖRBÄTTRAT: Lagerstatus med bättre logik
+            // Lagerstatus
             Integer stockQty = product.getStockQuantity();
             boolean inStock = stockQty != null && stockQty > 0;
             boolean lowStock = stockQty != null && stockQty < 5 && stockQty > 0;
 
             model.addAttribute("inStock", inStock);
             model.addAttribute("lowStock", lowStock);
-            model.addAttribute("onSale", isOnSale);
 
             log.info("Lagerstatus - I lager: {}, Lågt lager: {}, Antal: {}",
                     inStock, lowStock, stockQty);
@@ -164,7 +179,7 @@ public class ProductController {
         }
 
         log.info("=== PRODUKTDETALJER DEBUG END ===");
-        return "product-detail"; // 🔥 FIXAT: Använder product-detail template
+        return "product-detail";
     }
 
     // API endpoint för produktsökning (AJAX)
@@ -194,20 +209,42 @@ public class ProductController {
         return listProducts(category, null, model);
     }
 
-    // Rea-sida
+    // ✅ FIXAT REA-SIDA - använder den uppdaterade getProductsOnSale() metoden
     @GetMapping("/sale")
     public String viewSaleProducts(Model model) {
-        log.debug("Loading sale products");
+        log.info("=== REA-PRODUKTER DEBUG START ===");
         try {
+            // ✅ ANVÄND den fixade metoden från ProductService
             List<Product> saleProducts = productService.getProductsOnSale();
+
             model.addAttribute("products", saleProducts);
-            model.addAttribute("pageTitle", "Produkter på rea");
-            log.info("Found {} products on sale", saleProducts.size());
+            model.addAttribute("pageTitle", "Produkter på REA");
+            model.addAttribute("selectedCategory", "sale");
+
+            log.info("✅ REA-CONTROLLER: Found {} products on sale", saleProducts.size());
+
+            // Debug-logging för varje REA-produkt
+            if (!saleProducts.isEmpty()) {
+                saleProducts.forEach(product -> {
+                    try {
+                        log.debug("REA-produkt: {} - Ordinarie: {} kr, REA: {} kr",
+                                product.getName(),
+                                product.getOriginalPrice(),
+                                product.getPrice());
+                    } catch (Exception e) {
+                        log.debug("REA-produkt: {} - Basic info", product.getName());
+                    }
+                });
+            } else {
+                log.warn("✅ REA-CONTROLLER: Inga REA-produkter hittades!");
+            }
+
         } catch (Exception e) {
-            log.error("Error loading sale products: {}", e.getMessage());
+            log.error("✅ REA-CONTROLLER: Error loading sale products: {}", e.getMessage(), e);
             model.addAttribute("products", List.of());
             model.addAttribute("error", "Kunde inte ladda rea-produkter");
         }
+        log.info("=== REA-PRODUKTER DEBUG END ===");
         return "products";
     }
 
@@ -219,6 +256,7 @@ public class ProductController {
             List<Product> popularProducts = productService.getPopularProducts(12);
             model.addAttribute("products", popularProducts);
             model.addAttribute("pageTitle", "Populära produkter");
+            model.addAttribute("selectedCategory", "popular");
             log.info("Found {} popular products", popularProducts.size());
         } catch (Exception e) {
             log.error("Error loading popular products: {}", e.getMessage());
@@ -236,6 +274,7 @@ public class ProductController {
             List<Product> newProducts = productService.getNewestProducts(12);
             model.addAttribute("products", newProducts);
             model.addAttribute("pageTitle", "Nya produkter");
+            model.addAttribute("selectedCategory", "new");
             log.info("Found {} new products", newProducts.size());
         } catch (Exception e) {
             log.error("Error loading new products: {}", e.getMessage());
@@ -259,7 +298,19 @@ public class ProductController {
         }
     }
 
-    // 🔥 FÖRBÄTTRAT: Error handling med bättre logging
+    // ✅ GRUNDLÄGGANDE REA-STATISTIK (kompatibel med befintlig databas)
+    @GetMapping("/sale/stats")
+    @ResponseBody
+    public String getSaleStats() {
+        try {
+            List<Product> saleProducts = productService.getProductsOnSale();
+            return String.format("REA-statistik: %d produkter på rea", saleProducts.size());
+        } catch (Exception e) {
+            log.error("Error getting sale stats: {}", e.getMessage());
+            return "Kunde inte hämta REA-statistik";
+        }
+    }
+
     @ExceptionHandler(Exception.class)
     public String handleError(Exception e, Model model) {
         log.error("Fel i ProductController: {}", e.getMessage(), e);

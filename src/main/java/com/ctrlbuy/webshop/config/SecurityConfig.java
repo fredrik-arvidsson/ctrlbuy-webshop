@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -37,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
 
                         // Statiska resurser
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
 
                         // Publika sidor
                         .requestMatchers("/", "/home", "/home/**", "/about", "/om-oss", "/produkter", "/produkter/**", "/kontakt", "/support", "/debug-products").permitAll()
@@ -60,24 +61,27 @@ public class SecurityConfig {
                         .requestMatchers("/test-email", "/test-email/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
 
-                        // Admin endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // 🔥 FIXAT: Bara admins får tillgång
+                        // Admin endpoints - KRÄVER ADMIN ROLL
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Cart endpoints
                         .requestMatchers("/cart/**", "/varukorg/**").permitAll()
 
-                        // Coming Soon sidor (publika) - 🆕 UPPDATERAD med alla URLs
+                        // Coming Soon sidor
                         .requestMatchers("/returer", "/spara-bestallning", "/garantivillkor", "/coming-soon").permitAll()
 
                         // Profil-sidor kräver inloggning
                         .requestMatchers("/min-profil", "/min-profil/**", "/profile/**").authenticated()
+
+                        // ERROR endpoint
+                        .requestMatchers("/error").permitAll()
 
                         // Resten är publikt
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)  // 🔥 FIXAT: Alltid till hemsidan efter login
+                        .defaultSuccessUrl("/home", true)
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
@@ -87,21 +91,23 @@ public class SecurityConfig {
                         .userDetailsService(customUserDetailsService)
                         .rememberMeParameter(rememberMeParameter)
                         .rememberMeCookieName("ctrlbuy-remember-me")
-                        .alwaysRemember(false)  // 🔥 NYTT: Bara kom ihåg om användaren kryssar i
+                        .alwaysRemember(false)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID", "ctrlbuy-remember-me")
-                        .clearAuthentication(true)  // 🔥 NYTT: Rensa autentisering
+                        .clearAuthentication(true)
                         .permitAll()
                 )
+                // 🛡️ CSRF-SKYDD MED TOKENS FÖR ADMIN-PANEL
                 .csrf(csrf -> csrf
-                        // 🔥 VIKTIGT: Lägg till H2-konsoll här också!
-                        .ignoringRequestMatchers("/h2-console/**", "/test-email/**", "/api/test/**", "/admin/**", "/cart/**", "/varukorg/**")
+                        .ignoringRequestMatchers("/h2-console/**", "/test-email/**", "/api/test/**")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler())
                 )
-                // 🔥 NYTT: Headers för H2-konsoll
+                // Headers för H2-konsoll
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )

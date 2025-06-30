@@ -34,6 +34,35 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByEmailVerifiedFalse();
     List<User> findByEmailVerifiedFalse();
 
+    // 🔐 SÄKER LÖSENORDSÅTERSTÄLLNING - kräver BÅDE username OCH email
+
+    /**
+     * Säker metod för lösenordsåterställning
+     * Kräver att BÅDE username OCH email matchar samma användare
+     * KOMPATIBILITETSVERSION - returnerar User direkt (eller null)
+     */
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email")
+    User findByUsernameAndEmail(@Param("username") String username, @Param("email") String email);
+
+    /**
+     * Modern version - returnerar Optional<User>
+     * Rekommenderas för ny kod
+     */
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email")
+    Optional<User> findByUsernameAndEmailOptional(@Param("username") String username, @Param("email") String email);
+
+    /**
+     * Extra säkerhetsvariant - kräver även att användaren är aktiv
+     */
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
+    Optional<User> findByUsernameAndEmailAndActiveTrue(@Param("username") String username, @Param("email") String email);
+
+    /**
+     * Kompatibilitetsversion för aktiv användare - returnerar User direkt
+     */
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
+    User findByUsernameAndEmailAndActiveTrueUser(@Param("username") String username, @Param("email") String email);
+
     // ✅ KOMPATIBILITETSMETODER för UserService (mappar enabled -> active)
 
     /**
@@ -57,4 +86,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u FROM User u WHERE u.emailVerified = false AND u.active = true AND u.verificationTokenExpiry < CURRENT_TIMESTAMP")
     List<User> findUsersWithExpiredVerificationTokens();
+
+    // ✅ YTTERLIGARE SÄKERHETSMETODER
+
+    /**
+     * Kontrollera om användarnamn + email-kombination existerar
+     */
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.username = :username AND u.email = :email")
+    boolean existsByUsernameAndEmail(@Param("username") String username, @Param("email") String email);
+
+    /**
+     * Kontrollera om användarnamn + email-kombination existerar för aktiv användare
+     */
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
+    boolean existsByUsernameAndEmailAndActiveTrue(@Param("username") String username, @Param("email") String email);
 }

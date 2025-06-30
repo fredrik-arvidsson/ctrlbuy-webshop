@@ -3,94 +3,109 @@ package com.ctrlbuy.webshop.service.impl;
 import com.ctrlbuy.webshop.model.Order;
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.service.EmailService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class EmailServiceImpl implements EmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     public void sendVerificationEmail(User user, String token) {
-        sendVerificationEmail(user.getEmail(), token, user.getFirstName());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Verifiera ditt CTRLBUY-konto");
+        message.setText("Klicka här för att verifiera: /verify?token=" + token);
+        mailSender.send(message);
     }
 
     @Override
     public void sendVerificationEmail(String email, String token, String firstName) {
-        String verificationUrl = "http://localhost:8080/verify?token=" + token;
-
-        logger.info("📧 =========================");
-        logger.info("📧 EMAIL-VERIFIERING");
-        logger.info("📧 =========================");
-        logger.info("📧 Till: {} ({})", email, firstName);
-        logger.info("📧 Verifierings-länk: {}", verificationUrl);
-        logger.info("📧 =========================");
-
-        logger.info("✅ Verifieringsmail simulerat skickat till: {}", email);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Verifiera ditt CTRLBUY-konto");
+        message.setText("Hej " + firstName + "! Klicka här för att verifiera: /verify?token=" + token);
+        mailSender.send(message);
     }
 
     @Override
     public boolean sendVerificationEmail(String email, String token) {
         try {
-            sendVerificationEmail(email, token, "Användare");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Verifiera ditt CTRLBUY-konto");
+            message.setText("Klicka här för att verifiera: /verify?token=" + token);
+            mailSender.send(message);
             return true;
         } catch (Exception e) {
-            logger.error("Fel vid skickande av verifieringsmail", e);
             return false;
         }
     }
 
     @Override
     public void sendWelcomeEmail(User user) {
-        logger.info("📧 Välkomstmail simulerat skickat till: {} ({})",
-                user.getEmail(), user.getFirstName());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Välkommen till CTRLBUY!");
+        message.setText("Hej " + user.getUsername() + "! Välkommen till CTRLBUY!");
+        mailSender.send(message);
     }
 
     @Override
     public void sendPasswordResetEmail(User user, String resetToken) {
-        sendPasswordResetEmail(user.getEmail(), resetToken, user.getFirstName());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Återställ lösenord - CTRLBUY");
+        message.setText("Klicka här för att återställa: /reset?token=" + resetToken);
+        mailSender.send(message);
     }
 
     @Override
     public void sendPasswordResetEmail(String email, String resetToken, String firstName) {
-        String resetUrl = "http://localhost:8080/reset-password?token=" + resetToken;
-
-        logger.info("📧 =========================");
-        logger.info("📧 LÖSENORDSÅTERSTÄLLNING");
-        logger.info("📧 =========================");
-        logger.info("📧 Till: {} ({})", email, firstName);
-        logger.info("📧 Reset-länk: {}", resetUrl);
-        logger.info("📧 Token: {}", resetToken);
-        logger.info("📧 =========================");
-        logger.info("📧 KOPIERA LÄNKEN OVAN FÖR ATT TESTA!");
-        logger.info("📧 =========================");
-
-        logger.info("✅ Reset-mail simulerat skickat till: {}", email);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Återställ lösenord - CTRLBUY");
+        message.setText("Hej " + firstName + "! Klicka här för att återställa: /reset?token=" + resetToken);
+        mailSender.send(message);
     }
 
     @Override
     public boolean sendPasswordResetEmail(String email, String resetToken) {
         try {
-            sendPasswordResetEmail(email, resetToken, "Användare");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Återställ lösenord - CTRLBUY");
+            message.setText("Klicka här för att återställa: /reset?token=" + resetToken);
+            mailSender.send(message);
             return true;
         } catch (Exception e) {
-            logger.error("Fel vid skickande av reset-mail", e);
             return false;
         }
     }
 
     @Override
     public void sendOrderConfirmationEmail(User user, String orderNumber) {
-        logger.info("📧 Orderbekräftelse simulerat skickat till: {} för order: {}",
-                user.getEmail(), orderNumber);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Orderbekräftelse - " + orderNumber);
+        message.setText("Tack för din beställning! Ordernummer: " + orderNumber);
+        mailSender.send(message);
     }
 
     @Override
     public void sendOrderConfirmation(Order order, String email) {
-        logger.info("📧 Orderbekräftelse simulerat skickat till: {} för order: {}",
-                email, order.getOrderNumber());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Orderbekräftelse - Order #" + order.getId());
+        message.setText("Tack för din beställning!\nOrdernummer: " + order.getId() + 
+                       "\nTotalt: " + order.getTotalAmount() + " kr");
+        mailSender.send(message);
     }
 
     @Override
@@ -99,38 +114,76 @@ public class EmailServiceImpl implements EmailService {
             sendOrderConfirmation(order, email);
             return true;
         } catch (Exception e) {
-            logger.error("Fel vid skickande av orderbekräftelse", e);
             return false;
         }
     }
 
     @Override
     public void sendAccountDeletionNotification(User deletedUser, String adminUsername, String reason) {
-        logger.info("📧 Kontoborttagning-meddelande simulerat skickat till: {} av admin: {} (skäl: {})",
-                deletedUser.getEmail(), adminUsername, reason);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(deletedUser.getEmail());
+        message.setSubject("Konto borttaget - CTRLBUY");
+        message.setText("Ditt konto har tagits bort av " + adminUsername + ". Anledning: " + reason);
+        mailSender.send(message);
     }
 
     @Override
     public void sendAccountDeactivationNotification(User deactivatedUser, String adminUsername, String reason) {
-        logger.info("📧 Kontodeaktivering-meddelande simulerat skickat till: {} av admin: {} (skäl: {})",
-                deactivatedUser.getEmail(), adminUsername, reason);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(deactivatedUser.getEmail());
+        message.setSubject("Konto inaktiverat - CTRLBUY");
+        message.setText("Ditt konto har inaktiverats av " + adminUsername + ". Anledning: " + reason);
+        mailSender.send(message);
     }
 
     @Override
     public void sendAccountReactivationNotification(User reactivatedUser, String adminUsername) {
-        logger.info("📧 Kontoaktivering-meddelande simulerat skickat till: {} av admin: {}",
-                reactivatedUser.getEmail(), adminUsername);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(reactivatedUser.getEmail());
+        message.setSubject("Konto återaktiverat - CTRLBUY");
+        message.setText("Ditt konto har återaktiverats av " + adminUsername);
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendShippingNotification(Order order, String customerEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(customerEmail);
+        message.setSubject("Order skickad - Order #" + order.getId());
+        message.setText("Din order har skickats!\nOrdernummer: " + order.getId());
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendDeliveryConfirmation(Order order, String customerEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(customerEmail);
+        message.setSubject("Order levererad - Order #" + order.getId());
+        message.setText("Din order har levererats!\nOrdernummer: " + order.getId());
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendOrderCancellation(Order order, String customerEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(customerEmail);
+        message.setSubject("Order avbruten - Order #" + order.getId());
+        message.setText("Din order har avbrutits.\nOrdernummer: " + order.getId() + 
+                       "\nÅterbetalning sker inom 3-5 arbetsdagar.");
+        mailSender.send(message);
     }
 
     @Override
     public boolean testEmailConnection() {
-        logger.info("📧 Email-anslutning testad (simulerad)");
-        return true; // Simulerar framgångsrik test
+        try {
+            return mailSender != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public boolean isConfigured() {
-        logger.info("📧 Email-tjänst är konfigurerad (simulerad)");
-        return true; // Simulerar att email är konfigurerat
+        return mailSender != null;
     }
 }

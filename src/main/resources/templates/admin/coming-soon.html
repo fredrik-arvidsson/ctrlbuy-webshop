@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRLBUY Admin - Kommer snart</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .admin-coming-soon {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .admin-subtitle {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .development-status {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+        }
+
+        .development-status h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .development-status p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .progress-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            width: 75%;
+            transition: width 0.8s ease;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-coming-soon {
+                padding: 35px 25px;
+            }
+
+            .admin-title {
+                font-size: 1.7rem;
+            }
+
+            .admin-icon {
+                font-size: 3.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-coming-soon">
+    <!-- Admin Construction Icon -->
+    <div class="admin-icon">
+        <i class="fas fa-tools"></i>
+    </div>
+
+    <!-- Title & Subtitle -->
+    <h1 class="admin-title">🚧 Kommer snart</h1>
+    <p class="admin-subtitle">Vi bygger något fantastiskt åt dig!</p>
+
+    <!-- Development Status -->
+    <div class="development-status">
+        <h4><i class="fas fa-code me-2"></i>Under utveckling</h4>
+        <p>Den här funktionen utvecklas just nu och kommer att vara tillgänglig inom kort.</p>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section">
+        <h6 style="margin-bottom: 15px; color: #333; font-size: 1.1rem;">
+            <i class="fas fa-chart-line"></i> Utvecklingsframsteg
+        </h6>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <small class="text-muted">~75% färdigt - Lansering snart!</small>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a th:href="@{/admin/dashboard}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            Tillbaka till Dashboard
+        </a>
+
+        <a th:href="@{/admin/products-management}" class="btn btn-outline">
+            <i class="fas fa-box"></i>
+            Produkthantering
+        </a>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="footer-note">
+        <p>
+            <i class="fas fa-heart" style="color: #e25555;"></i>
+            Tack för ditt tålamod medan vi utvecklar!
+        </p>
+    </div>
+</div>
+</body>
+</html>
