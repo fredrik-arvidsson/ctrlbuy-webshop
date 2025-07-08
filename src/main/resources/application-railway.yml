@@ -1,48 +1,148 @@
 # =======================================
 # RAILWAY MILJÖ - PRODUCTION MySQL
 # =======================================
-# Railway sätter automatiskt MYSQLURL environment variable
-# =======================================
 
 spring:
   datasource:
-    url: ${MYSQLURL}
-    # Railway MySQL connection kommer från MYSQLURL env var
+    url: ${MYSQL_PUBLIC_URL}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      pool-name: CtrlBuyHikariPool
 
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update  # Säker för produktion
-    show-sql: false  # Ingen SQL logging i produktion
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          time_zone: Europe/Stockholm
+    show-sql: false
 
-  # Production cache settings
   thymeleaf:
     cache: true
 
+  web:
+    resources:
+      cache:
+        period: 3600
+        use-last-modified: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+        transport:
+          protocol: smtp
+        debug: false
+    test-connection: false
+    default-encoding: UTF-8
+
 # =======================================
-# PRODUCTION LOGGING
+# SERVER CONFIGURATION
+# =======================================
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+
+# =======================================
+# LOGGING
 # =======================================
 logging:
   level:
     root: WARN
     com.ctrlbuy.webshop: INFO
-    org.hibernate.SQL: WARN  # Minimal SQL logging
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.springframework.mail: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
 
 # =======================================
-# RAILWAY ENVIRONMENT
+# JWT CONFIGURATION
+# =======================================
+jwt:
+  secret: ${JWT_SECRET:ctrlbuy-secret-key-change-in-production}
+  expirationMs: 86400000
+  refresh-token:
+    expiration: 604800000
+
+# =======================================
+# APP CONFIGURATION
 # =======================================
 app:
   base:
     url: https://ctrlbuy-webshop-production.up.railway.app
 
-server:
-  port: ${PORT:8080}  # Railway sätter PORT automatiskt
+  email:
+    enabled: ${EMAIL_ENABLED:true}
+    from: ${MAIL_FROM:noreply@ctrlbuy.se}
+    from-name: ${MAIL_FROM_NAME:CTRL+BUY Solutions}
+    company:
+      name: ${COMPANY_NAME:CtrlBuy}
+      support-email: ${SUPPORT_EMAIL:support@ctrlbuy.se}
+      phone: ${COMPANY_PHONE:+46 8 123 456 78}
+
+  order:
+    confirmation:
+      send-email: ${ORDER_EMAIL_ENABLED:true}
+      admin-notification: ${ADMIN_NOTIFICATION_ENABLED:true}
+      admin-email: ${ADMIN_EMAIL:admin@ctrlbuy.se}
 
 # =======================================
-# RAILWAY INFO
+# ACTUATOR
+# =======================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+# =======================================
+# INFO
 # =======================================
 info:
   app:
+    name: CtrlBuy Webshop
     environment: Production (Railway)
+    version: 1.0.0
     database:
       provider: Railway MySQL
       region: EU West (Amsterdam)
+    security: Spring Security with JWT
