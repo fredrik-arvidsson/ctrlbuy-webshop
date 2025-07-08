@@ -1,5 +1,5 @@
-# Multi-stage build för Railway
-FROM maven:3.9.8-openjdk-21-slim AS build
+# Multi-stage build för Railway med Amazon Corretto
+FROM amazoncorretto:21-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY pom.xml .
 
 # Download dependencies (cached if pom.xml unchanged)
-RUN mvn dependency:go-offline -B
+RUN apk add --no-cache maven && mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
@@ -17,7 +17,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
-FROM eclipse-temurin:21-jdk
+FROM amazoncorretto:21-alpine
 
 # Set working directory
 WORKDIR /app
