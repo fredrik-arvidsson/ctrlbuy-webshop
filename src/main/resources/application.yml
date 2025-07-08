@@ -278,36 +278,4 @@ logging:
 # RAILWAY PROFILE - RAILWAY DEPLOYMENT
 # =======================================
 spring:
-  config:
-    activate:
-      on-profile: railway
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          ssl:
-            trust: smtp.gmail.com
-        debug: false
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: create
-  thymeleaf:
-    cache: true
-
-logging:
-  level:
-    com.ctrlbuy.webshop.service.EmailService: INFO
-    org.springframework.mail: WARN
+  
