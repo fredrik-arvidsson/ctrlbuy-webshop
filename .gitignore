@@ -1,5 +1,4 @@
 target/
-.mvn/
 *.log
 *.jar
 webshop-1.0-SNAPSHOT.jar
