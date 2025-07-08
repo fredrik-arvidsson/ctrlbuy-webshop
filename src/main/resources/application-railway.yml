@@ -20,8 +20,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+      # NAMING STRATEGY BORTTAGEN - LÅT @COLUMN ANNOTATIONS STYRA
     properties:
       hibernate:
         format_sql: false
