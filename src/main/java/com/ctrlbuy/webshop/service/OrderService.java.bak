@@ -1,7 +1,7 @@
 package com.ctrlbuy.webshop.service;
 
-import com.ctrlbuy.webshop.entity.Cart;
-import com.ctrlbuy.webshop.entity.CartItem;
+import com.ctrlbuy.webshop.model.Cart;
+import com.ctrlbuy.webshop.entity.OrderItem.CartItem;
 import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.entity.OrderItem;
 import com.ctrlbuy.webshop.security.entity.User;
@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    // Removed EmailService dependency to fix autowiring conflict
+    private final ProductService productService;
+    private final EmailService emailService; // ✅ NYTT: Lägg till EmailService
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -50,6 +52,8 @@ public class OrderService {
         if (cart == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Kundvagnen är tom");
         }
+
+        log.info("Skapar beställning från checkout för: {}", email);
 
         // Hämta användare om inloggad
         User user = null;
@@ -85,7 +89,7 @@ public class OrderService {
         // Spara beställning först
         order = orderRepository.save(order);
 
-        // Lägg till orderitems från cart - FIXED: Använd entity.CartItem
+        // Lägg till orderitems från cart
         for (CartItem cartItem : cart.getItems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -100,9 +104,16 @@ public class OrderService {
         // Spara igen med orderitems
         order = orderRepository.save(order);
 
-        // TODO: Email service will be added later
-        // emailService.sendOrderConfirmation(order, user != null ? user.getEmail() : email);
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+            emailService.sendOrderConfirmation(order, user != null ? user.getEmail() : email);
+            log.info("Orderbekräftelse skickad till: {}", user != null ? user.getEmail() : email);
+        } catch (Exception e) {
+            log.error("Kunde inte skicka orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
+        log.info("Beställning skapad med ordernummer: {}", orderNumber);
         return order;
     }
 
@@ -114,6 +125,8 @@ public class OrderService {
         if (cartItems == null || cartItems.isEmpty()) {
             throw new RuntimeException("Kundvagnen är tom");
         }
+
+        log.info("Skapar beställning för användare: {}", user.getEmail());
 
         // Beräkna totaler
         BigDecimal subtotal = cartItems.stream()
@@ -164,9 +177,16 @@ public class OrderService {
         // Spara igen med orderitems
         order = orderRepository.save(order);
 
-        // TODO: Email service will be added later
-        // emailService.sendOrderConfirmation(order, user.getEmail());
+        // ✅ NYTT: Skicka orderbekräftelse via e-post
+        try {
+            emailService.sendOrderConfirmation(order, user.getEmail());
+            log.info("Orderbekräftelse skickad till: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Kunde inte skicka orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
+        log.info("Beställning skapad med ordernummer: {}", orderNumber);
         return order;
     }
 
@@ -178,6 +198,8 @@ public class OrderService {
         if (cartItems == null || cartItems.isEmpty()) {
             throw new RuntimeException("Kundvagnen är tom");
         }
+
+        log.info("Skapar gästbeställning för: {}", guestDetails.getEmail());
 
         // Beräkna totaler
         BigDecimal subtotal = cartItems.stream()
@@ -227,9 +249,16 @@ public class OrderService {
         // Spara igen med orderitems
         order = orderRepository.save(order);
 
-        // TODO: Email service will be added later
-        // emailService.sendOrderConfirmation(order, guestDetails.getEmail());
+        // ✅ NYTT: Skicka orderbekräftelse via e-post för gäster
+        try {
+            emailService.sendOrderConfirmation(order, guestDetails.getEmail());
+            log.info("Gäst-orderbekräftelse skickad till: {}", guestDetails.getEmail());
+        } catch (Exception e) {
+            log.error("Kunde inte skicka gäst-orderbekräftelse för order {}: {}", orderNumber, e.getMessage());
+            // Logga felet men låt inte det stoppa orderprocessen
+        }
 
+        log.info("Gästbeställning skapad med ordernummer: {}", orderNumber);
         return order;
     }
 
@@ -262,43 +291,19 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Beställning hittades inte"));
 
         order.setStatus(status);
-        return orderRepository.save(order);
+        Order updatedOrder = orderRepository.save(order);
+
+        log.info("Orderstatus uppdaterad för beställning {}: {}", order.getOrderNumber(), status);
+        return updatedOrder;
     }
 
     /**
-     * Generera unikt ordernummer med datum och sekvens
-     * Format: CB20250707001, CB20250707002, etc.
+     * ✅ UPPDATERAD: Generera enkelt ordernummer med löpnummer
      */
     private String generateOrderNumber() {
-        // Hämta dagens datum i format YYYYMMDD
-        String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-        // Sök efter högsta ordernummer för idag
-        String todayPattern = "CB" + datePrefix + "%";
-
-        // Hämta alla ordernummer för idag och hitta högsta sekvensen
-        List<String> todaysOrders = orderRepository.findOrderNumbersByPattern(todayPattern);
-
-        int nextSequence = 1;
-        if (!todaysOrders.isEmpty()) {
-            // Hitta högsta sekvensen för idag
-            int maxSequence = 0;
-            for (String orderNum : todaysOrders) {
-                if (orderNum.length() >= 13) { // CB + 8 datum + 3 sekvens = 13
-                    try {
-                        String sequencePart = orderNum.substring(10); // Ta sista 3 siffrorna
-                        int sequence = Integer.parseInt(sequencePart);
-                        maxSequence = Math.max(maxSequence, sequence);
-                    } catch (NumberFormatException e) {
-                        // Ignorera felaktiga format
-                    }
-                }
-            }
-            nextSequence = maxSequence + 1;
-        }
-
-        // Generera unikt ordernummer: CB + datum + 3-siffrig sekvens
-        return String.format("CB%s%03d", datePrefix, nextSequence);
+        // Hämta totalt antal ordrar och lägg till 1 för nästa nummer
+        long nextOrderNumber = orderRepository.count() + 1;
+        return String.format("CB%03d", nextOrderNumber);
     }
 
     /**
@@ -321,6 +326,7 @@ public class OrderService {
                     .setParameter("orderId", orderId)
                     .getSingleResult();
         } catch (Exception e) {
+            log.error("Kunde inte hämta beställning med ID: {}", orderId, e);
             return null;
         }
     }
@@ -339,6 +345,10 @@ public class OrderService {
         return orderRepository.countByUser(user);
     }
 
+    // ========================================
+    // NYA METODER FÖR ORDERHISTORIK
+    // ========================================
+
     /**
      * Hämta orders med paginering för orderhistorik
      */
@@ -355,7 +365,7 @@ public class OrderService {
     }
 
     /**
-     * Hämta order via ordernummer och användare (säkerhetscheck)
+     * Hämta order via ordernummer och användare (säkerhetscheck) - wrapprar befintlig metod
      */
     public Optional<Order> getOrderByOrderNumberAndUser(String orderNumber, User user) {
         Order order = findByOrderNumberAndUser(orderNumber, user);
@@ -373,21 +383,28 @@ public class OrderService {
      * Hämta senaste order för användare
      */
     public Optional<Order> getLatestOrderByUser(User user) {
-        List<Order> orders = findByUser(user);
+        List<Order> orders = findByUser(user); // Använder befintlig metod
         return orders.isEmpty() ? Optional.empty() : Optional.of(orders.get(0));
     }
 
     /**
-     * Hämta orders för användare (orderhistorik)
+     * Hämta orders för användare (orderhistorik - använder befintlig metod)
      */
     public List<Order> getOrdersByUser(User user) {
-        return findByUser(user);
+        return findByUser(user); // Använder din befintliga metod
     }
+
+    // ========================================
+    // NYA METODER FÖR ADMINCONTROLLER
+    // ========================================
 
     /**
      * Hämta alla beställningar med paginering (för admin)
      */
     public Page<Order> getAllOrders(Pageable pageable) {
+        log.info("Hämtar alla beställningar med paginering: page={}, size={}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
         List<Order> allOrders = orderRepository.findAllByOrderByOrderDateDesc();
 
         // Konvertera till Page manuellt
@@ -395,6 +412,7 @@ public class OrderService {
         int end = Math.min((start + pageable.getPageSize()), allOrders.size());
 
         List<Order> pageContent = allOrders.subList(start, end);
+
         return new PageImpl<>(pageContent, pageable, allOrders.size());
     }
 
@@ -402,6 +420,7 @@ public class OrderService {
      * Hämta användarens beställningar med paginering (för kunder)
      */
     public Page<Order> getOrdersByUser(User user, Pageable pageable) {
+        log.info("Hämtar beställningar för användare: {}", user.getUsername());
         return getOrdersByUserWithPagination(user, pageable.getPageNumber(), pageable.getPageSize());
     }
 
@@ -409,6 +428,7 @@ public class OrderService {
      * Hämta beställning med ID (AdminController-kompatibel)
      */
     public Order getOrderById(Long orderId) {
+        log.info("Hämtar beställning med ID: {}", orderId);
         return findOrderWithItemsById(orderId);
     }
 
@@ -416,6 +436,7 @@ public class OrderService {
      * Räkna beställningar per status
      */
     public long countByStatus(Order.OrderStatus status) {
+        log.info("Räknar beställningar med status: {}", status);
         List<Order> ordersWithStatus = orderRepository.findByStatusOrderByOrderDateDesc(status);
         return ordersWithStatus.size();
     }
@@ -425,14 +446,50 @@ public class OrderService {
      */
     @Transactional
     public void updateOrderStatusWithNotifications(Long orderId, Order.OrderStatus newStatus) {
+        log.info("Uppdaterar orderstatus för order {} till {}", orderId, newStatus);
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
+        Order.OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);
-        orderRepository.save(order);
 
-        // TODO: Email notifications will be added later
-        // emailService.sendOrderConfirmation/sendShippingNotification etc.
+        Order savedOrder = orderRepository.save(order);
+
+        log.info("Orderstatus uppdaterad från {} till {} för order {}",
+                oldStatus, newStatus, orderId);
+
+        // Skicka notifikation via email om status ändras
+        try {
+            String customerEmail = savedOrder.getUser() != null ?
+                    savedOrder.getUser().getEmail() :
+                    "guest@ctrlbuy.se"; // Fallback för gäster
+
+            switch (newStatus) {
+                case CONFIRMED:
+                    emailService.sendOrderConfirmation(savedOrder, customerEmail);
+                    log.info("Bekräftelsemail skickat för order {}", orderId);
+                    break;
+                case SHIPPED:
+                    emailService.sendShippingNotification(savedOrder, customerEmail);
+                    log.info("Leveransnotifiering skickat för order {}", orderId);
+                    break;
+                case DELIVERED:
+                    emailService.sendDeliveryConfirmation(savedOrder, customerEmail);
+                    log.info("Leveransbekräftelse skickat för order {}", orderId);
+                    break;
+                case CANCELLED:
+                    emailService.sendOrderCancellation(savedOrder, customerEmail);
+                    log.info("Avbrytningsnotifiering skickat för order {}", orderId);
+                    break;
+                default:
+                    // Ingen email för PENDING
+                    break;
+            }
+        } catch (Exception emailError) {
+            log.error("Kunde inte skicka email för orderstatus-ändring: {}", emailError.getMessage());
+            // Låt inte email-fel påverka orderstatusändringen
+        }
     }
 
     /**
@@ -479,7 +536,7 @@ public class OrderService {
         List<Order> todaysOrders = getTodaysOrders();
         return todaysOrders.stream()
                 .filter(order -> order.getStatus() != Order.OrderStatus.CANCELLED)
-                .map(order -> new BigDecimal(order.getTotalAmount().toString()))
+                .map(order -> order.getTotalAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -492,7 +549,7 @@ public class OrderService {
                 .filter(order -> order.getOrderDate().isAfter(startDate) &&
                         order.getOrderDate().isBefore(endDate))
                 .filter(order -> order.getStatus() != Order.OrderStatus.CANCELLED)
-                .map(order -> new BigDecimal(order.getTotalAmount().toString()))
+                .map(order -> order.getTotalAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -523,6 +580,7 @@ public class OrderService {
         int end = Math.min((start + pageable.getPageSize()), searchResults.size());
 
         List<Order> pageContent = searchResults.subList(start, end);
+
         return new PageImpl<>(pageContent, pageable, searchResults.size());
     }
 
@@ -537,6 +595,7 @@ public class OrderService {
         int end = Math.min((start + pageable.getPageSize()), ordersWithStatus.size());
 
         List<Order> pageContent = ordersWithStatus.subList(start, end);
+
         return new PageImpl<>(pageContent, pageable, ordersWithStatus.size());
     }
 
@@ -545,8 +604,11 @@ public class OrderService {
      */
     @Transactional
     public boolean cancelOrder(Long orderId, User user) {
+        log.info("Försöker avbryta beställning {} för användare {}", orderId, user.getUsername());
+
         Optional<Order> orderOpt = getOrderByIdAndUser(orderId, user);
         if (!orderOpt.isPresent()) {
+            log.warn("Beställning {} hittades inte eller tillhör inte användare {}", orderId, user.getUsername());
             return false;
         }
 
@@ -554,41 +616,52 @@ public class OrderService {
 
         // Kan bara avbryta väntande beställningar
         if (order.getStatus() != Order.OrderStatus.PENDING) {
+            log.warn("Kan inte avbryta beställning {} med status {}", orderId, order.getStatus());
             return false;
         }
 
         order.setStatus(Order.OrderStatus.CANCELLED);
         orderRepository.save(order);
 
-        // TODO: Email notification will be added later
-        // emailService.sendOrderCancellation(order, user.getEmail());
+        log.info("Beställning {} avbruten av användare {}", orderId, user.getUsername());
+
+        // Skicka avbrytningsnotifiering
+        try {
+            String customerEmail = user.getEmail();
+            emailService.sendOrderCancellation(order, customerEmail);
+        } catch (Exception emailError) {
+            log.error("Kunde inte skicka avbrytningsnotifiering: {}", emailError.getMessage());
+        }
 
         return true;
     }
 
     // DTO klasser för beställningsdata
+    @lombok.Data
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
     public static class OrderDetails {
         private String deliveryName;
         private String deliveryAddress;
         private String deliveryCity;
         private String deliveryPostalCode;
         private String deliveryPhone;
-        private String paymentMethod;
 
         public void setDeliveryName(String deliveryName) { this.deliveryName = deliveryName; }
         public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
         public void setDeliveryCity(String deliveryCity) { this.deliveryCity = deliveryCity; }
         public void setDeliveryPostalCode(String deliveryPostalCode) { this.deliveryPostalCode = deliveryPostalCode; }
         public void setDeliveryPhone(String deliveryPhone) { this.deliveryPhone = deliveryPhone; }
-        public String getDeliveryName() { return deliveryName; }
-        public String getDeliveryAddress() { return deliveryAddress; }
-        public String getDeliveryCity() { return deliveryCity; }
-        public String getDeliveryPostalCode() { return deliveryPostalCode; }
-        public String getDeliveryPhone() { return deliveryPhone; }
-        public String getPaymentMethod() { return paymentMethod; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+        private String deliveryName;
+        private String deliveryAddress;
+        private String deliveryCity;
+        private String deliveryPostalCode;
+        private String deliveryPhone;
+        private String paymentMethod;
     }
 
+    @lombok.Data
+    @lombok.NoArgsConstructor
     public static class GuestOrderDetails {
         private String firstName;
         private String lastName;
@@ -598,28 +671,5 @@ public class OrderService {
         private String city;
         private String postalCode;
         private String paymentMethod;
-
-        // Konstruktor
-        public GuestOrderDetails() {}
-
-        // ALLA GETTERS:
-        public String getFirstName() { return firstName; }
-        public String getLastName() { return lastName; }
-        public String getEmail() { return email; }
-        public String getPhone() { return phone; }
-        public String getAddress() { return address; }
-        public String getCity() { return city; }
-        public String getPostalCode() { return postalCode; }
-        public String getPaymentMethod() { return paymentMethod; }
-
-        // ALLA SETTERS:
-        public void setFirstName(String firstName) { this.firstName = firstName; }
-        public void setLastName(String lastName) { this.lastName = lastName; }
-        public void setEmail(String email) { this.email = email; }
-        public void setPhone(String phone) { this.phone = phone; }
-        public void setAddress(String address) { this.address = address; }
-        public void setCity(String city) { this.city = city; }
-        public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     }
 }

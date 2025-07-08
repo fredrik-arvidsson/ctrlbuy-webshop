@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.repository;
 
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -98,81 +98,94 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByOrderByNameDesc();
 
     // ================================
-    // 🔥 NYA REA-METODER
+    // 🔥 REA-METODER - FIXED FIELD NAMES
+    // ÄNDRAT: onSale → isOnSale, active → isActive
     // ================================
 
     /**
      * Hämta alla produkter som är markerade som på REA och aktiva
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    List<Product> findByOnSaleTrueAndActiveTrue();
+    List<Product> findByIsOnSaleTrueAndIsActiveTrue();
 
     /**
      * Hämta alla produkter som är på REA (oavsett active-status)
+     * FIXED: onSale → isOnSale
      */
-    List<Product> findByOnSaleTrue();
+    List<Product> findByIsOnSaleTrue();
 
     /**
      * Hämta aktiva REA:or inom datumintervall
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    List<Product> findByOnSaleTrueAndActiveTrueAndSaleStartDateLessThanEqualAndSaleEndDateGreaterThanEqual(
+    List<Product> findByIsOnSaleTrueAndIsActiveTrueAndSaleStartDateLessThanEqualAndSaleEndDateGreaterThanEqual(
             LocalDateTime startDate, LocalDateTime endDate);
 
     /**
      * Hämta kommande REA:or
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    List<Product> findByOnSaleTrueAndActiveTrueAndSaleStartDateGreaterThan(LocalDateTime now);
+    List<Product> findByIsOnSaleTrueAndIsActiveTrueAndSaleStartDateGreaterThan(LocalDateTime now);
 
     /**
      * Hämta utgångna REA:or
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    List<Product> findByOnSaleTrueAndActiveTrueAndSaleEndDateLessThan(LocalDateTime now);
+    List<Product> findByIsOnSaleTrueAndIsActiveTrueAndSaleEndDateLessThan(LocalDateTime now);
 
     /**
      * Hämta REA-produkter sorterade efter rabatt (högst rabatt först)
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
             "ORDER BY ((p.originalPrice - p.salePrice) / p.originalPrice) DESC")
     List<Product> findSaleProductsOrderByDiscountDesc();
 
     /**
      * Hämta REA-produkter i en specifik kategori
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    List<Product> findByOnSaleTrueAndActiveTrueAndCategory(String category);
+    List<Product> findByIsOnSaleTrueAndIsActiveTrueAndCategory(String category);
 
     /**
      * Hämta REA-produkter med rabatt över en viss procent
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
             "AND ((p.originalPrice - p.salePrice) / p.originalPrice * 100) >= :minDiscountPercent")
     List<Product> findSaleProductsWithMinimumDiscount(@Param("minDiscountPercent") BigDecimal minDiscountPercent);
 
     /**
      * Hämta REA-produkter som sparar mer än ett visst belopp
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
             "AND (p.originalPrice - p.salePrice) >= :minSavings")
     List<Product> findSaleProductsWithMinimumSavings(@Param("minSavings") BigDecimal minSavings);
 
     /**
      * Hämta de bästa REA-erbjudandena (högsta rabatter)
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL " +
             "ORDER BY ((p.originalPrice - p.salePrice) / p.originalPrice) DESC")
     List<Product> findTopSaleDeals(Pageable pageable);
 
     /**
      * Räkna antal produkter på REA
+     * FIXED: onSale → isOnSale, active → isActive
      */
-    long countByOnSaleTrueAndActiveTrue();
+    long countByIsOnSaleTrueAndIsActiveTrue();
 
     /**
      * Hämta REA-produkter som slutar inom X dagar
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.saleEndDate IS NOT NULL " +
             "AND p.saleEndDate BETWEEN :now AND :endDate")
     List<Product> findSalesEndingSoon(@Param("now") LocalDateTime now,
@@ -180,8 +193,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
      * Söka bland REA-produkter
+     * FIXED: @Query med isOnSale och isActive
      */
-    @Query("SELECT p FROM Product p WHERE p.onSale = true AND p.active = true " +
+    @Query("SELECT p FROM Product p WHERE p.isOnSale = true AND p.isActive = true " +
             "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
             "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
             "OR LOWER(p.category) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
@@ -189,25 +203,28 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
      * Hämta REA-produkter grupperade efter kategori
+     * FIXED: @Query med isOnSale och isActive
      */
     @Query("SELECT p.category, COUNT(p) FROM Product p " +
-            "WHERE p.onSale = true AND p.active = true " +
+            "WHERE p.isOnSale = true AND p.isActive = true " +
             "GROUP BY p.category ORDER BY COUNT(p) DESC")
     List<Object[]> findSaleProductCountByCategory();
 
     /**
      * Beräkna totala besparingar för alla REA-produkter
+     * FIXED: @Query med isOnSale och isActive
      */
     @Query("SELECT SUM(p.originalPrice - p.salePrice) FROM Product p " +
-            "WHERE p.onSale = true AND p.active = true " +
+            "WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL")
     BigDecimal calculateTotalSavingsFromSales();
 
     /**
      * Hämta genomsnittlig rabattprocent
+     * FIXED: @Query med isOnSale och isActive
      */
     @Query("SELECT AVG((p.originalPrice - p.salePrice) / p.originalPrice * 100) FROM Product p " +
-            "WHERE p.onSale = true AND p.active = true " +
+            "WHERE p.isOnSale = true AND p.isActive = true " +
             "AND p.salePrice IS NOT NULL AND p.originalPrice IS NOT NULL")
     BigDecimal calculateAverageDiscountPercentage();
 

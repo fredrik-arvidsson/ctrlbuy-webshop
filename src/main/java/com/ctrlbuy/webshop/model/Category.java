@@ -1,5 +1,6 @@
 package com.ctrlbuy.webshop.model;
 
+import com.ctrlbuy.webshop.entity.Product;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,8 @@ public class EmailTestController {
     // 🆕 ENKLA DEBUG ENDPOINTS
     @GetMapping("/test-email-status")
     public String testEmailStatus() {
-        log.info("=== EMAIL STATUS TEST ===");
-        log.info("EmailService: {}", emailService != null ? "EXISTS" : "NULL");
-        log.info("Email Enabled: {}", emailEnabled);
 
         if (emailService != null) {
-            log.info("EmailService Class: {}", emailService.getClass().getName());
         }
 
         return String.format("EmailService: %s | Email Enabled: %s",
@@ -48,23 +44,19 @@ public class EmailTestController {
     @GetMapping("/test-email-connection")
     public String testEmailConnection() {
         try {
-            log.info("=== EMAIL CONNECTION TEST ===");
 
             if (emailService == null) {
                 return "❌ EmailService is NULL - Check bean configuration";
             }
 
-            log.info("EmailService found, testing connection...");
             boolean connectionResult = emailService.testEmailConnection();
 
-            log.info("Connection test result: {}", connectionResult);
 
             return String.format("✅ EmailService: EXISTS | Email Enabled: %s | Connection: %s",
                     emailEnabled,
                     connectionResult ? "SUCCESS" : "FAILED");
 
         } catch (Exception e) {
-            log.error("Email connection test failed: ", e);
             return "❌ Connection test failed: " + e.getMessage();
         }
     }
@@ -72,7 +64,6 @@ public class EmailTestController {
     @GetMapping("/test-order-email")
     public String testOrderEmail() {
         try {
-            log.info("=== ORDER EMAIL TEST ===");
 
             if (emailService == null) {
                 return "❌ EmailService is NULL";
@@ -87,14 +78,12 @@ public class EmailTestController {
 
             String testEmail = "test@example.com";
 
-            log.info("Sending test order confirmation to: {}", testEmail);
             emailService.sendOrderConfirmation(testOrder, testEmail);
 
             return "✅ Test order email sent successfully to " + testEmail +
                     " for order: " + testOrder.getOrderNumber();
 
         } catch (Exception e) {
-            log.error("Order email test failed: ", e);
             return "❌ Order email test failed: " + e.getMessage();
         }
     }

@@ -4,159 +4,557 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orderbekräftelse - CTRL+BUY</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirmation-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(180deg); }
+        }
+
+        .success-icon {
+            background: white;
+            color: #4CAF50;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            animation: pulse 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .order-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+            letter-spacing: 2px;
+        }
+
+        .order-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 8px 0;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .cost-breakdown {
+            background: linear-gradient(145deg, #f1f3f4, #e8eaed);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .breakdown-title {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            color: #5a6c7d;
+        }
+
+        .cost-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0 10px;
+            margin-top: 15px;
+            border-top: 2px solid #4CAF50;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: white;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            margin: 15px -25px -25px -25px;
+            padding: 20px 25px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .delivery-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #90caf9;
+        }
+
+        .delivery-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-icon {
+            color: #2196F3;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .customer-rights {
+            background: #fff8e1;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .rights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .rights-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #5d4037;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .rights-item i {
+            color: #ff8f00;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+        }
+
+        .thank-you {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+            border-radius: 15px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .thank-you-text {
+            color: #2e7d32;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .brand-message {
+            color: #558b2f;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .confirmation-container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .order-title {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .delivery-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .order-title {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+
+            .success-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+
+            .cost-row {
+                flex-direction: column;
+                text-align: center;
+                gap: 3px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container my-5">
-    <!-- Framgångsmeddelande -->
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white text-center">
-                    <h2 class="mb-0">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Tack för din beställning!
-                    </h2>
-                </div>
-                <div class="card-body text-center">
-                    <p class="lead">Din beställning har tagits emot och kommer att behandlas inom kort.</p>
-                    <p class="mb-4">En bekräftelse kommer att skickas till din e-post</p>
+<div class="confirmation-container">
+    <div class="header">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1 class="order-title">ORDERBEKRÄFTELSE</h1>
+        <p class="order-subtitle">Tack för din beställning! Vi behandlar den nu.</p>
+    </div>
 
-                    <!-- Ordernummer -->
-                    <div class="alert alert-info">
-                        <h5><i class="fas fa-hashtag me-2"></i>Ordernummer</h5>
-                        <h3 th:text="${order.orderNumber}">#CB202505311234</h3>
-                        <small>Spara detta nummer för framtida referens</small>
+    <div class="content">
+        <div class="order-info">
+            <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-hashtag"></i>
+                        Ordernummer:
+                    </span>
+                <span class="info-value" th:text="${order.orderNumber}">CB001</span>
+            </div>
+            <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Orderdatum:
+                    </span>
+                <span class="info-value" th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy HH:mm')}">7 juli 2025 22:30</span>
+            </div>
+            <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-info-circle"></i>
+                        Status:
+                    </span>
+                <span class="info-value" th:text="${order.status}">PENDING</span>
+            </div>
+            <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-credit-card"></i>
+                        Betalmetod:
+                    </span>
+                <span class="info-value" th:text="${order.paymentMethod}">Kort</span>
+            </div>
+            <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-euro-sign"></i>
+                        Totalt belopp:
+                    </span>
+                <span class="info-value" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')} + ' kr'">27 999,00 kr</span>
+            </div>
+        </div>
+
+        <div class="cost-breakdown">
+            <h3 class="breakdown-title">
+                <i class="fas fa-calculator"></i>
+                Kostnadsfördelning
+            </h3>
+
+            <div class="cost-row">
+                <span>Summa exkl. moms:</span>
+                <span th:text="${#numbers.formatDecimal(order.totalAmount / 1.25, 0, 'COMMA', 2, 'POINT')} + ' kr'">22 399,20 kr</span>
+            </div>
+            <div class="cost-row">
+                <span>Moms (25%):</span>
+                <span th:text="${#numbers.formatDecimal(order.totalAmount - (order.totalAmount / 1.25), 0, 'COMMA', 2, 'POINT')} + ' kr'">5 599,80 kr</span>
+            </div>
+            <div class="cost-row">
+                <span>Frakt:</span>
+                <span th:text="${order.totalAmount >= 499 ? '0,00 kr' : '49,00 kr'}">0,00 kr</span>
+            </div>
+
+            <div class="cost-total">
+                <span>TOTALT INKL. MOMS:</span>
+                <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')} + ' kr'">27 999,00 kr</span>
+            </div>
+        </div>
+
+        <div class="delivery-info">
+            <h3 class="breakdown-title">
+                <i class="fas fa-info-circle"></i>
+                Leveransinformation
+            </h3>
+
+            <div class="delivery-steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
                     </div>
+                    <div class="step-title">1. Bekräftelse</div>
+                    <div class="step-desc">Du får en e-post inom 5 minuter</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="step-title">2. Packning</div>
+                    <div class="step-desc">Vi packar din order inom 24h</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="step-title">3. Leverans</div>
+                    <div class="step-desc">Förväntad leverans 2-5 arbetsdagar</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Orderdetaljer -->
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-info-circle me-2"></i>Orderdetaljer</h5>
+        <div class="customer-rights">
+            <h3 class="breakdown-title">
+                <i class="fas fa-shield-alt"></i>
+                Köpvillkor och ångerrätt
+            </h3>
+
+            <div class="rights-grid">
+                <div class="rights-item">
+                    <i class="fas fa-undo-alt"></i>
+                    <span>14 dagars öppet köp/ångerrätt</span>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Leveransadress -->
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-truck me-2"></i>Leveransadress</h6>
-                            <address>
-                                <strong th:text="${order.deliveryName}">John Doe</strong><br>
-                                <span th:text="${order.deliveryAddress}">Testgatan 123</span><br>
-                                <span th:text="${order.deliveryPostalCode + ' ' + order.deliveryCity}">12345 Stockholm</span><br>
-                                <span th:text="${order.deliveryPhone}">070-123 45 67</span>
-                            </address>
-                        </div>
-
-                        <!-- Beställningsinfo -->
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-calendar me-2"></i>Beställningsinfo</h6>
-                            <p class="mb-1">
-                                <strong>Beställningsdatum:</strong><br>
-                                <span th:text="${#temporals.format(order.orderDate, 'dd MMM yyyy HH:mm')}">31 Maj 2025 14:30</span>
-                            </p>
-                            <p class="mb-1">
-                                <strong>Betalningsmetod:</strong><br>
-                                <span th:text="${order.paymentMethod}">Kort</span>
-                            </p>
-                            <p class="mb-1">
-                                <strong>Status:</strong><br>
-                                <span class="badge bg-success" th:text="${order.status}">CONFIRMED</span>
-                            </p>
-                        </div>
-                    </div>
+                <div class="rights-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>Fri frakt vid köp över 499 kr</span>
+                </div>
+                <div class="rights-item">
+                    <i class="fas fa-tools"></i>
+                    <span>Garanti enligt konsumentköplagen</span>
+                </div>
+                <div class="rights-item">
+                    <i class="fas fa-headset"></i>
+                    <span>Reklamation och support: info@ctrlbuy.se</span>
+                </div>
+                <div class="rights-item">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Fullständiga villkor: www.ctrlbuy.se/villkor</span>
+                </div>
+                <div class="rights-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Integritetspolicy: www.ctrlbuy.se/integritet</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Beställda produkter -->
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-shopping-bag me-2"></i>Beställda produkter</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Produkt</th>
-                                <th class="text-center">Antal</th>
-                                <th class="text-end">Pris</th>
-                                <th class="text-end">Totalt</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="item : ${order.orderItems}">
-                                <td>
-                                    <strong th:text="${item.productName}">Produktnamn</strong>
-                                </td>
-                                <td class="text-center" th:text="${item.quantity}">1</td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 2)} + ' kr'">99 kr</td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(item.getTotalPrice(), 0, 2)} + ' kr'">99 kr</td>
-                            </tr>
-                            </tbody>
-                            <tfoot>
-                            <tr class="table-success">
-                                <td colspan="3" class="text-end"><strong>Totalt:</strong></td>
-                                <td class="text-end"><strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 2)} + ' kr'">448 kr</strong></td>
-                            </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Nästa steg -->
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-8">
-            <div class="card bg-light">
-                <div class="card-body text-center">
-                    <h6><i class="fas fa-info-circle me-2"></i>Vad händer nu?</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <i class="fas fa-check-double text-success fa-2x mb-2"></i>
-                            <p><small><strong>1. Bekräftelse</strong><br>Du får en e-post inom 5 minuter</small></p>
-                        </div>
-                        <div class="col-md-4">
-                            <i class="fas fa-box text-info fa-2x mb-2"></i>
-                            <p><small><strong>2. Packning</strong><br>Vi packar din order inom 24h</small></p>
-                        </div>
-                        <div class="col-md-4">
-                            <i class="fas fa-shipping-fast text-primary fa-2x mb-2"></i>
-                            <p><small><strong>3. Leverans</strong><br>Förväntad leverans 2-5 arbetsdagar</small></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Knappar -->
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-8 text-center">
-            <a href="/" class="btn btn-primary me-3">
-                <i class="fas fa-home me-2"></i>
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i>
                 Tillbaka till startsidan
             </a>
-            <a href="/orders" class="btn btn-outline-secondary">
-                <i class="fas fa-list me-2"></i>
+            <a href="/orders" class="btn btn-secondary">
+                <i class="fas fa-list"></i>
                 Mina beställningar
             </a>
         </div>
+
+        <div class="thank-you">
+            <div class="thank-you-text">
+                <i class="fas fa-heart" style="color: #e91e63; margin-right: 8px;"></i>
+                Tack för att du handlar hos CTRL+BUY!
+            </div>
+            <div class="brand-message">
+                Vi uppskattar ditt förtroende och ser fram emot att leverera dina produkter.
+            </div>
+        </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

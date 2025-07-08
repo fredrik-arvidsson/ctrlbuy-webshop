@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ctrlbuy.webshop.service.ProductService;
 import com.ctrlbuy.webshop.service.LoggingService;
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 
 @Controller
 public class HomeController {

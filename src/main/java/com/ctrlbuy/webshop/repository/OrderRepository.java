@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.repository;
 
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.security.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +28,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE o.orderNumber LIKE %:search% ORDER BY o.orderDate DESC")
     List<Order> searchByOrderNumber(@Param("search") String search);
+
+    // ORDERNUMMER-GENERERING (NYTT!)
+    /**
+     * Hitta alla ordernummer som matchar ett pattern (för dagens ordrar)
+     * Används för att generera unika ordernummer baserat på datum
+     */
+    @Query("SELECT o.orderNumber FROM Order o WHERE o.orderNumber LIKE :pattern ORDER BY o.orderNumber DESC")
+    List<String> findOrderNumbersByPattern(@Param("pattern") String pattern);
 
     // PAGINERING
     Page<Order> findAllByOrderByOrderDateDesc(Pageable pageable);

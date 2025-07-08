@@ -1,178 +1,236 @@
 package com.ctrlbuy.webshop.security.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Entity
-@Table(name = "USERS")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "first_name")
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
 
-    @Builder.Default
-    private Boolean active = true;
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
 
-    // 🚀 PRODUCTION READY - Alla advanced fields som @Transient för Railway/AWS compatibility
-    @Transient
-    @Builder.Default
-    private Boolean emailVerified = false;
+    @Column(nullable = false)
+    private boolean enabled = true;
 
-    @Transient
+    private boolean emailVerified = false;
     private String verificationToken;
-
-    @Transient
     private LocalDateTime verificationTokenExpiry;
-
-    @Transient
     private String resetToken;
-
-    @Transient
     private LocalDateTime resetTokenExpiry;
 
-    @Transient
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime lastLoginAt;
 
-    @Transient
-    private LocalDateTime updatedAt;
+    // Default constructor
+    public User() {}
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    @Builder.Default
-    private List<String> roles = new ArrayList<>(List.of("USER"));
+    // Constructor with all fields
+    public User(Long id, String username, String email, String password, String firstName, String lastName, Role role, boolean enabled, boolean emailVerified, String verificationToken, LocalDateTime verificationTokenExpiry, String resetToken, LocalDateTime resetTokenExpiry, LocalDateTime createdAt, LocalDateTime lastLoginAt) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+        this.enabled = enabled;
+        this.emailVerified = emailVerified;
+        this.verificationToken = verificationToken;
+        this.verificationTokenExpiry = verificationTokenExpiry;
+        this.resetToken = resetToken;
+        this.resetTokenExpiry = resetTokenExpiry;
+        this.createdAt = createdAt;
+        this.lastLoginAt = lastLoginAt;
+    }
 
-    // UserDetails implementation - PRODUCTION READY
+    // Builder pattern
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
+
+    public static class UserBuilder {
+        private Long id;
+        private String username;
+        private String email;
+        private String password;
+        private String firstName;
+        private String lastName;
+        private Role role = Role.USER;
+        private boolean enabled = true;
+        private boolean emailVerified = false;
+        private String verificationToken;
+        private LocalDateTime verificationTokenExpiry;
+        private String resetToken;
+        private LocalDateTime resetTokenExpiry;
+        private LocalDateTime createdAt = LocalDateTime.now();
+        private LocalDateTime lastLoginAt;
+
+        public UserBuilder id(Long id) { this.id = id; return this; }
+        public UserBuilder username(String username) { this.username = username; return this; }
+        public UserBuilder email(String email) { this.email = email; return this; }
+        public UserBuilder password(String password) { this.password = password; return this; }
+        public UserBuilder firstName(String firstName) { this.firstName = firstName; return this; }
+        public UserBuilder lastName(String lastName) { this.lastName = lastName; return this; }
+        public UserBuilder role(Role role) { this.role = role; return this; }
+        public UserBuilder enabled(boolean enabled) { this.enabled = enabled; return this; }
+        public UserBuilder emailVerified(boolean emailVerified) { this.emailVerified = emailVerified; return this; }
+        public UserBuilder verificationToken(String verificationToken) { this.verificationToken = verificationToken; return this; }
+        public UserBuilder verificationTokenExpiry(LocalDateTime verificationTokenExpiry) { this.verificationTokenExpiry = verificationTokenExpiry; return this; }
+        public UserBuilder resetToken(String resetToken) { this.resetToken = resetToken; return this; }
+        public UserBuilder resetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; return this; }
+        public UserBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
+        public UserBuilder lastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; return this; }
+
+        // ADD THIS METHOD for DataInitializer compatibility
+        public UserBuilder active(boolean active) {
+            this.enabled = active;
+            return this;
+        }
+
+        public UserBuilder roles(List<String> roles) {
+            if (roles != null && !roles.isEmpty()) {
+                // Take first role and convert to enum
+                String roleStr = roles.get(0).replace("ROLE_", "").toUpperCase();
+                try {
+                    this.role = Role.valueOf(roleStr);
+                } catch (IllegalArgumentException e) {
+                    this.role = Role.USER; // Default fallback
+                }
+            }
+            return this;
+        }
+
+        public User build() {
+            return new User(id, username, email, password, firstName, lastName, role, enabled, emailVerified, verificationToken, verificationTokenExpiry, resetToken, resetTokenExpiry, createdAt, lastLoginAt);
+        }
+    }
+
+    // All getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public LocalDateTime getVerificationTokenExpiry() { return verificationTokenExpiry; }
+    public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) { this.verificationTokenExpiry = verificationTokenExpiry; }
+
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+
+    // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (roles == null || roles.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return roles.stream()
-                .map(role -> {
-                    if (role.startsWith("ROLE_")) {
-                        return new SimpleGrantedAuthority(role);
-                    } else {
-                        return new SimpleGrantedAuthority("ROLE_" + role);
-                    }
-                })
-                .collect(Collectors.toList());
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
-    @Override
-    public boolean isEnabled() {
-        // ✅ Production: Email verification disabled, only check active status
-        return active != null && active;
-    }
-
-    // 🔧 COMPATIBILITY METHODS for Railway/AWS deployment
-    public void setEnabled(boolean enabled) {
-        this.active = enabled;
-    }
-
+    // KRITISK: active property alias för enabled
     public boolean isActive() {
-        return active != null && active;
+        return enabled;
     }
 
-    public boolean isEmailVerified() {
-        // ✅ Always return true for production deployment
-        return true;
+    public void setActive(boolean active) {
+        this.enabled = active;
     }
 
-    // 🎯 UTILITY METHODS - Production optimized
-    public String getFullName() {
-        if (firstName != null && !firstName.trim().isEmpty() &&
-                lastName != null && !lastName.trim().isEmpty()) {
-            return "%s %s".formatted(firstName.trim(), lastName.trim());
-        }
-        return username;
+    // Helper method för JPA Query kompatibilitet
+    public boolean getActive() {
+        return enabled;
     }
 
-    public void addRole(String role) {
-        if (roles == null) {
-            roles = new ArrayList<>();
-        }
-        String normalizedRole = role.startsWith("ROLE_") ? role.substring(5) : role;
-        if (!roles.contains(normalizedRole)) {
-            roles.add(normalizedRole);
+    public Set<String> getRoles() { return Set.of(role.name()); }
+    public void addRole(String roleName) { this.role = Role.valueOf(roleName); }
+
+    // NEW: For DataInitializer compatibility
+    public void setRoles(List<String> roles) {
+        if (roles != null && !roles.isEmpty()) {
+            String roleStr = roles.get(0).replace("ROLE_", "").toUpperCase();
+            try {
+                this.role = Role.valueOf(roleStr);
+            } catch (IllegalArgumentException e) {
+                this.role = Role.USER;
+            }
         }
     }
 
     public boolean isVerificationTokenValid() {
-        // ✅ Production: Always return false to disable token verification
-        return false;
+        return verificationToken != null && verificationTokenExpiry != null
+                && LocalDateTime.now().isBefore(verificationTokenExpiry);
     }
 
     public boolean isResetTokenValid() {
-        // ✅ Production: Always return false to disable reset tokens
-        return false;
+        return resetToken != null && resetTokenExpiry != null
+                && LocalDateTime.now().isBefore(resetTokenExpiry);
     }
 
-    // 📅 PRODUCTION DATE METHODS - Use current time as fallback
-    public String getFormattedCreatedAt() {
-        LocalDateTime dateToUse = createdAt != null ? createdAt : LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-        return dateToUse.format(formatter);
-    }
-
-    public String getFormattedUpdatedAt() {
-        LocalDateTime dateToUse = updatedAt != null ? updatedAt : LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
-        return dateToUse.format(formatter);
-    }
-
-    public boolean hasCompleteProfile() {
-        // ✅ Production: Only check name fields, ignore email verification
-        return firstName != null && !firstName.trim().isEmpty() &&
-                lastName != null && !lastName.trim().isEmpty();
+    public enum Role {
+        USER, ADMIN
     }
 }

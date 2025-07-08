@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -117,7 +117,8 @@ public class AdminProductController {
     @GetMapping("/edit/{id}")
     public String showEditProductForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
-            Product product = productService.getProductById(id);
+            // FIX: Optional<Product> conversion error - RAD 120
+            Product product = productService.getProductById(id).orElse(null);
             if (product == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Produkten kunde inte hittas!");
                 return "redirect:/admin/products-management";
@@ -147,11 +148,13 @@ public class AdminProductController {
         }
 
         try {
-            Product existingProduct = productService.getProductById(id);
-            if (existingProduct == null) {
+            // FIX: Optional<Product> conversion error - RAD 150
+            Optional<Product> optionalProduct = productService.getProductById(id);
+            if (!optionalProduct.isPresent()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Produkten kunde inte hittas!");
                 return "redirect:/admin/products-management";
             }
+            Product existingProduct = optionalProduct.get();
 
             // Uppdatera befintlig produkt med nya värden
             existingProduct.setName(product.getName());
@@ -187,10 +190,9 @@ public class AdminProductController {
     @ResponseBody
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         try {
-            Product product = productService.getProductById(id);
-            if (product == null) {
-                return ResponseEntity.badRequest().body("Produkten kunde inte hittas!");
-            }
+            // FIX: Optional<Product> conversion error - RAD 190
+            Product product = productService.getProductById(id)
+                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
             String productName = product.getName();
             productService.deleteProduct(id);
@@ -208,7 +210,8 @@ public class AdminProductController {
     @ResponseBody
     public ResponseEntity<String> toggleProductStatus(@PathVariable Long id) {
         try {
-            Product product = productService.getProductById(id);
+            // FIX: Optional<Product> conversion error - RAD 211
+            Product product = productService.getProductById(id).orElse(null);
             if (product == null) {
                 return ResponseEntity.badRequest().body("Produkten kunde inte hittas!");
             }

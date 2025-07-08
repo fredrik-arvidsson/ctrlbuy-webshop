@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.model;
 
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.enums.PaymentStatus;
 import com.ctrlbuy.webshop.enums.PaymentType;
 import jakarta.persistence.*;

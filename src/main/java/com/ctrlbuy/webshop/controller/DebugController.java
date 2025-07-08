@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ctrlbuy.webshop.repository.ProductRepository;
 import com.ctrlbuy.webshop.service.ProductService;
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 
 @Controller
 @RequestMapping("/debug")

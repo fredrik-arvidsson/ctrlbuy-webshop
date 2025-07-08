@@ -15,7 +15,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)  // 🛡️ Aktiverar @PreAuthorize annotationer
 public class SecurityConfig {
 
     @Autowired
@@ -37,46 +37,46 @@ public class SecurityConfig {
                         // 🔥 H2-KONSOLL - MÅSTE VARA FÖRST!
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // Statiska resurser
+                        // 📁 Statiska resurser - tillgängliga för alla
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
 
-                        // Publika sidor
+                        // 🏠 Publika sidor - ingen inloggning krävs
                         .requestMatchers("/", "/home", "/home/**", "/about", "/om-oss", "/produkter", "/produkter/**", "/kontakt", "/support", "/debug-products").permitAll()
 
-                        // Produktsidor
+                        // 🛍️ Produktsidor - publikt tillgängliga
                         .requestMatchers("/products", "/products/**").permitAll()
 
-                        // Autentisering och registrering
+                        // 🔐 Autentisering och registrering - publikt tillgängliga
                         .requestMatchers("/login", "/login/**", "/register", "/register/**").permitAll()
 
-                        // E-postverifiering och relaterade endpoints
+                        // 📧 E-postverifiering och relaterade endpoints
                         .requestMatchers("/verify-email", "/verify-email/**").permitAll()
                         .requestMatchers("/resend-verification", "/resend-verification/**").permitAll()
 
-                        // Lösenordsåterställning
+                        // 🔑 Lösenordsåterställning - publikt tillgängliga
                         .requestMatchers("/forgot-password", "/forgot-password/**").permitAll()
                         .requestMatchers("/reset-password", "/reset-password/**").permitAll()
 
-                        // Test endpoints
+                        // 🧪 Test endpoints - utveckling
                         .requestMatchers("/test-email", "/test-email/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
 
-                        // Admin endpoints - KRÄVER ADMIN ROLL
+                        // 🛡️ ADMIN ENDPOINTS - KRÄVER ROLE_ADMIN (dubbel säkerhet)
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Cart endpoints
+                        // 🛒 Varukorg - tillgänglig för alla (session-baserad)
                         .requestMatchers("/cart/**", "/varukorg/**").permitAll()
 
-                        // Coming Soon sidor
+                        // 📄 Coming Soon sidor - publikt tillgängliga
                         .requestMatchers("/returer", "/spara-bestallning", "/garantivillkor", "/coming-soon").permitAll()
 
-                        // Profil-sidor kräver inloggning
+                        // 👤 Profil-sidor - kräver inloggning (vilken roll som helst)
                         .requestMatchers("/min-profil", "/min-profil/**", "/profile/**").authenticated()
 
-                        // ERROR endpoint
+                        // ❌ Error endpoint - publikt tillgängligt
                         .requestMatchers("/error").permitAll()
 
-                        // Resten är publikt
+                        // 🌐 Allt annat är publikt (fallback)
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
@@ -107,7 +107,7 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler())
                 )
-                // Headers för H2-konsoll
+                // 🖼️ Headers för H2-konsoll
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )

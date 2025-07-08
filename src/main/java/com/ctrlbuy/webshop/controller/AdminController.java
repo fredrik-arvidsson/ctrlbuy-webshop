@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.repository.ProductRepository;
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.service.UserService;
@@ -15,6 +15,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")  // 🛡️ SÄKERHET: Hela controllern kräver ROLE_ADMIN
 public class AdminController {
 
     @Autowired
@@ -25,10 +26,10 @@ public class AdminController {
 
     /**
      * Admin Dashboard - huvudsida efter inloggning
-     * ✅ FIXAD: Nu med produktstatistik som matchar rapporterna
+     * ✅ SÄKERHET: Dubbel kontroll med @PreAuthorize på metod-nivå också
      */
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")  // 🛡️ Extra säkerhet på metod-nivå
     public String dashboard(Model model) {
         System.out.println("🎛️🔥🔥 ADMIN DASHBOARD ENDPOINT ANROPAD! 🔥🔥🎛️");
         System.out.println("🎛️ Returnerar template: admin/dashboard");
@@ -122,6 +123,7 @@ public class AdminController {
 
     /**
      * Redirect från /admin till dashboard
+     * 🛡️ SÄKERHET: Ärver @PreAuthorize från klass-nivå
      */
     @GetMapping("")
     public String adminHome() {
@@ -132,6 +134,7 @@ public class AdminController {
 
     /**
      * ✅ UPPDATERAD: Visa användare med filter för aktiva/inaktiva
+     * 🛡️ SÄKERHET: Extra säkerhet på metod-nivå
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -171,6 +174,7 @@ public class AdminController {
     /**
      * 🔄 REDIRECT: /admin/products -> /admin/products-management
      * Eftersom /admin/products-management redan fungerar perfekt
+     * 🛡️ SÄKERHET: Ärver @PreAuthorize från klass-nivå
      */
     @GetMapping("/products")
     public String redirectToProductsManagement() {
@@ -181,6 +185,7 @@ public class AdminController {
     /**
      * 🔄 TEMPORARY: /admin/roles -> /admin/users
      * Tills vi fixar rollhantering
+     * 🛡️ SÄKERHET: Ärver @PreAuthorize från klass-nivå
      */
     @GetMapping("/roles")
     public String redirectToUsers() {

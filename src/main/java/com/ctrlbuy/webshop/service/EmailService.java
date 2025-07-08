@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.service;
 
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.security.entity.User;
 
 /**

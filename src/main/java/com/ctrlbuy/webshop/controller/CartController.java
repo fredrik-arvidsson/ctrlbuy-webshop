@@ -1,12 +1,11 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Product;
+import org.springframework.stereotype.Controller;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -21,9 +20,9 @@ import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 public class CartController {
 
+    private static final System.Logger log = System.getLogger(CartController.class.getName());
     private final ProductService productService;
     private static final String CART_SESSION_KEY = "shopping_cart";
 
@@ -36,7 +35,7 @@ public class CartController {
     // SVENSK URL - DIREKT MAPPING (inte under /cart)
     @GetMapping("/varukorg")
     public String viewCartSwedish(HttpSession session, Model model, Authentication auth) {
-        log.debug("Visar kundvagn via svensk URL för användare: {}",
+        log.log(System.Logger.Level.DEBUG, "Visar kundvagn via svensk URL för användare: {0}",
                 auth != null ? auth.getName() : "anonym");
 
         try {
@@ -65,11 +64,11 @@ public class CartController {
             model.addAttribute("cartTotal", total);       // Backup
             model.addAttribute("cartItemCount", cartItemCount);
 
-            log.debug("Cart contains {} items, subtotal: {} kr, shipping: {} kr, total: {} kr",
+            log.log(System.Logger.Level.DEBUG, "Cart contains {0} items, subtotal: {1} kr, shipping: {2} kr, total: {3} kr",
                     cartItemCount, subtotal, shipping, total);
 
         } catch (Exception e) {
-            log.error("Error loading cart", e);
+            log.log(System.Logger.Level.ERROR, "Error loading cart", e);
             model.addAttribute("errorMessage", "Ett fel uppstod vid hämtning av kundvagnen.");
             model.addAttribute("cartItems", new ArrayList<>());
             model.addAttribute("subtotal", BigDecimal.ZERO);
@@ -89,7 +88,7 @@ public class CartController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        log.debug("Lägger till produkt {} i kundvagn, kvantitet: {}", productId, quantity);
+        log.log(System.Logger.Level.DEBUG, "Lägger till produkt {0} i kundvagn, kvantitet: {1}", productId, quantity);
 
         try {
             Optional<Product> productOpt = productService.getProductByIdWithoutView(productId);
@@ -136,10 +135,10 @@ public class CartController {
             redirectAttributes.addFlashAttribute("successMessage",
                     product.getName() + " har lagts till i kundvagnen");
 
-            log.info("Produkt {} tillagd i kundvagn", product.getName());
+            log.log(System.Logger.Level.INFO, "Produkt {0} tillagd i kundvagn", product.getName());
 
         } catch (Exception e) {
-            log.error("Fel vid tillägg i kundvagn för produkt: " + productId, e);
+            log.log(System.Logger.Level.ERROR, "Fel vid tillägg i kundvagn för produkt: " + productId, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ett fel uppstod vid tillägg i kundvagn");
         }
 
@@ -155,7 +154,7 @@ public class CartController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        log.debug("Uppdaterar kvantitet för produkt {} till {}", productId, quantity);
+        log.log(System.Logger.Level.DEBUG, "Uppdaterar kvantitet för produkt {0} till {1}", productId, quantity);
 
         try {
             if (quantity <= 0) {
@@ -197,7 +196,7 @@ public class CartController {
             redirectAttributes.addFlashAttribute("successMessage", "Kvantiteten har uppdaterats");
 
         } catch (Exception e) {
-            log.error("Fel vid uppdatering av kundvagn för produkt: " + productId, e);
+            log.log(System.Logger.Level.ERROR, "Fel vid uppdatering av kundvagn för produkt: " + productId, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ett fel uppstod vid uppdatering");
         }
 
@@ -211,7 +210,7 @@ public class CartController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        log.debug("Tar bort produkt {} från kundvagn", productId);
+        log.log(System.Logger.Level.DEBUG, "Tar bort produkt {0} från kundvagn", productId);
 
         try {
             List<CartItem> cartItems = getCartItemsFromSession(session);
@@ -226,7 +225,7 @@ public class CartController {
             }
 
         } catch (Exception e) {
-            log.error("Fel vid borttagning från kundvagn för produkt: " + productId, e);
+            log.log(System.Logger.Level.ERROR, "Fel vid borttagning från kundvagn för produkt: " + productId, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ett fel uppstod vid borttagning");
         }
 
@@ -236,14 +235,14 @@ public class CartController {
     // Rensa kundvagn
     @PostMapping("/cart/clear")
     public String clearCart(HttpSession session, RedirectAttributes redirectAttributes) {
-        log.debug("Rensar kundvagn");
+        log.log(System.Logger.Level.DEBUG, "Rensar kundvagn");
 
         try {
             session.removeAttribute(CART_SESSION_KEY);
             redirectAttributes.addFlashAttribute("successMessage", "Kundvagnen har rensats");
 
         } catch (Exception e) {
-            log.error("Fel vid rensning av kundvagn", e);
+            log.log(System.Logger.Level.ERROR, "Fel vid rensning av kundvagn", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ett fel uppstod vid rensning av kundvagn");
         }
 
@@ -317,7 +316,7 @@ public class CartController {
             response.put("cartTotal", total);
 
         } catch (Exception e) {
-            log.error("Fel vid AJAX-tillägg i kundvagn för produkt: " + productId, e);
+            log.log(System.Logger.Level.ERROR, "Fel vid AJAX-tillägg i kundvagn för produkt: " + productId, e);
             response.put("success", false);
             response.put("message", "Ett fel uppstod vid tillägg i kundvagn");
             return ResponseEntity.internalServerError().body(response);
@@ -353,7 +352,7 @@ public class CartController {
         return cartItems;
     }
 
-    // CartItem class som är kompatibel med din template
+    // ✅ FIXAD CartItem class med REA-pris support
     public static class CartItem {
         private Product product;
         private Integer quantity;
@@ -363,7 +362,16 @@ public class CartController {
         public CartItem(Product product, Integer quantity) {
             this.product = product;
             this.quantity = quantity;
-            this.unitPrice = product.getPrice();
+
+            // ✅ FIXAT: Använd getCurrentPrice() istället för getPrice()
+            // Detta returnerar REA-pris om produkten är på rea
+            try {
+                this.unitPrice = product.getCurrentPrice();
+            } catch (Exception e) {
+                // Fallback till vanligt pris om getCurrentPrice() inte finns
+                this.unitPrice = product.getPrice();
+            }
+
             updatePrice();
         }
 
@@ -371,9 +379,22 @@ public class CartController {
             this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
         }
 
+        // ✅ FIXAT: Uppdatera även unitPrice när produkten ändras
+        public void refreshPrice() {
+            try {
+                this.unitPrice = product.getCurrentPrice();
+            } catch (Exception e) {
+                this.unitPrice = product.getPrice();
+            }
+            updatePrice();
+        }
+
         // Getters and setters
         public Product getProduct() { return product; }
-        public void setProduct(Product product) { this.product = product; }
+        public void setProduct(Product product) {
+            this.product = product;
+            refreshPrice(); // ✅ Uppdatera pris när produkt ändras
+        }
 
         public Integer getQuantity() { return quantity; }
         public void setQuantity(Integer quantity) {

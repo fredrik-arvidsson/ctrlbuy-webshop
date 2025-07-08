@@ -1,7 +1,7 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Order;
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Order;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.repository.OrderRepository;
 import com.ctrlbuy.webshop.repository.ProductRepository;
 import org.springframework.security.access.prepost.PreAuthorize;

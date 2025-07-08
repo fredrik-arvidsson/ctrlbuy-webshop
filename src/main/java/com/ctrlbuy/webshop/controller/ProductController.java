@@ -1,9 +1,10 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,6 @@ public class ProductController {
             @RequestParam(required = false) String search,
             Model model) {
 
-        log.info("=== PRODUKTCONTROLLER DEBUG START ===");
-        log.info("Parameters - category: {}, search: {}", category, search);
-
         try {
             List<Product> products;
 
@@ -37,28 +35,24 @@ public class ProductController {
                 products = productService.searchProducts(search.trim());
                 model.addAttribute("pageTitle", "Sökresultat för: " + search);
                 model.addAttribute("searchTerm", search);
-                log.info("Searching for products with query: {}, found: {} products", search, products.size());
             } else if (category != null && !category.trim().isEmpty() && !category.equals("Alla")) {
                 products = productService.getProductsByCategory(category);
                 model.addAttribute("pageTitle", "Produkter i kategorin: " + category);
                 model.addAttribute("selectedCategory", category);
-                log.info("Filtering products by category: {}, found: {} products", category, products.size());
             } else {
                 products = productService.getAllProducts();
                 model.addAttribute("pageTitle", "Alla produkter");
-                log.info("Loading all products, found: {} products", products.size());
             }
 
             model.addAttribute("products", products);
-            log.info("Products loaded successfully: {} products", products.size());
+            log.info("✅ Visar {} produkter på produktsidan", products.size());
 
         } catch (Exception e) {
-            log.error("ERROR in listProducts: ", e);
+            log.error("❌ Fel vid hämtning av produkter: {}", e.getMessage());
             model.addAttribute("error", "Ett fel uppstod vid hämtning av produkter.");
             model.addAttribute("products", List.of());
         }
 
-        log.info("=== PRODUKTCONTROLLER DEBUG END ===");
         return "products";
     }
 
@@ -66,20 +60,16 @@ public class ProductController {
     public String viewProduct(@PathVariable Long id,
                               Model model,
                               RedirectAttributes redirectAttributes) {
-        log.info("=== PRODUKTDETALJER DEBUG START ===");
-        log.info("Visar produktdetaljer för ID: {}", id);
 
         try {
             Optional<Product> productOpt = productService.findById(id);
 
             if (productOpt.isEmpty()) {
-                log.warn("Produkt med ID {} hittades inte", id);
                 redirectAttributes.addFlashAttribute("error", "Produkten hittades inte.");
                 return "redirect:/products";
             }
 
             Product product = productOpt.get();
-            log.info("Produkt hittad: {} (ID: {})", product.getName(), product.getId());
 
             // Lägg till produktdata
             model.addAttribute("product", product);
@@ -90,30 +80,25 @@ public class ProductController {
                 model.addAttribute("reviews", List.of());
                 model.addAttribute("reviewCount", 0);
                 model.addAttribute("averageRating", 0.0);
-                log.debug("Recensionsdata initialiserad");
             } catch (Exception e) {
-                log.warn("Could not load reviews for product {}: {}", product.getName(), e.getMessage());
                 model.addAttribute("reviews", List.of());
                 model.addAttribute("reviewCount", 0);
                 model.addAttribute("averageRating", 0.0);
             }
 
-            // Relaterade produkter
+            // Relaterade produkter - ✅ BEHÅLL BEGRÄNSNING HÄR (bara för relaterade)
             if (product.getCategory() != null && !product.getCategory().trim().isEmpty()) {
                 try {
                     List<Product> relatedProducts = productService.getProductsByCategory(product.getCategory())
                             .stream()
                             .filter(p -> !p.getId().equals(id))
-                            .limit(4)
+                            .limit(4)  // ✅ BEHÅLL - bara 4 relaterade produkter
                             .toList();
                     model.addAttribute("relatedProducts", relatedProducts);
-                    log.info("Found {} related products för kategori: {}", relatedProducts.size(), product.getCategory());
                 } catch (Exception e) {
-                    log.warn("Could not load related products: {}", e.getMessage());
                     model.addAttribute("relatedProducts", List.of());
                 }
             } else {
-                log.warn("Ingen kategori för produkt {}, inga relaterade produkter", product.getName());
                 model.addAttribute("relatedProducts", List.of());
             }
 
@@ -144,12 +129,8 @@ public class ProductController {
                     model.addAttribute("discountPercentage", discountPercentage);
                     model.addAttribute("saleDescription", product.getSaleDescription());
 
-                    log.info("Produkt på rea: {} - Ordinarie: {} kr, Rea: {} kr, Rabatt: {}%",
-                            product.getName(), originalPrice, currentPrice, discountPercentage);
                 } catch (Exception e) {
                     // Fallback: använd grundläggande fält
-                    log.warn("Använder fallback REA-logik för {}: {}", product.getName(), e.getMessage());
-
                     BigDecimal currentPrice = product.getPrice();
                     BigDecimal salePrice = product.getSalePrice();
                     BigDecimal displayPrice = salePrice != null ? salePrice : currentPrice;
@@ -168,25 +149,19 @@ public class ProductController {
             model.addAttribute("inStock", inStock);
             model.addAttribute("lowStock", lowStock);
 
-            log.info("Lagerstatus - I lager: {}, Lågt lager: {}, Antal: {}",
-                    inStock, lowStock, stockQty);
-            log.info("Produktdetaljer redo för visning: {}", product.getName());
-
         } catch (Exception e) {
-            log.error("Error loading product with id {}: {}", id, e.getMessage(), e);
+            log.error("❌ Fel vid hämtning av produktdetail för ID {}: {}", id, e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Ett fel uppstod vid hämtning av produkten.");
             return "redirect:/products";
         }
 
-        log.info("=== PRODUKTDETALJER DEBUG END ===");
         return "product-detail";
     }
 
-    // API endpoint för produktsökning (AJAX)
+    // API endpoint för produktsökning (AJAX) - ✅ BEHÅLL BEGRÄNSNING HÄR (för prestanda)
     @GetMapping("/api/search")
     @ResponseBody
     public List<Product> searchProducts(@RequestParam String q) {
-        log.debug("API-sökning efter: {}", q);
 
         if (q == null || q.trim().length() < 2) {
             return List.of();
@@ -195,10 +170,9 @@ public class ProductController {
         try {
             return productService.searchActiveProducts(q.trim())
                     .stream()
-                    .limit(10)
+                    .limit(10)  // ✅ BEHÅLL - bara 10 i AJAX-sök för prestanda
                     .toList();
         } catch (Exception e) {
-            log.warn("Search method error: {}", e.getMessage());
             return List.of();
         }
     }
@@ -209,75 +183,70 @@ public class ProductController {
         return listProducts(category, null, model);
     }
 
-    // ✅ FIXAT REA-SIDA - använder den uppdaterade getProductsOnSale() metoden
+    // ✅ FIXAT REA-SIDA - visar ALLA rea-produkter
     @GetMapping("/sale")
     public String viewSaleProducts(Model model) {
-        log.info("=== REA-PRODUKTER DEBUG START ===");
         try {
-            // ✅ ANVÄND den fixade metoden från ProductService
+            // ✅ TA BORT .limit() - visa ALLA rea-produkter
             List<Product> saleProducts = productService.getProductsOnSale();
 
             model.addAttribute("products", saleProducts);
             model.addAttribute("pageTitle", "Produkter på REA");
             model.addAttribute("selectedCategory", "sale");
 
-            log.info("✅ REA-CONTROLLER: Found {} products on sale", saleProducts.size());
+            log.info("✅ Visar {} produkter på REA", saleProducts.size());
 
             // Debug-logging för varje REA-produkt
             if (!saleProducts.isEmpty()) {
                 saleProducts.forEach(product -> {
                     try {
-                        log.debug("REA-produkt: {} - Ordinarie: {} kr, REA: {} kr",
-                                product.getName(),
-                                product.getOriginalPrice(),
-                                product.getPrice());
+                        log.debug("REA-produkt: {} - {}", product.getName(), product.getCurrentPrice());
                     } catch (Exception e) {
-                        log.debug("REA-produkt: {} - Basic info", product.getName());
+                        log.warn("Kunde inte logga REA-produkt: {}", e.getMessage());
                     }
                 });
             } else {
-                log.warn("✅ REA-CONTROLLER: Inga REA-produkter hittades!");
+                log.warn("Inga REA-produkter hittades");
             }
 
         } catch (Exception e) {
-            log.error("✅ REA-CONTROLLER: Error loading sale products: {}", e.getMessage(), e);
+            log.error("❌ Fel vid hämtning av REA-produkter: {}", e.getMessage());
             model.addAttribute("products", List.of());
             model.addAttribute("error", "Kunde inte ladda rea-produkter");
         }
-        log.info("=== REA-PRODUKTER DEBUG END ===");
         return "products";
     }
 
-    // Populära produkter
+    // ✅ UPPDATERAD: Populära produkter - kan visa fler än 12
     @GetMapping("/popular")
     public String viewPopularProducts(Model model) {
-        log.debug("Loading popular products");
         try {
-            List<Product> popularProducts = productService.getPopularProducts(12);
+            // ✅ ÄNDRAT: Visa alla populära produkter istället för bara 12
+            List<Product> popularProducts = productService.getPopularProducts(50); // Ökat från 12 till 50
             model.addAttribute("products", popularProducts);
             model.addAttribute("pageTitle", "Populära produkter");
             model.addAttribute("selectedCategory", "popular");
-            log.info("Found {} popular products", popularProducts.size());
+            log.info("✅ Visar {} populära produkter", popularProducts.size());
         } catch (Exception e) {
-            log.error("Error loading popular products: {}", e.getMessage());
+            log.error("❌ Fel vid hämtning av populära produkter: {}", e.getMessage());
             model.addAttribute("products", List.of());
             model.addAttribute("error", "Kunde inte ladda populära produkter");
         }
         return "products";
     }
 
-    // Nya produkter
+    // ✅ UPPDATERAD: Nya produkter - kan visa fler än 12
     @GetMapping("/new")
     public String viewNewProducts(Model model) {
-        log.debug("Loading new products");
         try {
-            List<Product> newProducts = productService.getNewestProducts(12);
+            // ✅ ÄNDRAT: Visa alla nya produkter istället för bara 12
+            List<Product> newProducts = productService.getNewestProducts(50); // Ökat från 12 till 50
             model.addAttribute("products", newProducts);
             model.addAttribute("pageTitle", "Nya produkter");
             model.addAttribute("selectedCategory", "new");
-            log.info("Found {} new products", newProducts.size());
+            log.info("✅ Visar {} nya produkter", newProducts.size());
         } catch (Exception e) {
-            log.error("Error loading new products: {}", e.getMessage());
+            log.error("❌ Fel vid hämtning av nya produkter: {}", e.getMessage());
             model.addAttribute("products", List.of());
             model.addAttribute("error", "Kunde inte ladda nya produkter");
         }
@@ -293,7 +262,7 @@ public class ProductController {
                     .map(product -> product.getStockQuantity() != null && product.getStockQuantity() > 0)
                     .orElse(false);
         } catch (Exception e) {
-            log.error("Error checking stock for product {}: {}", id, e.getMessage());
+            log.error("❌ Fel vid kontroll av lagerstatus för produkt {}: {}", id, e.getMessage());
             return false;
         }
     }
@@ -306,16 +275,76 @@ public class ProductController {
             List<Product> saleProducts = productService.getProductsOnSale();
             return String.format("REA-statistik: %d produkter på rea", saleProducts.size());
         } catch (Exception e) {
-            log.error("Error getting sale stats: {}", e.getMessage());
+            log.error("❌ Fel vid hämtning av REA-statistik: {}", e.getMessage());
             return "Kunde inte hämta REA-statistik";
         }
     }
 
     @ExceptionHandler(Exception.class)
     public String handleError(Exception e, Model model) {
-        log.error("Fel i ProductController: {}", e.getMessage(), e);
+        log.error("❌ Oväntat fel i ProductController: {}", e.getMessage(), e);
         model.addAttribute("error", "Ett oväntat fel inträffade vid hämtning av produkter.");
         model.addAttribute("products", List.of());
         return "products";
+    }
+}
+
+// ===============================================
+// ✅ LÄGG TILL DENNA CONTROLLER-KLASS SEPARAT
+// ===============================================
+
+@Controller
+@RequiredArgsConstructor
+@Slf4j
+class ReaController {
+
+    private final ProductService productService;
+
+    // ✅ NY REA-MAPPING för /rea URL
+    @GetMapping("/rea")
+    public String getProductsOnSale(Model model, Authentication authentication) {
+        log.info("=== REA CONTROLLER START ===");
+
+        try {
+            // Hämta alla produkter på rea
+            List<Product> saleProducts = productService.getProductsOnSale();
+            log.info("Hittade {} produkter på rea", saleProducts.size());
+
+            // Lägg till i model
+            model.addAttribute("saleProducts", saleProducts);
+            model.addAttribute("title", "REA - Spara pengar på våra bästa produkter!");
+
+            // Beräkna total besparing
+            BigDecimal totalSavings = BigDecimal.ZERO;
+            for (Product product : saleProducts) {
+                if (product.getOriginalPrice() != null && product.getSalePrice() != null) {
+                    BigDecimal saving = product.getOriginalPrice().subtract(product.getSalePrice());
+                    totalSavings = totalSavings.add(saving);
+                } else if (product.getOriginalPrice() != null && product.getPrice() != null) {
+                    BigDecimal saving = product.getOriginalPrice().subtract(product.getPrice());
+                    totalSavings = totalSavings.add(saving);
+                }
+            }
+            model.addAttribute("totalSavings", totalSavings);
+
+            // Användarinfo om inloggad
+            if (authentication != null && authentication.isAuthenticated()) {
+                String username = authentication.getName();
+                model.addAttribute("isLoggedIn", true);
+                model.addAttribute("username", username);
+                log.info("REA-sida visad för inloggad användare: {}", username);
+            } else {
+                model.addAttribute("isLoggedIn", false);
+                log.info("REA-sida visad för anonym användare");
+            }
+
+            log.info("=== REA CONTROLLER END ===");
+            return "rea"; // Returnerar rea.html template
+
+        } catch (Exception e) {
+            log.error("Fel vid hämtning av REA-produkter: ", e);
+            model.addAttribute("error", "Kunde inte ladda REA-produkter");
+            return "error";
+        }
     }
 }

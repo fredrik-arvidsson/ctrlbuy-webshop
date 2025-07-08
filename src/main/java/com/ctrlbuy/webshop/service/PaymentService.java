@@ -1,9 +1,12 @@
 package com.ctrlbuy.webshop.service;
 
+import com.ctrlbuy.webshop.entity.Order;
+
 import com.ctrlbuy.webshop.exception.PaymentException;
 import com.ctrlbuy.webshop.model.*;
-import com.ctrlbuy.webshop.enums.PaymentStatus;
-import com.ctrlbuy.webshop.enums.PaymentType;import com.ctrlbuy.webshop.repository.OrderRepository;
+import com.ctrlbuy.webshop.entity.Order.PaymentStatus;
+import com.ctrlbuy.webshop.enums.PaymentType;
+import com.ctrlbuy.webshop.repository.OrderRepository;
 import com.ctrlbuy.webshop.repository.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +46,9 @@ public class PaymentService {
         logger.info("Bearbetar betalning för order: {}", order.getOrderNumber());
 
         // Validera att belopp matchar
-        if (!paymentInfo.getAmount().equals(BigDecimal.valueOf(order.getTotalAmount()))) {
+        if (!paymentInfo.getAmount().equals(order.getTotalAmount())) {
             throw new PaymentException("Belopp matchar inte order. Order: " +
-                    BigDecimal.valueOf(order.getTotalAmount()) + ", Betalning: " + paymentInfo.getAmount());
+                    order.getTotalAmount() + ", Betalning: " + paymentInfo.getAmount());
         }
 
         // Validera betalningsinformation
@@ -139,7 +142,7 @@ public class PaymentService {
 
         try {
             // Anropa payment gateway för återbetalning
-            boolean success = paymentGateway.refund(order.getTransactionId(), BigDecimal.valueOf(order.getTotalAmount()));
+            boolean success = paymentGateway.refund(order.getTransactionId(), order.getTotalAmount());
 
             if (success) {
                 order.setPaymentStatus(PaymentStatus.REFUNDED);
@@ -374,7 +377,7 @@ public class PaymentService {
         payment.setAmount(paymentInfo.getAmount());
         payment.setCardType(detectCardType(paymentInfo.getCardNumber()));
         payment.setTransactionId(result.getTransactionId());
-        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setStatus(com.ctrlbuy.webshop.enums.PaymentStatus.COMPLETED);
         payment.setProcessedAt(LocalDateTime.now());
 
         // Maskera kortnummer
@@ -387,9 +390,9 @@ public class PaymentService {
     private void createRefundRecord(Order order) {
         Payment refund = new Payment();
         refund.setOrder(order);
-        refund.setAmount(BigDecimal.valueOf(order.getTotalAmount()).negate()); // Negativt belopp för återbetalning
+        refund.setAmount(order.getTotalAmount().negate()); // Negativt belopp för återbetalning
         refund.setTransactionId(order.getTransactionId() + "-REFUND");
-        refund.setStatus(PaymentStatus.REFUNDED);
+        refund.setStatus(com.ctrlbuy.webshop.enums.PaymentStatus.REFUNDED);
         refund.setProcessedAt(LocalDateTime.now());
         refund.setType(com.ctrlbuy.webshop.enums.PaymentType.REFUND);
 

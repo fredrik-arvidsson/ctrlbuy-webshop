@@ -85,12 +85,12 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setActive(true);                        // ✅ Sätt active istället för enabled
+            user.setEnabled(true);                       // ✅ FIXED: Använd enabled istället för active
             user.setEmailVerified(true);                 // ✅ Aktivera direkt utan email-verifiering
             user.setCreatedAt(LocalDateTime.now());
 
-            logger.info("Creating user with username: '{}', email: '{}', active: {}, emailVerified: {}",
-                    user.getUsername(), user.getEmail(), user.isActive(), user.isEmailVerified());
+            logger.info("Creating user with username: '{}', email: '{}', enabled: {}, emailVerified: {}",
+                    user.getUsername(), user.getEmail(), user.isEnabled(), user.isEmailVerified());
 
             User savedUser = userRepository.save(user);
             logger.info("User registered successfully with ID: {} and username: {}", savedUser.getId(), savedUser.getUsername());
@@ -121,7 +121,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        user.setActive(true);
+        user.setEnabled(true);                           // ✅ FIXED: Använd enabled istället för active
         user.setEmailVerified(false);
 
         String token = UUID.randomUUID().toString();
@@ -493,14 +493,14 @@ public class UserService {
 
     public List<User> getActiveUsers() {
         logger.info("🔍 Hämtar aktiva användare");
-        List<User> users = userRepository.findByActiveTrue();
+        List<User> users = userRepository.findByEnabledTrue(); // ✅ FIXED: Active → Enabled
         logger.info("🔍 Hittade {} aktiva användare", users.size());
         return users;
     }
 
     public List<User> getInactiveUsers() {
         logger.info("🔍 Hämtar inaktiva användare");
-        List<User> users = userRepository.findByActiveFalse(); // ✅ FIXAT: Använd 'active' istället för 'enabled'
+        List<User> users = userRepository.findByEnabledFalse(); // ✅ FIXED: Active → Enabled
         logger.info("🔍 Hittade {} inaktiva användare", users.size());
         return users;
     }
@@ -542,7 +542,7 @@ public class UserService {
     }
 
     public long countActiveUsers() {
-        long count = userRepository.countByActiveTrue();
+        long count = userRepository.countByEnabledTrue(); // ✅ FIXED: Active → Enabled
         logger.info("📊 Antal aktiva användare: {}", count);
         return count;
     }
@@ -550,11 +550,11 @@ public class UserService {
     // ===== USER EXISTENCE CHECKS =====
 
     public boolean existsByUsername(String username) {
-        return userRepository.findByUsernameAndActiveTrue(username).isPresent();
+        return userRepository.findByUsernameAndEnabledTrue(username).isPresent(); // ✅ FIXED: Active → Enabled
     }
 
     public boolean existsByEmail(String email) {
-        return userRepository.findByEmailAndActiveTrue(email).isPresent();
+        return userRepository.findByEmailAndEnabledTrue(email).isPresent(); // ✅ FIXED: Active → Enabled
     }
 
     public boolean existsByEmailIncludingInactive(String email) {
@@ -592,10 +592,10 @@ public class UserService {
     public void toggleUserActive(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User finns inte"));
-        boolean oldStatus = user.isActive();
-        user.setActive(!user.isActive());
+        boolean oldStatus = user.isEnabled(); // ✅ FIXED: Active → Enabled (via isActive() alias)
+        user.setEnabled(!user.isEnabled());   // ✅ FIXED: Active → Enabled
         userRepository.save(user);
-        logger.info("User {} active status toggled from {} to: {}", userId, oldStatus, user.isActive());
+        logger.info("User {} active status toggled from {} to: {}", userId, oldStatus, user.isEnabled());
     }
 
     @Transactional
@@ -615,7 +615,7 @@ public class UserService {
                 }
             }
 
-            user.setActive(false);
+            user.setEnabled(false); // ✅ FIXED: Active → Enabled
             userRepository.save(user);
             logger.info("User {} deactivated", userId);
             return true;
@@ -640,7 +640,7 @@ public class UserService {
             throw new RuntimeException("⛔ Kan inte radera huvudadmin 'fredrik'");
         }
 
-        if (user.isActive()) {
+        if (user.isEnabled()) { // ✅ FIXED: Active → Enabled (via isActive() alias)
             throw new RuntimeException("⛔ Kan endast radera inaktiva användare. Inaktivera användaren först.");
         }
 
@@ -745,7 +745,7 @@ public class UserService {
     @Transactional
     public boolean initiatePasswordReset(String email) {
         try {
-            Optional<User> userOpt = userRepository.findByEmailAndActiveTrue(email);
+            Optional<User> userOpt = userRepository.findByEmailAndEnabledTrue(email); // ✅ FIXED: Active → Enabled
             if (userOpt.isEmpty()) {
                 return false;
             }
@@ -803,7 +803,7 @@ public class UserService {
             }
 
             // Kontrollera att användaren är aktiv
-            if (!user.isActive()) {
+            if (!user.isEnabled()) { // ✅ FIXED: Active → Enabled (via isActive() alias)
                 logger.warn("⚠️ Användare {} är inaktiv", username);
                 return null;
             }
@@ -866,7 +866,7 @@ public class UserService {
     // ===== SPRING SECURITY INTEGRATION =====
 
     public UserDetails loadUserByUsername(String username) {
-        return userRepository.findByUsernameAndActiveTrue(username)
+        return userRepository.findByUsernameAndEnabledTrue(username) // ✅ FIXED: Active → Enabled
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
@@ -916,7 +916,7 @@ public class UserService {
 
     public UserStats getUserStats() {
         long totalUsers = userRepository.count();
-        long activeUsers = userRepository.countByActiveTrue();
+        long activeUsers = userRepository.countByEnabledTrue(); // ✅ FIXED: Active → Enabled
         long verifiedUsers = userRepository.countByEmailVerifiedTrue();
 
         return new UserStats(totalUsers, activeUsers, verifiedUsers);

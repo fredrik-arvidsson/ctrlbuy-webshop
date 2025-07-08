@@ -1,6 +1,7 @@
 package com.ctrlbuy.webshop.controller;
+import lombok.extern.slf4j.Slf4j;
 
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.security.entity.User;
 import com.ctrlbuy.webshop.service.EmailService;
 import com.ctrlbuy.webshop.service.OrderService;
@@ -43,10 +44,8 @@ public class CheckoutController {
             List<CartController.CartItem> cartItems = (List<CartController.CartItem>)
                     session.getAttribute("shopping_cart");
 
-            log.debug("DEBUG CHECKOUT: Cart items from session = {}", cartItems != null ? cartItems.size() : "null");
 
             if (cartItems == null || cartItems.isEmpty()) {
-                log.debug("DEBUG CHECKOUT: Cart is null or empty, redirecting to cart");
                 model.addAttribute("error", "Din varukorg är tom");
                 return "redirect:/varukorg";
             }
@@ -59,8 +58,6 @@ public class CheckoutController {
             BigDecimal shipping = BigDecimal.valueOf(49.00);
             BigDecimal total = subtotal.add(shipping);
 
-            log.debug("DEBUG CHECKOUT: Proceeding to checkout with {} items, total: {}",
-                    cartItems.size(), total);
 
             // Lägg till i model (samma struktur som innan)
             model.addAttribute("cartItems", cartItems);
@@ -71,7 +68,6 @@ public class CheckoutController {
             return "checkout";
 
         } catch (Exception e) {
-            log.error("Error in checkout: ", e);
             model.addAttribute("error", "Ett fel uppstod vid checkout");
             return "redirect:/varukorg";
         }
@@ -114,7 +110,6 @@ public class CheckoutController {
                 return "redirect:/varukorg";
             }
 
-            log.info("Processing order for user: {} with {} items", currentUser.getUsername(), cartItems.size());
 
             // Beräkna total
             BigDecimal subtotal = cartItems.stream()
@@ -124,8 +119,6 @@ public class CheckoutController {
             BigDecimal shipping = BigDecimal.valueOf(49.00);
             BigDecimal orderTotal = subtotal.add(shipping);
 
-            log.info("Order total: {} kr", orderTotal);
-            log.info("About to call orderService.createOrderFromCart()");
 
             // Skapa OrderDetails objekt (korrekt struktur med 6 fält)
             OrderService.OrderDetails orderDetails = new OrderService.OrderDetails();
@@ -139,26 +132,19 @@ public class CheckoutController {
             // **SKAPA BESTÄLLNINGEN I DATABASEN**
             Order savedOrder = orderService.createOrderFromCart(currentUser, cartItems, orderDetails);
 
-            log.info("Order created successfully with ID: {}", savedOrder.getId());
 
             // ✅ FIXAD: SKICKA ORDERBEKRÄFTELSE VIA EMAIL
             try {
                 // Logga båda emails för debugging
-                log.info("📧 Form email: {}, User email: {}", email, currentUser.getEmail());
-                log.info("📧 Attempting to send order confirmation email to: {}", currentUser.getEmail());
 
                 // FIXAT: Använd currentUser.getEmail() istället för formulärets email
                 boolean emailSent = emailService.sendOrderConfirmation(currentUser.getEmail(), savedOrder);
 
                 if (emailSent) {
-                    log.info("✅ Order confirmation email sent successfully for order: {}", savedOrder.getId());
                 } else {
-                    log.warn("⚠️ Order confirmation email was not sent (email service not configured) for order: {}", savedOrder.getId());
                 }
 
             } catch (Exception emailError) {
-                log.error("❌ Failed to send order confirmation email for order {}: {}",
-                        savedOrder.getId(), emailError.getMessage(), emailError);
                 // Fortsätt ändå - ordern är redan sparad och det är viktigare än email
             }
 
@@ -173,7 +159,6 @@ public class CheckoutController {
             return "redirect:/checkout/confirmation/" + savedOrder.getId();
 
         } catch (Exception e) {
-            log.error("ERROR in checkout process: ", e);
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Något gick fel vid beställningen: " + e.getMessage());
             return "redirect:/checkout";
@@ -195,7 +180,6 @@ public class CheckoutController {
             return "confirmation";
 
         } catch (Exception e) {
-            log.error("Error showing confirmation: ", e);
             model.addAttribute("error", "Ett fel uppstod");
             return "redirect:/";
         }

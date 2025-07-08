@@ -15,19 +15,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // ✅ BEFINTLIGA METODER från er nuvarande struktur
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
-    Optional<User> findByUsernameAndActiveTrue(String username);
-    Optional<User> findByEmailAndActiveTrue(String email);
+    Optional<User> findByUsernameAndEnabledTrue(String username);
+    Optional<User> findByEmailAndEnabledTrue(String email);
     Optional<User> findByVerificationToken(String verificationToken);
     Optional<User> findByResetToken(String resetToken);
 
-    List<User> findByActiveTrue();
-    List<User> findByActiveFalse();
+    List<User> findByEnabledTrue();
+    List<User> findByEnabledFalse();
 
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
-    long countByActiveTrue();
-    long countByActiveFalse();
+    long countByEnabledTrue();
+    long countByEnabledFalse();
 
     // ✅ NYA METODER för email-verifiering (används av UserService)
     long countByEmailVerifiedTrue();
@@ -53,38 +53,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Extra säkerhetsvariant - kräver även att användaren är aktiv
+     * FIX: Använder enabled istället för active
      */
-    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
-    Optional<User> findByUsernameAndEmailAndActiveTrue(@Param("username") String username, @Param("email") String email);
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
+    Optional<User> findByUsernameAndEmailAndEnabledTrue(@Param("username") String username, @Param("email") String email);
 
     /**
      * Kompatibilitetsversion för aktiv användare - returnerar User direkt
+     * FIX: Använder enabled istället för active
      */
-    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
-    User findByUsernameAndEmailAndActiveTrueUser(@Param("username") String username, @Param("email") String email);
-
-    // ✅ KOMPATIBILITETSMETODER för UserService (mappar enabled -> active)
-
-    /**
-     * Kompatibilitetsmetod - mappar till findByActiveTrue()
-     * UserService förväntar sig denna metod
-     */
-    @Query("SELECT u FROM User u WHERE u.active = true")
-    List<User> findByEnabledTrue();
-
-    /**
-     * Kompatibilitetsmetod - mappar till findByActiveFalse()
-     * UserService förväntar sig denna metod
-     */
-    @Query("SELECT u FROM User u WHERE u.active = false")
-    List<User> findByEnabledFalse();
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
+    User findByUsernameAndEmailAndEnabledTrueUser(@Param("username") String username, @Param("email") String email);
 
     // ✅ ENKLA QUERIES som definitivt fungerar
+    // FIX: Alla queries använder enabled istället för active
 
     /**
      * Hitta användare som inte verifierat sin email på länge
      */
-    @Query("SELECT u FROM User u WHERE u.emailVerified = false AND u.active = true AND u.verificationTokenExpiry < CURRENT_TIMESTAMP")
+    @Query("SELECT u FROM User u WHERE u.emailVerified = false AND u.enabled = true AND u.verificationTokenExpiry < CURRENT_TIMESTAMP")
     List<User> findUsersWithExpiredVerificationTokens();
 
     // ✅ YTTERLIGARE SÄKERHETSMETODER
@@ -97,7 +84,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Kontrollera om användarnamn + email-kombination existerar för aktiv användare
+     * FIX: Använder enabled istället för active
      */
-    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.username = :username AND u.email = :email AND u.active = true")
-    boolean existsByUsernameAndEmailAndActiveTrue(@Param("username") String username, @Param("email") String email);
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
+    boolean existsByUsernameAndEmailAndEnabledTrue(@Param("username") String username, @Param("email") String email);
 }

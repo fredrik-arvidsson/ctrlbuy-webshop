@@ -57,6 +57,18 @@
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: opacity 0.3s ease;
+        }
+        .product-image.loading {
+            opacity: 0.6;
+        }
+        .product-image.error {
+            opacity: 0.3;
+        }
+        .image-debug {
+            font-size: 0.7rem;
+            color: #6c757d;
+            margin-top: 2px;
         }
         .status-badge {
             padding: 6px 12px;
@@ -274,14 +286,24 @@
                     <tbody>
                     <tr th:each="product : ${products}" th:attr="data-category=${product.category}">
                         <td>
-                            <img th:if="${product.imageUrl}"
-                                 th:src="${product.imageUrl}"
-                                 th:alt="${product.name}"
-                                 class="product-image"
-                                 onerror="this.src='/images/placeholder-product.jpg'">
-                            <div th:unless="${product.imageUrl}"
-                                 class="product-image bg-light d-flex align-items-center justify-content-center">
-                                <i class="fas fa-image text-muted"></i>
+                            <div class="position-relative">
+                                <img th:if="${product.imageUrl}"
+                                     th:src="${product.imageUrl}"
+                                     th:alt="${product.name}"
+                                     class="product-image"
+                                     th:attr="data-product-id=${product.id}"
+                                     onload="handleImageLoad(this)"
+                                     onerror="handleImageError(this)"
+                                     loading="lazy">
+                                <div th:unless="${product.imageUrl}"
+                                     class="product-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                                <!-- Debug info för bildstatus -->
+                                <div class="image-debug" th:if="${product.imageUrl}">
+                                    <small th:text="'ID: ' + ${product.id}">ID</small><br>
+                                    <small class="image-status" th:attr="data-product-id=${product.id}">Laddar...</small>
+                                </div>
                             </div>
                         </td>
                         <td>
@@ -299,7 +321,6 @@
                                     Kategori
                                 </span>
                         </td>
-                        <!-- FIXED: Använd product.price istället för product.originalPrice -->
                         <td>
                                 <span th:if="${product.price}"
                                       th:text="${#numbers.formatDecimal(product.price, 1, 2)} + ' kr'"
@@ -416,17 +437,76 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let allProducts = [];
+    let imageStats = {
+        loaded: 0,
+        failed: 0,
+        total: 0
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         // Store all products for filtering
         const rows = document.querySelectorAll('#productsTable tbody tr');
         allProducts = Array.from(rows);
 
+        // Count total images
+        imageStats.total = document.querySelectorAll('.product-image[data-product-id]').length;
+        console.log(`🖼️ Laddar ${imageStats.total} produktbilder...`);
+
         // Setup event listeners
         document.getElementById('searchInput').addEventListener('input', filterProducts);
         document.getElementById('categoryFilter').addEventListener('change', filterProducts);
         document.getElementById('statusFilter').addEventListener('change', filterProducts);
     });
+
+    function handleImageLoad(img) {
+        imageStats.loaded++;
+        img.classList.remove('loading');
+
+        const productId = img.getAttribute('data-product-id');
+        const statusElement = document.querySelector(`.image-status[data-product-id="${productId}"]`);
+        if (statusElement) {
+            statusElement.textContent = '✅ Laddad';
+            statusElement.style.color = '#28a745';
+        }
+
+        console.log(`✅ Bild laddad för produkt ${productId} (${imageStats.loaded}/${imageStats.total})`);
+        updateImageStats();
+    }
+
+    function handleImageError(img) {
+        imageStats.failed++;
+        img.classList.add('error');
+
+        const productId = img.getAttribute('data-product-id');
+        const statusElement = document.querySelector(`.image-status[data-product-id="${productId}"]`);
+        const originalUrl = img.src;
+
+        if (statusElement) {
+            statusElement.textContent = '❌ Misslyckades';
+            statusElement.style.color = '#dc3545';
+        }
+
+        console.error(`❌ Bild misslyckades för produkt ${productId}:`, originalUrl);
+
+        // Försök med fallback-bild
+        img.src = '/images/placeholder-product.jpg';
+
+        // Log detailed error info
+        console.log(`🔍 URL som misslyckades: ${originalUrl}`);
+        console.log(`🔍 Kontrollera om URL:en fungerar i ny flik`);
+
+        updateImageStats();
+    }
+
+    function updateImageStats() {
+        if (imageStats.loaded + imageStats.failed === imageStats.total) {
+            console.log(`📊 Bildstatistik: ${imageStats.loaded} lyckades, ${imageStats.failed} misslyckades av ${imageStats.total} totalt`);
+
+            if (imageStats.failed > 0) {
+                console.warn(`⚠️ ${imageStats.failed} bilder misslyckades att ladda. Kontrollera Unsplash-URL:erna.`);
+            }
+        }
+    }
 
     function filterProducts() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();

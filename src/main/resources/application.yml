@@ -1,26 +1,21 @@
 # =======================================
 # CTRLBUY WEBSHOP - SPRING BOOT CONFIGURATION
 # =======================================
-# MySQL överallt - inga fler H2-krångel!
-# Miljöer: dev (lokal), railway, aws, test
+# MySQL överallt - Förenklad version utan property errors
 # =======================================
 
-# =======================================
-# PROFIL ACTIVATION - ÄNDRA TILL 'dev' FÖR LOKAL UTVECKLING MED MAILHOG
-# =======================================
 spring:
   profiles:
     active: dev
 
   # =======================================
-  # GEMENSAM DATABAS KONFIGURATION (MySQL)
+  # DATABAS KONFIGURATION (MySQL ENDAST)
   # =======================================
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # DEFAULT FÖR AWS - använder miljövariabler eller fallback
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/webshop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Stockholm}
-    username: ${DATABASE_USERNAME:root}
-    password: ${DATABASE_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ctrlbuy_webshop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Stockholm}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:
       connection-timeout: 20000
       idle-timeout: 300000
@@ -32,7 +27,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -44,11 +39,11 @@ spring:
     show-sql: false
 
   # =======================================
-  # EMAIL CONFIGURATION (SMTP) - SÄKER MED MILJÖVARIABLER
+  # EMAIL CONFIGURATION (SMTP)
   # =======================================
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
@@ -59,15 +54,18 @@ spring:
             enable: true
             required: true
           ssl:
-            trust: smtp.gmail.com
+            trust: ${MAIL_HOST:smtp.gmail.com}
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+        transport:
+          protocol: smtp
+        debug: ${MAIL_DEBUG:false}
     test-connection: false
     default-encoding: UTF-8
 
   # =======================================
-  # THYMELEAF CONFIGURATION - UPPDATERAD
+  # THYMELEAF CONFIGURATION
   # =======================================
   thymeleaf:
     prefix: classpath:/templates/
@@ -78,7 +76,7 @@ spring:
     enabled: true
 
   # =======================================
-  # WEB RESOURCES CACHE - NYTT!
+  # WEB RESOURCES CACHE
   # =======================================
   web:
     resources:
@@ -87,7 +85,7 @@ spring:
         use-last-modified: false
 
 # =======================================
-# SERVER CONFIGURATION - UPPDATERAD
+# SERVER CONFIGURATION
 # =======================================
 server:
   port: ${SERVER_PORT:8080}
@@ -103,26 +101,40 @@ server:
 # SECURITY - JWT CONFIGURATION
 # =======================================
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:ctrlbuy-secret-key-change-in-production}
   expirationMs: 86400000
   refresh-token:
     expiration: 604800000
 
 # =======================================
-# EMAIL APPLICATION SETTINGS - SÄKER
+# CUSTOM APPLICATION PROPERTIES
+# Dessa läses av våra @ConfigurationProperties classes
 # =======================================
 app:
   email:
-    enabled: true
+    enabled: ${EMAIL_ENABLED:true}
     from: ${MAIL_FROM:noreply@ctrlbuy.se}
-    from-name: CTRL+BUY Solutions
+    from-name: ${MAIL_FROM_NAME:CTRL+BUY Solutions}
     company:
-      name: CtrlBuy
+      name: ${COMPANY_NAME:CtrlBuy}
+      support-email: ${SUPPORT_EMAIL:support@ctrlbuy.se}
+      phone: ${COMPANY_PHONE:+46 8 123 456 78}
+    vat:
+      rate: 0.25
+      country: SE
+      currency: kr
+
+  order:
+    confirmation:
+      send-email: ${ORDER_EMAIL_ENABLED:true}
+      admin-notification: ${ADMIN_NOTIFICATION_ENABLED:true}
+      admin-email: ${ADMIN_EMAIL:admin@ctrlbuy.se}
+
   base:
     url: ${APP_BASE_URL:http://localhost:8080}
 
 # =======================================
-# LOGGING CONFIGURATION - FÖRBÄTTRAD EMAIL DEBUG
+# LOGGING CONFIGURATION
 # =======================================
 logging:
   level:
@@ -130,23 +142,12 @@ logging:
     com.ctrlbuy.webshop: ${APP_LOG_LEVEL:DEBUG}
     org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
     org.springframework.web: ${WEB_LOG_LEVEL:INFO}
-    org.springframework.boot.context.config: DEBUG
-    # MySQL Debug (kan stängas av i prod)
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    # App-specifik debug
-    com.ctrlbuy.webshop.controller.HomeController: TRACE
-    com.ctrlbuy.webshop.controller.CheckoutController: DEBUG
-    com.ctrlbuy.webshop.service.ProductService: TRACE
-    com.ctrlbuy.webshop.service.ImageService: TRACE
-    com.ctrlbuy.webshop.service.OrderService: DEBUG
-    # EMAIL DEBUG - MAXIMAL DEBUGGING
+    # EMAIL DEBUG
     org.springframework.mail: DEBUG
     com.ctrlbuy.webshop.service.EmailService: DEBUG
     javax.mail: DEBUG
-    com.sun.mail: DEBUG
-    # ADMIN CONTROLLER DEBUG - NYTT!
-    com.ctrlbuy.webshop.controller.AdminController: DEBUG
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
 
@@ -175,28 +176,28 @@ management:
 info:
   app:
     name: CtrlBuy Webshop
-    description: Enterprise E-commerce Platform with MySQL
+    description: Enterprise E-commerce Platform with MySQL & EmailService
     version: 1.0.0
     security: Spring Security with JWT
     database: MySQL 8.0
 
 ---
 # =======================================
-# DEV PROFILE - LOKAL UTVECKLING MED MAILHOG
+# DEV PROFILE - LOKAL UTVECKLING
 # =======================================
 spring:
   config:
     activate:
       on-profile: dev
   datasource:
-    url: ${DEV_DATABASE_URL:jdbc:mysql://localhost:3306/ctrlbuy_webshop}
-    username: ${DEV_DATABASE_USERNAME:ctrlbuy_user}
-    password: ${DEV_DATABASE_PASSWORD}
-  # MAILHOG KONFIGURATION
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ctrlbuy_webshop}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  # MAILHOG FÖR DEV (eller Gmail)
   mail:
-    host: mailhog
-    port: 1025
-    username: ${DEV_MAIL_USERNAME:noreply@ctrlbuy.se}
+    host: ${DEV_MAIL_HOST:localhost}
+    port: ${DEV_MAIL_PORT:1025}
+    username: ""
     password: ""
     properties:
       mail:
@@ -211,33 +212,31 @@ spring:
           protocol: smtp
         debug: true
     test-connection: false
-    default-encoding: UTF-8
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
-  # THYMELEAF DEV SETTINGS
+      ddl-auto: create
   thymeleaf:
     cache: false
-  # WEB RESOURCES CACHE OFF
-  web:
-    resources:
-      cache:
-        period: 0
-        use-last-modified: false
 
-# DEV-SPECIFIK EMAIL KONFIGURATION
 app:
   email:
     enabled: true
-    from: ${DEV_MAIL_FROM:test@ctrlbuy.se}
+    from: ${MAIL_FROM:test@ctrlbuy.se}
     from-name: CTRL+BUY Solutions (DEV)
     company:
       name: CtrlBuy DEV
+      support-email: dev-support@ctrlbuy.se
+      phone: "+46 8 123 456 78 (DEV)"
+
+logging:
+  level:
+    com.ctrlbuy.webshop.service.EmailService: TRACE
+    org.springframework.mail: TRACE
 
 ---
 # =======================================
-# AWS PROFILE - ELASTIC BEANSTALK
+# AWS PROFILE - PRODUKTION
 # =======================================
 spring:
   config:
@@ -261,13 +260,18 @@ spring:
             required: true
           ssl:
             trust: smtp.gmail.com
-    test-connection: false
+        debug: false
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate
   thymeleaf:
     cache: true
+
+logging:
+  level:
+    com.ctrlbuy.webshop.service.EmailService: INFO
+    org.springframework.mail: WARN
 
 ---
 # =======================================
@@ -295,10 +299,15 @@ spring:
             required: true
           ssl:
             trust: smtp.gmail.com
-    test-connection: false
+        debug: false
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
   thymeleaf:
     cache: true
+
+logging:
+  level:
+    com.ctrlbuy.webshop.service.EmailService: INFO
+    org.springframework.mail: WARN

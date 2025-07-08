@@ -3,7 +3,7 @@ package com.ctrlbuy.webshop.controller;
 import com.ctrlbuy.webshop.service.OrderService;
 import com.ctrlbuy.webshop.security.repository.UserRepository;
 import com.ctrlbuy.webshop.security.entity.User;
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Order;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

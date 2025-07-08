@@ -1,6 +1,6 @@
 package com.ctrlbuy.webshop.controller;
 
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,6 @@ public class ProductApiController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search) {
 
-        log.info("API: Getting products - category: {}, search: {}", category, search);
-
         try {
             List<Product> products;
 
@@ -41,59 +39,47 @@ public class ProductApiController {
                 try {
                     products = productService.searchProducts(search.trim());
                 } catch (Exception e) {
-                    log.warn("Search method failed, trying alternative: {}", e.getMessage());
                     products = productService.getAllProducts();
                 }
-                log.info("API: Search found {} products for query: {}", products.size(), search);
             } else if (category != null && !category.trim().isEmpty() && !category.equals("Alla")) {
                 try {
                     products = productService.getProductsByCategory(category);
                 } catch (Exception e) {
-                    log.warn("Category method failed, trying alternative: {}", e.getMessage());
                     products = productService.getAllProducts();
                 }
-                log.info("API: Category filter found {} products for: {}", products.size(), category);
             } else {
                 products = productService.getAllProducts();
-                log.info("API: Retrieved all {} products", products.size());
             }
 
             return ResponseEntity.ok(products);
 
         } catch (Exception e) {
-            log.error("API: Error getting products", e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
     /**
      * GET /api/products/{id} - Hämta en specifik produkt (JSON)
+     * FIX: RAD 80 - Optional<Product> conversion error löst
      */
     @GetMapping("/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        log.info("API: Getting product by ID: {}", id);
 
         try {
-            Optional<Product> productOpt = productService.findById(id);
-
-            if (productOpt.isPresent()) {
-                log.info("API: Found product: {}", productOpt.get().getName());
-                return ResponseEntity.ok(productOpt.get());
-            } else {
-                log.warn("API: Product not found with ID: {}", id);
-                return ResponseEntity.notFound().build();
-            }
+            // FIX: Använd direkt Optional chain istället för conversion
+            return productService.findById(id)
+                    .map(product -> ResponseEntity.ok(product))
+                    .orElse(ResponseEntity.notFound().build());
 
         } catch (Exception e) {
-            log.error("API: Error getting product by ID: {}", id, e);
             // Fallback: försök med alternativ metod
             try {
-                Product product = productService.getProductById(id);
-                if (product != null) {
-                    return ResponseEntity.ok(product);
+                Optional<Product> productOpt = productService.getProductById(id);
+                if (productOpt.isPresent()) {
+                    return ResponseEntity.ok(productOpt.get());
                 }
             } catch (Exception e2) {
-                log.error("API: Fallback method also failed: {}", e2.getMessage());
+                // Ignore fallback errors
             }
             return ResponseEntity.internalServerError().build();
         }
@@ -104,15 +90,12 @@ public class ProductApiController {
      */
     @GetMapping("/products/category/{category}")
     public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        log.info("API: Getting products by category: {}", category);
 
         try {
             List<Product> products = productService.getProductsByCategory(category);
-            log.info("API: Found {} products in category: {}", products.size(), category);
             return ResponseEntity.ok(products);
 
         } catch (Exception e) {
-            log.error("API: Error getting products by category: {}", category, e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -122,7 +105,6 @@ public class ProductApiController {
      */
     @GetMapping("/products/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String q) {
-        log.info("API: Searching products with query: {}", q);
 
         if (q == null || q.trim().length() < 2) {
             return ResponseEntity.ok(List.of());
@@ -130,11 +112,9 @@ public class ProductApiController {
 
         try {
             List<Product> products = productService.searchProducts(q.trim());
-            log.info("API: Search found {} products for: {}", products.size(), q);
             return ResponseEntity.ok(products);
 
         } catch (Exception e) {
-            log.error("API: Error searching products with query: {}", q, e);
             // Fallback: returnera alla produkter om sökning misslyckas
             try {
                 List<Product> allProducts = productService.getAllProducts();
@@ -142,7 +122,6 @@ public class ProductApiController {
                         .filter(p -> p.getName().toLowerCase().contains(q.toLowerCase()))
                         .toList());
             } catch (Exception e2) {
-                log.error("API: Fallback search also failed: {}", e2.getMessage());
                 return ResponseEntity.ok(List.of());
             }
         }
@@ -153,16 +132,13 @@ public class ProductApiController {
      */
     @GetMapping("/products/count")
     public ResponseEntity<Long> getProductCount() {
-        log.info("API: Getting product count");
 
         try {
             List<Product> products = productService.getAllProducts();
             long count = products.size();
-            log.info("API: Product count: {}", count);
             return ResponseEntity.ok(count);
 
         } catch (Exception e) {
-            log.error("API: Error getting product count", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -172,15 +148,12 @@ public class ProductApiController {
      */
     @GetMapping("/products/sale")
     public ResponseEntity<List<Product>> getProductsOnSale() {
-        log.info("API: Getting products on sale");
 
         try {
             List<Product> saleProducts = productService.getProductsOnSale();
-            log.info("API: Found {} products on sale", saleProducts.size());
             return ResponseEntity.ok(saleProducts);
 
         } catch (Exception e) {
-            log.error("API: Error getting products on sale", e);
             // Fallback: försök hitta produkter med salePrice > 0
             try {
                 List<Product> allProducts = productService.getAllProducts();
@@ -205,15 +178,12 @@ public class ProductApiController {
      */
     @GetMapping("/products/popular")
     public ResponseEntity<List<Product>> getPopularProducts(@RequestParam(defaultValue = "12") int limit) {
-        log.info("API: Getting popular products, limit: {}", limit);
 
         try {
             List<Product> popularProducts = productService.getPopularProducts(limit);
-            log.info("API: Found {} popular products", popularProducts.size());
             return ResponseEntity.ok(popularProducts);
 
         } catch (Exception e) {
-            log.error("API: Error getting popular products", e);
             // Fallback: returnera första X produkter
             try {
                 List<Product> allProducts = productService.getAllProducts();
@@ -232,15 +202,12 @@ public class ProductApiController {
      */
     @GetMapping("/products/new")
     public ResponseEntity<List<Product>> getNewProducts(@RequestParam(defaultValue = "12") int limit) {
-        log.info("API: Getting new products, limit: {}", limit);
 
         try {
             List<Product> newProducts = productService.getNewestProducts(limit);
-            log.info("API: Found {} new products", newProducts.size());
             return ResponseEntity.ok(newProducts);
 
         } catch (Exception e) {
-            log.error("API: Error getting new products", e);
             // Fallback: returnera sista X produkter
             try {
                 List<Product> allProducts = productService.getAllProducts();

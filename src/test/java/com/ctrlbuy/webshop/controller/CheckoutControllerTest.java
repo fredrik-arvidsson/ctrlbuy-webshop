@@ -2,8 +2,8 @@ package com.ctrlbuy.webshop.controller;
 
 import com.ctrlbuy.webshop.service.OrderService;
 import com.ctrlbuy.webshop.service.UserService;
-import com.ctrlbuy.webshop.model.Cart;
-import com.ctrlbuy.webshop.model.Order;
+import com.ctrlbuy.webshop.entity.Cart;
+import com.ctrlbuy.webshop.entity.Order;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;

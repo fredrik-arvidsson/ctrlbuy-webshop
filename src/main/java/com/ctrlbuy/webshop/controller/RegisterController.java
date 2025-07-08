@@ -35,58 +35,34 @@ public class RegisterController {
                                RedirectAttributes redirectAttributes) {
 
         // 🔍 DEBUG: Logga alla inkommande värden
-        log.info("=== REGISTRERING DEBUG ===");
-        log.info("RegisterRequest object: {}", registerRequest.toString());
-        log.info("Username: '{}'", registerRequest.getUsername());
-        log.info("Email: '{}'", registerRequest.getEmail());
-        log.info("FirstName: '{}'", registerRequest.getFirstName());
-        log.info("LastName: '{}'", registerRequest.getLastName());
-        log.info("Password length: {}", registerRequest.getPassword() != null ? registerRequest.getPassword().length() : "null");
-        log.info("AcceptTerms: {}", registerRequest.isAcceptTerms());
-        log.info("Has all required fields: {}", registerRequest.hasAllRequiredFields());
-        log.info("Passwords match: {}", registerRequest.passwordsMatch());
-        log.info("=========================");
 
         // 🔧 TRIMMA FÄLT INNAN VALIDERING
         registerRequest.trimAllFields();
-        log.info("Efter trimning - Username: '{}', Email: '{}'",
-                registerRequest.getUsername(), registerRequest.getEmail());
 
         // Kontrollera om några kritiska fält är null EFTER trimning
         if (registerRequest.getUsername() == null || registerRequest.getUsername().isEmpty()) {
             bindingResult.rejectValue("username", "username.required", "Användarnamn är obligatoriskt");
-            log.error("Username är null eller tomt efter trimning!");
         }
 
         if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
             bindingResult.rejectValue("email", "email.required", "E-post är obligatorisk");
-            log.error("Email är null eller tomt efter trimning!");
         }
 
-        log.info("Registreringsförsök för email: {}", registerRequest.getEmail());
 
         // Kör egen validering
         validateRegistration(registerRequest, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            log.warn("Valideringsfel vid registrering: {}", bindingResult.getAllErrors());
             bindingResult.getAllErrors().forEach(error -> {
-                log.debug("Valideringsfel: {} - Field: {} - Code: {}",
-                        error.getDefaultMessage(),
-                        error instanceof org.springframework.validation.FieldError ?
-                                ((org.springframework.validation.FieldError) error).getField() : "unknown",
-                        error.getCode());
             });
             return "register";
         }
 
         try {
             // ✅ ANVÄND ENKEL REGISTRERING UTAN EMAIL-VERIFIERING
-            log.info("Börjar registrering av användare: {}", registerRequest.sanitized());
             RegistrationResult registrationResult = userService.registerUser(registerRequest);
 
             if (registrationResult.isSuccess()) {
-                log.info("Användare registrerad och aktiverad direkt: {}", registerRequest.getUsername());
 
                 // ✅ ANVÄNDAREN KAN LOGGA IN DIREKT - INGEN EMAIL KRÄVS
                 redirectAttributes.addFlashAttribute("success",
@@ -94,18 +70,14 @@ public class RegisterController {
 
                 return "redirect:/login";
             } else {
-                log.error("Registrering misslyckades: {}", registrationResult.getMessage());
                 model.addAttribute("error", registrationResult.getMessage());
                 return "register";
             }
 
         } catch (RuntimeException e) {
-            log.error("Fel vid registrering: {}", e.getMessage());
-            log.error("Stack trace: ", e);
             model.addAttribute("error", "Registreringsfel: " + e.getMessage());
             return "register";
         } catch (Exception e) {
-            log.error("Oväntat fel vid registrering: {}", e.getMessage(), e);
             model.addAttribute("error", "Ett oväntat fel inträffade. Försök igen senare.");
             return "register";
         }
@@ -141,7 +113,6 @@ public class RegisterController {
     @GetMapping("/verify-email")
     public String verifyEmail(@RequestParam("token") String token, Model model) {
         // ✅ EMAIL-VERIFIERING DISABLED - VISA MEDDELANDE
-        log.info("Email verification attempted but disabled in current configuration");
         model.addAttribute("message", "Email-verifiering är för närvarande inaktiverad. Alla nya konton aktiveras automatiskt.");
         model.addAttribute("messageType", "info");
         model.addAttribute("showLoginButton", true);
@@ -160,7 +131,6 @@ public class RegisterController {
     @PostMapping("/resend-verification")
     public String resendVerification(@RequestParam("email") String email, Model model) {
         // ✅ EMAIL-VERIFIERING DISABLED - VISA MEDDELANDE
-        log.info("Resend verification attempted but email verification is disabled");
         model.addAttribute("message", "Email-verifiering är för närvarande inaktiverad. Alla nya konton aktiveras automatiskt vid registrering.");
         model.addAttribute("messageType", "info");
         return "resend-verification";

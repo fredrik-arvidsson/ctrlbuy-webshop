@@ -1,199 +1,207 @@
-// ==============================================
-// GRUPP 3: SERVICE & CONTROLLER - Kör efter modellerna
-// ==============================================
-
-// FILE: src/main/java/com/ctrlbuy/webshop/service/CartService.java
 package com.ctrlbuy.webshop.service;
 
-import com.ctrlbuy.webshop.model.Cart;
-import com.ctrlbuy.webshop.model.CartItem;
-import com.ctrlbuy.webshop.model.Product;
+import com.ctrlbuy.webshop.entity.Cart;
+import com.ctrlbuy.webshop.entity.CartItem;
+import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.repository.CartRepository;
+import com.ctrlbuy.webshop.repository.ProductRepository;
 import com.ctrlbuy.webshop.security.entity.User;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductService productService;
+    private final ProductRepository productRepository;
 
-    public CartService(CartRepository cartRepository, ProductService productService) {
+    @Autowired
+    public CartService(CartRepository cartRepository,
+                       ProductRepository productRepository) {
         this.cartRepository = cartRepository;
-        this.productService = productService;
+        this.productRepository = productRepository;
     }
 
-    // Hämta eller skapa kundvagn för inloggad användare
-    public Cart getOrCreateCartForUser(User user) {
-        Optional<Cart> existingCart = cartRepository.findByUserWithItems(user);
-
-        if (existingCart.isPresent()) {
-            log.debug("Found existing cart for user: {}", user.getEmail());
-            return existingCart.get();
+    public Cart getOrCreateCart(User user) {
+        if (user == null) {
+            return new Cart();
         }
 
-        log.debug("Creating new cart for user: {}", user.getEmail());
-        Cart newCart = Cart.builder()
-                .user(user)
-                .build();
-
-        return cartRepository.save(newCart);
+        return cartRepository.findByUser(user)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart(user);
+                    return cartRepository.save(newCart);
+                });
     }
 
-    // Hämta eller skapa kundvagn för session (icke-inloggad användare)
-    public Cart getOrCreateCartForSession(String sessionId) {
-        Optional<Cart> existingCart = cartRepository.findBySessionIdWithItems(sessionId);
-
-        if (existingCart.isPresent()) {
-            log.debug("Found existing cart for session: {}", sessionId);
-            return existingCart.get();
+    public Cart getOrCreateSessionCart(String sessionId) {
+        if (sessionId == null || sessionId.isEmpty()) {
+            return new Cart();
         }
 
-        log.debug("Creating new cart for session: {}", sessionId);
-        Cart newCart = Cart.builder()
-                .sessionId(sessionId)
-                .build();
-
-        return cartRepository.save(newCart);
+        return cartRepository.findBySessionId(sessionId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart(sessionId);
+                    return cartRepository.save(newCart);
+                });
     }
 
-    // Lägg till produkt i kundvagn
     public Cart addProductToCart(Cart cart, Long productId, Integer quantity) {
-        Product product = productService.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+        if (cart == null || productId == null || quantity == null || quantity <= 0) {
+            return cart;
+        }
 
-        // Kontrollera om produkten redan finns i kundvagnen
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+
+        // Check if item already exists in cart
         CartItem existingItem = cart.findItemByProduct(product);
 
         if (existingItem != null) {
-            // Öka kvantiteten för befintlig produkt
-            existingItem.increaseQuantity(quantity);
-            log.debug("Updated quantity for product {} in cart. New quantity: {}",
-                    product.getName(), existingItem.getQuantity());
+            // Update quantity of existing item
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.calculateSubtotal();
         } else {
-            // Skapa ny cart item
-            CartItem newItem = CartItem.builder()
-                    .product(product)
-                    .quantity(quantity)
-                    .unitPrice(product.getPrice())
-                    .cart(cart)
-                    .build();
-
+            // Create new cart item
+            CartItem newItem = new CartItem(cart, product, quantity);
             cart.addItem(newItem);
-            log.debug("Added new product {} to cart with quantity: {}",
-                    product.getName(), quantity);
         }
 
+        cart.updateTotalPrice();
         return cartRepository.save(cart);
     }
 
-    // Uppdatera kvantitet för en produkt i kundvagnen
     public Cart updateCartItemQuantity(Cart cart, Long productId, Integer newQuantity) {
-        Product product = productService.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+        if (cart == null || productId == null || newQuantity == null) {
+            return cart;
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
         CartItem item = cart.findItemByProduct(product);
-        if (item == null) {
-            throw new RuntimeException("Product not found in cart: " + productId);
+        if (item != null) {
+            if (newQuantity <= 0) {
+                // Remove item if quantity is 0 or negative
+                cart.removeItem(item);
+            } else {
+                // Update quantity
+                item.setQuantity(newQuantity);
+                item.calculateSubtotal();
+            }
+
+            cart.updateTotalPrice();
+            return cartRepository.save(cart);
         }
 
-        if (newQuantity <= 0) {
-            cart.removeItem(item);
-            log.debug("Removed product {} from cart", product.getName());
-        } else {
-            item.updateQuantity(newQuantity);
-            log.debug("Updated quantity for product {} to {}", product.getName(), newQuantity);
-        }
-
-        return cartRepository.save(cart);
+        return cart;
     }
 
-    // Ta bort produkt från kundvagn
     public Cart removeProductFromCart(Cart cart, Long productId) {
-        Product product = productService.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+        if (cart == null || productId == null) {
+            return cart;
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
         CartItem item = cart.findItemByProduct(product);
         if (item != null) {
             cart.removeItem(item);
-            log.debug("Removed product {} from cart", product.getName());
+            cart.updateTotalPrice();
+            return cartRepository.save(cart);
         }
 
-        return cartRepository.save(cart);
+        return cart;
     }
 
-    // Rensa hela kundvagnen
     public void clearCart(Cart cart) {
-        cart.clear();
-        cartRepository.save(cart);
-        log.debug("Cleared cart with id: {}", cart.getId());
+        if (cart != null && !cart.isEmpty()) {
+            // Clear the cart - JPA will handle cascade delete
+            cart.clear();
+            cart.updateTotalPrice();
+            cartRepository.save(cart);
+        }
     }
 
-    // Slå ihop session-cart med användar-cart vid inloggning
-    public Cart mergeSessionCartWithUserCart(String sessionId, User user) {
-        Optional<Cart> sessionCart = cartRepository.findBySessionIdWithItems(sessionId);
-
-        if (sessionCart.isEmpty() || sessionCart.get().isEmpty()) {
-            log.debug("No session cart to merge for user: {}", user.getEmail());
-            return getOrCreateCartForUser(user);
+    public BigDecimal getCartTotal(User user, String sessionId) {
+        Cart cart;
+        if (user != null) {
+            cart = cartRepository.findByUser(user).orElse(null);
+        } else {
+            cart = cartRepository.findBySessionId(sessionId).orElse(null);
         }
 
-        Cart userCart = getOrCreateCartForUser(user);
-        Cart sessionCartEntity = sessionCart.get();
+        return cart != null ? cart.getTotalPrice() : BigDecimal.ZERO;
+    }
 
-        // Flytta över alla items från session-cart till user-cart
-        for (CartItem sessionItem : sessionCartEntity.getItems()) {
+    public int getCartItemCount(User user, String sessionId) {
+        Cart cart;
+        if (user != null) {
+            cart = cartRepository.findByUser(user).orElse(null);
+        } else {
+            cart = cartRepository.findBySessionId(sessionId).orElse(null);
+        }
+
+        return cart != null ? cart.getTotalItems() : 0;
+    }
+
+    public Cart mergeSessionCartWithUserCart(String sessionId, User user) {
+        if (sessionId == null || user == null) {
+            return getOrCreateCart(user);
+        }
+
+        Optional<Cart> sessionCartOpt = cartRepository.findBySessionId(sessionId);
+        if (sessionCartOpt.isEmpty()) {
+            return getOrCreateCart(user);
+        }
+
+        Cart sessionCart = sessionCartOpt.get();
+        Cart userCart = getOrCreateCart(user);
+
+        // Merge items from session cart to user cart
+        for (CartItem sessionItem : sessionCart.getItems()) {
             CartItem existingUserItem = userCart.findItemByProduct(sessionItem.getProduct());
 
             if (existingUserItem != null) {
-                // Lägg ihop kvantiteterna
-                existingUserItem.increaseQuantity(sessionItem.getQuantity());
+                // Merge quantities
+                existingUserItem.setQuantity(existingUserItem.getQuantity() + sessionItem.getQuantity());
+                existingUserItem.calculateSubtotal();
             } else {
-                // Skapa ny item i user-cart
-                CartItem newItem = CartItem.builder()
-                        .product(sessionItem.getProduct())
-                        .quantity(sessionItem.getQuantity())
-                        .unitPrice(sessionItem.getUnitPrice())
-                        .cart(userCart)
-                        .build();
-                userCart.addItem(newItem);
+                // Move item to user cart
+                sessionItem.setCart(userCart);
+                userCart.addItem(sessionItem);
             }
         }
 
-        // Ta bort session-cart
-        cartRepository.delete(sessionCartEntity);
+        // Delete session cart
+        cartRepository.delete(sessionCart);
 
-        Cart savedCart = cartRepository.save(userCart);
-        log.debug("Merged session cart with user cart for user: {}", user.getEmail());
-
-        return savedCart;
+        // Update and save user cart
+        userCart.updateTotalPrice();
+        return cartRepository.save(userCart);
     }
 
-    // Hämta kundvagn baserat på användare eller session
-    public Cart getCurrentCart(User user, String sessionId) {
-        if (user != null) {
-            return getOrCreateCartForUser(user);
-        } else {
-            return getOrCreateCartForSession(sessionId);
+    @Transactional
+    public void cleanupOldCarts() {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
+        cartRepository.deleteBySessionIdAndCreatedAtBefore(null, cutoffDate);
+    }
+
+    public List<Cart> findCartsByUser(User user) {
+        return cartRepository.findAllByUser(user);
+    }
+
+    public void deleteCart(Cart cart) {
+        if (cart != null) {
+            cartRepository.delete(cart);
         }
-    }
-
-    // Räkna totalt antal items i kundvagn (för navigation badge)
-    public Integer getCartItemCount(User user, String sessionId) {
-        Cart cart = getCurrentCart(user, sessionId);
-        return cart.getTotalItems();
-    }
-
-    // Hämta total summa för kundvagn
-    public BigDecimal getCartTotal(User user, String sessionId) {
-        Cart cart = getCurrentCart(user, sessionId);
-        return cart.getTotalAmount();
     }
 }
