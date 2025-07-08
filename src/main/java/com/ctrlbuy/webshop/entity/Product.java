@@ -26,9 +26,10 @@ public class Product {
     @Column(nullable = false)
     private String category;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "stockQuantity")
     private Integer stockQuantity;
 
+    @Column(name = "imageUrl")
     private String imageUrl;
 
     private String brand;
@@ -38,68 +39,87 @@ public class Product {
     private String barcode;
     private String dimensions;
     private Float weight;
+
+    @Column(name = "originCountry")
     private String originCountry;
 
     // Additional product fields
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2, name = "costPrice")
     private BigDecimal costPrice;
 
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2, name = "originalPrice")
     private BigDecimal originalPrice;
 
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2, name = "salePrice")
     private BigDecimal salePrice;
 
-    @Column(precision = 5, scale = 2)
+    @Column(precision = 5, scale = 2, name = "discountPercentage")
     private BigDecimal discountPercentage;
 
+    @Column(name = "saleStartDate")
     private LocalDateTime saleStartDate;
+
+    @Column(name = "saleEndDate")
     private LocalDateTime saleEndDate;
 
     @Column(precision = 3, scale = 2)
     private BigDecimal rating;
 
+    @Column(name = "reviewCount")
     private Integer reviewCount;
+
+    @Column(name = "viewCount")
     private Integer viewCount;
 
     // Inventory management
+    @Column(name = "minimumStockLevel")
     private Integer minimumStockLevel;
+
+    @Column(name = "maximumStockLevel")
     private Integer maximumStockLevel;
+
+    @Column(name = "reorderPoint")
     private Integer reorderPoint;
+
+    @Column(name = "supplierId")
     private Long supplierId;
 
     // Product status flags
-    @Column(columnDefinition = "BIT DEFAULT 1")
+    @Column(columnDefinition = "BIT DEFAULT 1", name = "isActive")
     private Boolean isActive = true;
 
-    @Column(columnDefinition = "BIT DEFAULT 0")
+    @Column(columnDefinition = "BIT DEFAULT 0", name = "isFeatured")
     private Boolean isFeatured = false;
 
-    @Column(columnDefinition = "BIT DEFAULT 0")
+    @Column(columnDefinition = "BIT DEFAULT 0", name = "isOnSale")
     private Boolean isOnSale = false;
 
     // SEO and metadata
-    @Column(length = 200)
+    @Column(length = 200, name = "metaTitle")
     private String metaTitle;
 
-    @Column(length = 500)
+    @Column(length = 500, name = "metaDescription")
     private String metaDescription;
 
     @Column(length = 500)
     private String tags;
 
     // NYTT: Sale description field
-    @Column(length = 1000)
+    @Column(length = 1000, name = "saleDescription")
     private String saleDescription;
 
     // Product specifications
+    @Column(name = "warrantyMonths")
     private Integer warrantyMonths;
+
+    @Column(name = "estimatedDeliveryDays")
     private Integer estimatedDeliveryDays;
 
     // Audit fields
-    @Column(updatable = false)
+    @Column(updatable = false, name = "createdAt")
     private LocalDateTime createdAt;
 
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
 
     // Relationships
