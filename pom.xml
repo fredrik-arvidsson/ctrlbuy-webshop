@@ -15,10 +15,10 @@
     <description>Demo project for Spring Boot</description>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
@@ -189,7 +189,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo med Java 21 support - FIXAD KONFIGURATION -->
+            <!-- JaCoCo med Java 17 support - FIXAD KONFIGURATION -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
