@@ -1,35 +1,42 @@
-# Multi-stage build för Railway med Amazon Corretto
-FROM amazoncorretto:21-alpine AS build
+# Använd Amazon Corretto 17 (samma som Railway buildpack)
+FROM amazoncorretto:17-alpine
 
-# Set working directory
+# Skapa en app-användare för säkerhet
+RUN addgroup -g 1001 -S app && \
+    adduser -S app -u 1001 -G app
+
+# Sätt working directory
 WORKDIR /app
 
-# Copy pom.xml first for better caching
-COPY pom.xml .
+# Kopiera Maven wrapper och pom.xml först (för caching)
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
 
-# Download dependencies (cached if pom.xml unchanged)
-RUN apk add --no-cache maven && mvn dependency:go-offline -B
+# Ladda ner dependencies (detta cachas om pom.xml inte ändras)
+RUN ./mvnw dependency:go-offline
 
-# Copy source code
+# Kopiera källkoden
 COPY src ./src
 
-# Build application (skip tests for faster builds)
-RUN mvn clean package -DskipTests -B
+# Bygg applikationen
+RUN ./mvnw clean package -DskipTests
 
-# Runtime stage
-FROM amazoncorretto:21-alpine
+# Kopiera den byggda JAR-filen
+RUN cp target/*.jar app.jar
 
-# Set working directory
-WORKDIR /app
+# Byt till app-användaren
+USER app
 
-# Copy the built jar from build stage
-COPY --from=build /app/target/webshop-1.0-SNAPSHOT.jar app.jar
-
-# Expose port (Railway uses PORT environment variable)
+# Exponera port (Railway hanterar PORT environment variable automatiskt)
 EXPOSE 8080
 
-# Environment for Railway
-ENV SPRING_PROFILES_ACTIVE=prod
+# Hälsokontroll
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+# Starta applikationen med optimerade JVM-inställningar
+ENTRYPOINT ["java", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-Dspring.profiles.active=production", \
+  "-jar", \
+  "/app/app.jar"]
