@@ -2,4 +2,4 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "java -Dserver.port=$PORT -Dspring.profiles.active=railway -jar target/webshop-1.0-SNAPSHOT.jar"
+startCommand = "echo 'PORT is:' $PORT && java -Dserver.port=$PORT -Dserver.address=0.0.0.0 -Dspring.profiles.active=railway -jar target/webshop-1.0-SNAPSHOT.jar"
