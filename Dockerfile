@@ -1,5 +1,8 @@
-# Använd Amazon Corretto 17 (samma som Railway buildpack)
+# Använd Amazon Corretto 17 med Maven pre-installerat
 FROM amazoncorretto:17-alpine
+
+# Installera Maven
+RUN apk add --no-cache maven
 
 # Skapa en app-användare för säkerhet
 RUN addgroup -g 1001 -S app && \
@@ -8,18 +11,11 @@ RUN addgroup -g 1001 -S app && \
 # Sätt working directory
 WORKDIR /app
 
-# Kopiera Maven wrapper och pom.xml först (för caching)
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
+# Kopiera allt och bygg (enklare approach)
+COPY . .
 
-# Ladda ner dependencies (detta cachas om pom.xml inte ändras)
-RUN ./mvnw dependency:go-offline
-
-# Kopiera källkoden
-COPY src ./src
-
-# Bygg applikationen
-RUN ./mvnw clean package -DskipTests
+# Bygg applikationen med system Maven
+RUN mvn clean package -DskipTests
 
 # Kopiera den byggda JAR-filen
 RUN cp target/*.jar app.jar
