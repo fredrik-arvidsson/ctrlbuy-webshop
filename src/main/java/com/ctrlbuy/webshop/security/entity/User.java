@@ -28,37 +28,28 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "firstName")
     private String firstName;
 
-    @Column(name = "lastName")
     private String lastName;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    @Column(nullable = false, name = "enabled")
+    @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "emailVerified")
     private boolean emailVerified = false;
 
-    @Column(name = "verificationToken")
     private String verificationToken;
 
-    @Column(name = "verificationTokenExpiry")
     private LocalDateTime verificationTokenExpiry;
 
-    @Column(name = "resetToken")
     private String resetToken;
 
-    @Column(name = "resetTokenExpiry")
     private LocalDateTime resetTokenExpiry;
 
-    @Column(name = "createdAt")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "lastLoginAt")
     private LocalDateTime lastLoginAt;
 
     // Default constructor
