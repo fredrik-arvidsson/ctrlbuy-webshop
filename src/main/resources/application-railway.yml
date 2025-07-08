@@ -21,7 +21,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     properties:
       hibernate:
         format_sql: false
@@ -128,21 +128,6 @@ management:
     web:
       exposure:
         include: health,info
-      base-path: /actuator
   endpoint:
     health:
-      show-details: never
-      show-components: never
-
-# =======================================
-# INFO
-# =======================================
-info:
-  app:
-    name: CtrlBuy Webshop
-    environment: Production (Railway)
-    version: 1.0.0
-    database:
-      provider: Railway MySQL
-      region: EU West (Amsterdam)
-    security: Spring Security with JWT
+      show-details: when-authorized
