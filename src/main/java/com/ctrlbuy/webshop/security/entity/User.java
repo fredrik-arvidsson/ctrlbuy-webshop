@@ -28,10 +28,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "first_name")
+    @Column(name = "firstName")
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "lastName")
     private String lastName;
 
     @Enumerated(EnumType.STRING)
@@ -40,25 +40,25 @@ public class User implements UserDetails {
     @Column(nullable = false, name = "enabled")
     private boolean enabled = true;
 
-    @Column(name = "email_verified")
+    @Column(name = "emailVerified")
     private boolean emailVerified = false;
 
-    @Column(name = "verification_token")
+    @Column(name = "verificationToken")
     private String verificationToken;
 
-    @Column(name = "verification_token_expiry")
+    @Column(name = "verificationTokenExpiry")
     private LocalDateTime verificationTokenExpiry;
 
-    @Column(name = "reset_token")
+    @Column(name = "resetToken")
     private String resetToken;
 
-    @Column(name = "reset_token_expiry")
+    @Column(name = "resetTokenExpiry")
     private LocalDateTime resetTokenExpiry;
 
-    @Column(name = "created_at")
+    @Column(name = "createdAt")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "last_login_at")
+    @Column(name = "lastLoginAt")
     private LocalDateTime lastLoginAt;
 
     // Default constructor
