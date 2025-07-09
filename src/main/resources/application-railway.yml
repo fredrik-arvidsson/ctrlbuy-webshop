@@ -19,7 +19,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       # NAMING STRATEGY BORTTAGEN - LÅT @COLUMN ANNOTATIONS STYRA
     properties:
       hibernate:
