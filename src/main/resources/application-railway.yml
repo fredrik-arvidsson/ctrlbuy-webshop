@@ -104,6 +104,14 @@ app:
   base:
     url: https://ctrlbuy-webshop-production.up.railway.app
 
+  # =======================================
+  # ADMIN USER CONFIGURATION - FIXAD! 
+  # =======================================
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
+    email: ${ADMIN_EMAIL:admin@ctrlbuy.se}
+
   email:
     enabled: ${EMAIL_ENABLED:true}
     from: ${MAIL_FROM:noreply@ctrlbuy.se}
