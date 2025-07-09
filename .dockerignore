@@ -8,7 +8,7 @@ yarn-error.log*
 target/
 !target/*.jar
 !target/*.war
-.mvn/
+# .mvn/ folder is needed for Maven Wrapper
 # mvnw and mvnw.cmd are needed for Railway deployment
 # mvnw
 # mvnw.cmd
