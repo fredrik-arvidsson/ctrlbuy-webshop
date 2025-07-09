@@ -194,3 +194,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Made with ❤️ in Sweden** | *Showcasing enterprise Spring Boot development with security focus*# Railway deployment
+# Database fixed manually
