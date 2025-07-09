@@ -9,8 +9,9 @@ target/
 !target/*.jar
 !target/*.war
 .mvn/
-mvnw
-mvnw.cmd
+# mvnw and mvnw.cmd are needed for Railway deployment
+# mvnw
+# mvnw.cmd
 
 # IDE files
 .vscode/
