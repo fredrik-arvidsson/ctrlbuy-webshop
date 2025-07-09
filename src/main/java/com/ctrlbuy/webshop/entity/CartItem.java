@@ -23,10 +23,10 @@ public class CartItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", precision = 10, scale = 2, nullable = false)
+    @Column(name = "unit_price", precision = 10, nullable = false)
     private BigDecimal price;
 
-    @Column(name = "subtotal", precision = 10, scale = 2)
+    @Column(name = "subtotal", precision = 10)
     private BigDecimal subtotal;
 
     @Column(name = "created_at")

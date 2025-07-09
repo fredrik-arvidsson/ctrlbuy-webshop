@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Åtkomst nekad - CtrlBuy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .access-denied-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .access-denied-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .access-denied-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 1.5rem;
+        }
+        .access-denied-title {
+            color: #343a40;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .access-denied-message {
+            color: #6c757d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .btn-home {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+            margin-left: 10px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        .nav-link:hover {
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-keyboard"></i> CTRL+BUY
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/">Hem</a>
+            <a class="nav-link" href="/products">Produkter</a>
+            <a class="nav-link" href="/login">Logga in</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Access Denied Content -->
+<div class="access-denied-container">
+    <div class="access-denied-card">
+        <i class="bi bi-shield-exclamation access-denied-icon"></i>
+
+        <h1 class="access-denied-title">Åtkomst nekad</h1>
+
+        <p class="access-denied-message">
+            Du har inte behörighet att komma åt denna sida.
+            Denna del av webbplatsen är endast tillgänglig för administratörer.
+        </p>
+
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a href="/" class="btn-home">
+                <i class="bi bi-house-door"></i> Tillbaka till startsidan
+            </a>
+
+            <a href="/login" class="btn-login">
+                <i class="bi bi-person-lock"></i> Logga in som admin
+            </a>
+        </div>
+
+        <div class="mt-4">
+            <small class="text-muted">
+                <i class="bi bi-info-circle"></i>
+                Kontakta supporten om du tror att detta är ett misstag
+            </small>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

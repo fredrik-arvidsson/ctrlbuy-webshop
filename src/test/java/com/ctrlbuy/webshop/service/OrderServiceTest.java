@@ -1,6 +1,8 @@
 package com.ctrlbuy.webshop.service;
 
 import com.ctrlbuy.webshop.repository.OrderRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,14 +26,40 @@ class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private EntityManager entityManager;
+
+    @Mock
+    private Query query;
+
     @InjectMocks
     private OrderService orderService;
+
+    // ✅ Inject EntityManager manually since @PersistenceContext doesn't work in unit tests
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        // Use reflection to inject the mock EntityManager
+        try {
+            java.lang.reflect.Field field = OrderService.class.getDeclaredField("entityManager");
+            field.setAccessible(true);
+            field.set(orderService, entityManager);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to inject EntityManager", e);
+        }
+    }
 
     @Test
     void generateOrderNumber_ShouldCreateUniqueNumberWithCorrectFormat() throws Exception {
         // Arrange
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        when(orderRepository.findOrderNumbersByPattern(anyString())).thenReturn(Collections.emptyList());
+
+        // ✅ FIXED: Proper mock chain setup
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(Collections.emptyList());
 
         // Act - Use reflection to access private method
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");
@@ -53,8 +82,12 @@ class OrderServiceTest {
         String existingOrder1 = "CB" + today + "001";
         String existingOrder2 = "CB" + today + "002";
 
-        when(orderRepository.findOrderNumbersByPattern("CB" + today + "%"))
-                .thenReturn(Arrays.asList(existingOrder1, existingOrder2));
+        List<String> existingOrders = Arrays.asList(existingOrder1, existingOrder2);
+
+        // ✅ FIXED: Proper mock chain setup
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(existingOrders);
 
         // Act
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");
@@ -75,8 +108,12 @@ class OrderServiceTest {
         String existingOrder1 = "CB" + today + "001";
         String existingOrder2 = "CB" + today + "005"; // Gap in sequence
 
-        when(orderRepository.findOrderNumbersByPattern("CB" + today + "%"))
-                .thenReturn(Arrays.asList(existingOrder1, existingOrder2));
+        List<String> existingOrders = Arrays.asList(existingOrder1, existingOrder2);
+
+        // ✅ FIXED: Proper mock chain setup
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(existingOrders);
 
         // Act
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");
@@ -97,8 +134,12 @@ class OrderServiceTest {
         String validOrder = "CB" + today + "001";
         String invalidOrder = "CB" + today + "ABC"; // Non-numeric
 
-        when(orderRepository.findOrderNumbersByPattern("CB" + today + "%"))
-                .thenReturn(Arrays.asList(validOrder, invalidOrder));
+        List<String> existingOrders = Arrays.asList(validOrder, invalidOrder);
+
+        // ✅ FIXED: Proper mock chain setup
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(existingOrders);
 
         // Act
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");
@@ -117,9 +158,10 @@ class OrderServiceTest {
         // Arrange
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-        // Mock: no orders for today
-        when(orderRepository.findOrderNumbersByPattern("CB" + today + "%"))
-                .thenReturn(Collections.emptyList());
+        // ✅ FIXED: Proper mock chain setup - no orders for today
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(Collections.emptyList());
 
         // Act
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");
@@ -139,8 +181,12 @@ class OrderServiceTest {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String existingOrder = "CB" + today + "999";
 
-        when(orderRepository.findOrderNumbersByPattern("CB" + today + "%"))
-                .thenReturn(Arrays.asList(existingOrder));
+        List<String> existingOrders = Arrays.asList(existingOrder);
+
+        // ✅ FIXED: Proper mock chain setup
+        when(entityManager.createQuery(anyString())).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.getResultList()).thenReturn(existingOrders);
 
         // Act
         Method method = OrderService.class.getDeclaredMethod("generateOrderNumber");

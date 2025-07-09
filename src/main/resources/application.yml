@@ -6,14 +6,14 @@
 
 spring:
   profiles:
-    active: dev
+    active: local  # ÄNDRAT FRÅN dev TILL local
 
   # =======================================
   # DATABAS KONFIGURATION (MySQL ENDAST)
   # =======================================
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ctrlbuy_webshop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Stockholm}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/webshop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Stockholm}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:
@@ -83,6 +83,13 @@ spring:
       cache:
         period: 0
         use-last-modified: false
+
+  # =======================================
+  # MVC CONFIGURATION - FAVICON FIX
+  # =======================================
+  mvc:
+    favicon:
+      enabled: false
 
 # =======================================
 # SERVER CONFIGURATION
@@ -183,7 +190,46 @@ info:
 
 ---
 # =======================================
-# DEV PROFILE - LOKAL UTVECKLING
+# LOCAL PROFILE - LOKAL UTVECKLING (ANVÄNDER .env)
+# =======================================
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/webshop}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: ${MAIL_HOST:smtp.gmail.com}
+        debug: ${MAIL_DEBUG:false}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    com.ctrlbuy.webshop.service.EmailService: DEBUG
+    org.springframework.mail: DEBUG
+
+---
+# =======================================
+# DEV PROFILE - UTVECKLING MED MAILHOG
 # =======================================
 spring:
   config:
@@ -272,9 +318,3 @@ logging:
   level:
     com.ctrlbuy.webshop.service.EmailService: INFO
     org.springframework.mail: WARN
-
----
-# =======================================
-# RAILWAY PROFILE - RAILWAY DEPLOYMENT
-# =======================================
-spring:

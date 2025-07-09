@@ -40,7 +40,7 @@ class GmailEmailServiceTest {
         // Create test order
         testOrder = new Order();
         testOrder.setId(123L);
-        testOrder.setTotalAmount(new BigDecimal("299.99"));
+        testOrder.setTotalAmount(new BigDecimal("299.99").doubleValue()); // ✅ FIXED: Convert BigDecimal to Double
         testOrder.setStatus(Order.OrderStatus.PENDING);
 
         System.out.println("✅ Test setup complete");

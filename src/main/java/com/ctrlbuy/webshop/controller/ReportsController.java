@@ -4,6 +4,8 @@ import com.ctrlbuy.webshop.entity.Order;
 import com.ctrlbuy.webshop.entity.Product;
 import com.ctrlbuy.webshop.repository.OrderRepository;
 import com.ctrlbuy.webshop.repository.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 @PreAuthorize("hasRole('ADMIN')")
 public class ReportsController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReportsController.class);
+
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
@@ -32,7 +36,7 @@ public class ReportsController {
     // 🏠 HUVUDSIDA - /admin/reports
     @GetMapping("")
     public String reports(Model model) {
-        System.out.println("🏠 RAPPORTER HUVUDSIDA ANROPAD");
+        logger.info("Genererar rapport huvudsida");
 
         try {
             List<Product> allProducts = productRepository.findAll();
@@ -42,11 +46,11 @@ public class ReportsController {
             model.addAttribute("totalProducts", totalProducts);
             model.addAttribute("activeProducts", activeProducts);
 
-            System.out.println("📊 Huvudsida - Total: " + totalProducts + ", Aktiva: " + activeProducts);
+            logger.debug("Huvudsida - Total: {}, Aktiva: {}", totalProducts, activeProducts);
         } catch (Exception e) {
-            System.err.println("❌ Fel i huvudsida: " + e.getMessage());
-            model.addAttribute("totalProducts", 54);
-            model.addAttribute("activeProducts", 45);
+            logger.error("Fel vid generering av rapport huvudsida", e);
+            model.addAttribute("totalProducts", 0);
+            model.addAttribute("activeProducts", 0);
         }
 
         return "admin/reports/index";
@@ -56,11 +60,11 @@ public class ReportsController {
     @GetMapping("/products")
     public String productReport(Model model) {
         try {
-            System.out.println("🔥 STARTAR PRODUKTRAPPORT - BRUTE FORCE VERSION");
+            logger.info("Genererar produktrapport");
 
             // Använd standard JPA findAll() - enklast och mest pålitlig
             List<Product> allProducts = productRepository.findAll();
-            System.out.println("📊 HÄMTADE " + allProducts.size() + " PRODUKTER MED findAll()");
+            logger.debug("Hämtade {} produkter", allProducts.size());
 
             // Grundläggande statistik
             int totalProducts = allProducts.size();
@@ -74,8 +78,6 @@ public class ReportsController {
             Product mostExpensive = null;
             Product cheapest = null;
 
-            System.out.println("💰 BERÄKNAR PRISER MANUELLT:");
-
             for (Product product : allProducts) {
                 BigDecimal currentPrice = product.getCurrentPrice(); // Använd getCurrentPrice() istället för getPrice()
                 if (currentPrice != null && currentPrice.compareTo(BigDecimal.ZERO) > 0) {
@@ -86,14 +88,12 @@ public class ReportsController {
                     if (currentPrice.compareTo(maxPrice) > 0) {
                         maxPrice = currentPrice;
                         mostExpensive = product;
-                        System.out.println("  🔺 Nytt MAX: " + maxPrice + " kr (" + product.getName() + ")");
                     }
 
                     // Kontrollera min pris
                     if (currentPrice.compareTo(minPrice) < 0) {
                         minPrice = currentPrice;
                         cheapest = product;
-                        System.out.println("  🔻 Nytt MIN: " + minPrice + " kr (" + product.getName() + ")");
                     }
                 }
             }
@@ -109,14 +109,7 @@ public class ReportsController {
                 averagePrice = totalPrice.divide(new BigDecimal(validPriceCount), 2, RoundingMode.HALF_UP);
             }
 
-            System.out.println("💯 SLUTRESULTAT:");
-            System.out.println("  Totala produkter: " + totalProducts);
-            System.out.println("  Produkter med pris: " + validPriceCount);
-            System.out.println("  MAX pris: " + maxPrice + " kr");
-            System.out.println("  MIN pris: " + minPrice + " kr");
-            System.out.println("  Genomsnitt: " + averagePrice + " kr");
-            System.out.println("  Dyraste: " + (mostExpensive != null ? mostExpensive.getName() : "Ingen"));
-            System.out.println("  Billigaste: " + (cheapest != null ? cheapest.getName() : "Ingen"));
+            logger.debug("Prisstatistik - Max: {}, Min: {}, Genomsnitt: {}", maxPrice, minPrice, averagePrice);
 
             // Sätt attribut för frontend - ALLA VARIANTER
             model.addAttribute("maxPrice", maxPrice);
@@ -139,20 +132,14 @@ public class ReportsController {
             model.addAttribute("lowStockCount", lowStockCount);
             model.addAttribute("lowStockProducts", lowStockProducts);
 
-            // Kategori-räkning med detaljerad loggning
+            // Kategori-räkning
             Map<String, Long> categoryMap = new HashMap<>();
-            System.out.println("📂 KATEGORIANALYS:");
             for (Product product : allProducts) {
                 String category = "Okänd";
                 if (product.getCategory() != null && !product.getCategory().trim().isEmpty()) {
                     category = product.getCategory();
                 }
                 categoryMap.put(category, categoryMap.getOrDefault(category, 0L) + 1L);
-            }
-
-            // Logga kategorier
-            for (Map.Entry<String, Long> entry : categoryMap.entrySet()) {
-                System.out.println("  📁 " + entry.getKey() + ": " + entry.getValue() + " produkter");
             }
 
             model.addAttribute("productsByCategory", categoryMap);
@@ -170,24 +157,23 @@ public class ReportsController {
             // Alla produkter för tabellen
             model.addAttribute("products", allProducts);
 
-            System.out.println("✅ PRODUKTRAPPORT KLAR - ALLA VÄRDEN SATTA KORREKT");
+            logger.info("Produktrapport genererad framgångsrikt");
 
         } catch (Exception e) {
-            System.err.println("❌ FEL I PRODUKTRAPPORT: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Fel vid generering av produktrapport", e);
 
             // Fallback-värden
-            model.addAttribute("totalProducts", 54);
-            model.addAttribute("averagePrice", new BigDecimal("8767.44"));
-            model.addAttribute("maxPrice", new BigDecimal("45999.00"));
-            model.addAttribute("minPrice", new BigDecimal("499.00"));
-            model.addAttribute("highestPrice", new BigDecimal("45999.00"));
-            model.addAttribute("lowestPrice", new BigDecimal("499.00"));
-            model.addAttribute("lowStockCount", 9);
+            model.addAttribute("totalProducts", 0);
+            model.addAttribute("averagePrice", BigDecimal.ZERO);
+            model.addAttribute("maxPrice", BigDecimal.ZERO);
+            model.addAttribute("minPrice", BigDecimal.ZERO);
+            model.addAttribute("highestPrice", BigDecimal.ZERO);
+            model.addAttribute("lowestPrice", BigDecimal.ZERO);
+            model.addAttribute("lowStockCount", 0);
             model.addAttribute("products", new ArrayList<>());
             model.addAttribute("productsByCategory", new HashMap<>());
-            model.addAttribute("inStockProducts", 45L);
-            model.addAttribute("outOfStockProducts", 9L);
+            model.addAttribute("inStockProducts", 0L);
+            model.addAttribute("outOfStockProducts", 0L);
         }
 
         return "admin/reports/products";
@@ -197,7 +183,7 @@ public class ReportsController {
     @GetMapping("/sales")
     public String salesReport(Model model) {
         try {
-            System.out.println("💰 STARTAR FÖRSÄLJNINGSRAPPORT");
+            logger.info("Genererar försäljningsrapport");
 
             List<Product> allProducts = productRepository.findAll();
             List<Order> allOrders = orderRepository.findAll();
@@ -239,6 +225,7 @@ public class ReportsController {
                     avgDiscount = BigDecimal.valueOf(tempAvg).setScale(2, RoundingMode.HALF_UP);
                 }
             } catch (Exception e) {
+                logger.warn("Fel vid beräkning av genomsnittlig rabatt", e);
                 avgDiscount = BigDecimal.ZERO;
             }
 
@@ -277,22 +264,16 @@ public class ReportsController {
                     .collect(Collectors.toList());
             model.addAttribute("activeDeals", activeDeals);
 
-            System.out.println("💰 FÖRSÄLJNINGSSTATISTIK:");
-            System.out.println("  Totala produkter: " + totalProducts);
-            System.out.println("  REA-produkter: " + saleProducts);
-            System.out.println("  Totala besparingar: " + totalSavings + " kr");
-            System.out.println("  Potentiell intäkt: " + totalPotentialRevenue + " kr");
-            System.out.println("  Genomsnittlig rabatt: " + avgDiscount.doubleValue() + "%");
-            System.out.println("  Totala beställningar: " + allOrders.size());
-            System.out.println("✅ FÖRSÄLJNINGSRAPPORT KLAR");
+            logger.debug("Försäljningsstatistik - Produkter: {}, REA: {}, Besparingar: {} kr",
+                    totalProducts, saleProducts, totalSavings);
+            logger.info("Försäljningsrapport genererad framgångsrikt");
 
         } catch (Exception e) {
-            System.err.println("❌ Fel i försäljningsrapport: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Fel vid generering av försäljningsrapport", e);
 
             // Fallback-värden
-            model.addAttribute("totalProducts", 54);
-            model.addAttribute("saleProducts", 12);
+            model.addAttribute("totalProducts", 0);
+            model.addAttribute("saleProducts", 0);
             model.addAttribute("totalSavings", BigDecimal.ZERO);
             model.addAttribute("totalRevenue", BigDecimal.ZERO);
             model.addAttribute("avgDiscount", BigDecimal.ZERO);
@@ -308,7 +289,7 @@ public class ReportsController {
 
     @GetMapping("/users")
     public String userReport(Model model) {
-        System.out.println("👥 STARTAR ANVÄNDARRAPPORT");
+        logger.info("Genererar användarrapport");
 
         // Temporärt inaktiverad - kan implementeras senare
         model.addAttribute("totalUsers", 0);
@@ -316,25 +297,24 @@ public class ReportsController {
         model.addAttribute("customerUsers", 0);
         model.addAttribute("users", new ArrayList<>());
 
-        System.out.println("⚠️ ANVÄNDARRAPPORT: Temporärt inaktiverad");
-        System.out.println("💡 IMPLEMENTERA: UserRepository och user-statistik");
+        logger.debug("Användarrapport: Temporärt inaktiverad");
 
         return "admin/reports/users";
     }
 
     /**
-     * Hjälpmetod för att kontrollera produktdata
+     * Hjälpmetod för att kontrollera produktdata (används endast för debugging)
      */
     @SuppressWarnings("unused")
     private void logProductSample(List<Product> products) {
-        System.out.println("🔍 PRODUKTSAMPLING (första 3):");
-        for (int i = 0; i < Math.min(3, products.size()); i++) {
-            Product p = products.get(i);
-            System.out.println("  [" + p.getId() + "] " + p.getName() +
-                    " - Pris: " + p.getCurrentPrice() + " kr" +
-                    " - Lager: " + p.getStockQuantity() +
-                    " - Kategori: " + p.getCategory() +
-                    " - REA: " + p.isOnSale());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Produktsampling (första 3):");
+            for (int i = 0; i < Math.min(3, products.size()); i++) {
+                Product p = products.get(i);
+                logger.debug("[{}] {} - Pris: {} kr - Lager: {} - Kategori: {} - REA: {}",
+                        p.getId(), p.getName(), p.getCurrentPrice(), p.getStockQuantity(),
+                        p.getCategory(), p.isOnSale());
+            }
         }
     }
 }

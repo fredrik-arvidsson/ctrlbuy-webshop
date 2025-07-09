@@ -61,20 +61,26 @@ public class SecurityConfig {
                         .requestMatchers("/test-email", "/test-email/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
 
+                        // ❌ Error och access denied sidor - publikt tillgängliga
+                        .requestMatchers("/error", "/access-denied").permitAll()
+
                         // 🛡️ ADMIN ENDPOINTS - KRÄVER ROLE_ADMIN (dubbel säkerhet)
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // 🛒 Varukorg - tillgänglig för alla (session-baserad)
                         .requestMatchers("/cart/**", "/varukorg/**").permitAll()
 
+                        // 💳 Checkout och betalningar - kräver inloggning
+                        .requestMatchers("/checkout/**", "/betalningsmetoder/**").authenticated()
+
+                        // 📦 Orderhantering - kräver inloggning
+                        .requestMatchers("/orders/**", "/order/**").authenticated()
+
                         // 📄 Coming Soon sidor - publikt tillgängliga
                         .requestMatchers("/returer", "/spara-bestallning", "/garantivillkor", "/coming-soon").permitAll()
 
                         // 👤 Profil-sidor - kräver inloggning (vilken roll som helst)
                         .requestMatchers("/min-profil", "/min-profil/**", "/profile/**").authenticated()
-
-                        // ❌ Error endpoint - publikt tillgängligt
-                        .requestMatchers("/error").permitAll()
 
                         // 🌐 Allt annat är publikt (fallback)
                         .anyRequest().permitAll()
@@ -100,6 +106,21 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID", "ctrlbuy-remember-me")
                         .clearAuthentication(true)
                         .permitAll()
+                )
+                // 🚫 EXCEPTION HANDLING - SNYGG ACCESS DENIED HANTERING
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedPage("/access-denied")  // Snygg access denied sida
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // Om inte inloggad och försöker nå admin, omdirigera till login
+                            String requestURI = request.getRequestURI();
+                            if (requestURI.startsWith("/admin")) {
+                                response.sendRedirect("/login?message=admin_required");
+                            } else if (requestURI.startsWith("/checkout") || requestURI.startsWith("/orders")) {
+                                response.sendRedirect("/login?message=login_required");
+                            } else {
+                                response.sendRedirect("/login");
+                            }
+                        })
                 )
                 // 🛡️ CSRF-SKYDD MED TOKENS FÖR ADMIN-PANEL
                 .csrf(csrf -> csrf

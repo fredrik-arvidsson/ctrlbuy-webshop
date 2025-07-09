@@ -1,62 +1,68 @@
 package com.ctrlbuy.webshop.dto;
 
-import com.ctrlbuy.webshop.security.entity.User;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-/**
- * ✅ UPPDATERAD: RegistrationResult som stödjer båda användningsfallen
- * - Ursprunglig: User + token
- * - Ny: boolean success + message
- */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RegistrationResult {
-    private final User user;
-    private final String token;
-    private final boolean success;
-    private final String message;
 
-    // ✅ Ursprunglig konstruktor (User + token)
-    public RegistrationResult(User user, String token) {
-        this.user = user;
-        this.token = token;
-        this.success = (user != null);
-        this.message = null;
+    private boolean success;
+    private String message;
+    private Long userId;  // ID för den skapade användaren (om lyckad)
+    private String errorCode; // Specifik felkod för frontend-hantering
+
+    /**
+     * Skapa ett lyckat resultat
+     */
+    public static RegistrationResult success(String message) {
+        return new RegistrationResult(true, message, null, null);
     }
 
-    // ✅ Ny konstruktor (boolean + message) - för UserService
-    public RegistrationResult(boolean success, String message) {
-        this.success = success;
-        this.message = message;
-        this.user = null;
-        this.token = null;
+    /**
+     * Skapa ett lyckat resultat med användar-ID
+     */
+    public static RegistrationResult success(String message, Long userId) {
+        return new RegistrationResult(true, message, userId, null);
     }
 
-    // ✅ Getters för ursprungliga fält
-    public User getUser() {
-        return user;
+    /**
+     * Skapa ett misslyckat resultat
+     */
+    public static RegistrationResult failure(String message) {
+        return new RegistrationResult(false, message, null, null);
     }
 
-    public String getToken() {
-        return token;
+    /**
+     * Skapa ett misslyckat resultat med felkod
+     */
+    public static RegistrationResult failure(String message, String errorCode) {
+        return new RegistrationResult(false, message, null, errorCode);
     }
 
-    // ✅ Getters för nya fält
+    /**
+     * Kontrollera om registreringen lyckades
+     */
     public boolean isSuccess() {
         return success;
     }
 
-    public String getMessage() {
-        return message;
+    /**
+     * Kontrollera om registreringen misslyckades
+     */
+    public boolean isFailure() {
+        return !success;
     }
 
-    // ✅ Utility method för att kontrollera om registreringen lyckades
-    public boolean hasUser() {
-        return user != null;
-    }
-
-    public boolean hasToken() {
-        return token != null && !token.isEmpty();
-    }
-
-    public boolean hasMessage() {
-        return message != null && !message.isEmpty();
+    @Override
+    public String toString() {
+        return "RegistrationResult{" +
+                "success=" + success +
+                ", message='" + message + '\'' +
+                ", userId=" + userId +
+                ", errorCode='" + errorCode + '\'' +
+                '}';
     }
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // ✅ BEFINTLIGA METODER från er nuvarande struktur
+    // ✅ SPRING DATA JPA DERIVED QUERIES - fungerar automatiskt
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
     Optional<User> findByUsernameAndEnabledTrue(String username);
@@ -34,7 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByEmailVerifiedFalse();
     List<User> findByEmailVerifiedFalse();
 
-    // 🔐 SÄKER LÖSENORDSÅTERSTÄLLNING - kräver BÅDE username OCH email
+    // 🔐 SÄKER LÖSENORDSÅTERSTÄLLNING - FIXED JPQL QUERIES
 
     /**
      * Säker metod för lösenordsåterställning
@@ -53,23 +53,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Extra säkerhetsvariant - kräver även att användaren är aktiv
-     * FIX: Använder enabled istället för active
+     * FIXED: Använder enabled istället för active
      */
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
     Optional<User> findByUsernameAndEmailAndEnabledTrue(@Param("username") String username, @Param("email") String email);
 
     /**
      * Kompatibilitetsversion för aktiv användare - returnerar User direkt
-     * FIX: Använder enabled istället för active
+     * FIXED: Använder enabled istället för active
      */
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
     User findByUsernameAndEmailAndEnabledTrueUser(@Param("username") String username, @Param("email") String email);
 
     // ✅ ENKLA QUERIES som definitivt fungerar
-    // FIX: Alla queries använder enabled istället för active
+    // FIXED: Alla queries använder enabled istället för active
 
     /**
      * Hitta användare som inte verifierat sin email på länge
+     * FIXED: Använder entity field names
      */
     @Query("SELECT u FROM User u WHERE u.emailVerified = false AND u.enabled = true AND u.verificationTokenExpiry < CURRENT_TIMESTAMP")
     List<User> findUsersWithExpiredVerificationTokens();
@@ -84,7 +85,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Kontrollera om användarnamn + email-kombination existerar för aktiv användare
-     * FIX: Använder enabled istället för active
+     * FIXED: Använder enabled istället för active
      */
     @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.username = :username AND u.email = :email AND u.enabled = true")
     boolean existsByUsernameAndEmailAndEnabledTrue(@Param("username") String username, @Param("email") String email);

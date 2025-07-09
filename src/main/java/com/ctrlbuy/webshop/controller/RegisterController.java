@@ -34,10 +34,11 @@ public class RegisterController {
                                Model model,
                                RedirectAttributes redirectAttributes) {
 
-        // 🔍 DEBUG: Logga alla inkommande värden
+        log.info("🚀 Registreringsförsök för användare: {}", registerRequest.getUsername());
 
         // 🔧 TRIMMA FÄLT INNAN VALIDERING
         registerRequest.trimAllFields();
+        registerRequest.normalizeEmail();
 
         // Kontrollera om några kritiska fält är null EFTER trimning
         if (registerRequest.getUsername() == null || registerRequest.getUsername().isEmpty()) {
@@ -48,21 +49,25 @@ public class RegisterController {
             bindingResult.rejectValue("email", "email.required", "E-post är obligatorisk");
         }
 
-
         // Kör egen validering
         validateRegistration(registerRequest, bindingResult);
 
         if (bindingResult.hasErrors()) {
+            log.warn("⚠️ Valideringsfel vid registrering för: {}", registerRequest.getUsername());
             bindingResult.getAllErrors().forEach(error -> {
+                log.debug("Valideringsfel: {}", error.getDefaultMessage());
             });
             return "register";
         }
 
         try {
+            log.info("✅ Validering OK, försöker registrera användare: {}", registerRequest.getUsername());
+
             // ✅ ANVÄND ENKEL REGISTRERING UTAN EMAIL-VERIFIERING
             RegistrationResult registrationResult = userService.registerUser(registerRequest);
 
             if (registrationResult.isSuccess()) {
+                log.info("🎉 Registrering lyckades för användare: {}", registerRequest.getUsername());
 
                 // ✅ ANVÄNDAREN KAN LOGGA IN DIREKT - INGEN EMAIL KRÄVS
                 redirectAttributes.addFlashAttribute("success",
@@ -70,14 +75,20 @@ public class RegisterController {
 
                 return "redirect:/login";
             } else {
+                log.warn("❌ Registrering misslyckades för användare: {} - {}",
+                        registerRequest.getUsername(), registrationResult.getMessage());
                 model.addAttribute("error", registrationResult.getMessage());
                 return "register";
             }
 
         } catch (RuntimeException e) {
+            log.error("❌ RuntimeException vid registrering för användare: {}",
+                    registerRequest.getUsername(), e);
             model.addAttribute("error", "Registreringsfel: " + e.getMessage());
             return "register";
         } catch (Exception e) {
+            log.error("❌ Oväntat fel vid registrering för användare: {}",
+                    registerRequest.getUsername(), e);
             model.addAttribute("error", "Ett oväntat fel inträffade. Försök igen senare.");
             return "register";
         }

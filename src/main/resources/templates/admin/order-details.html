@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTRLBUY Admin - Beställningsdetaljer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .admin-sidebar {
+      background: linear-gradient(135deg, #212529, #495057);
+      min-height: 100vh;
+      color: white;
+    }
+
+    .admin-content {
+      padding: 2rem;
+    }
+
+    .order-header {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid #0d6efd;
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    .status-processing { background: #e2e3e5; color: #383d41; }
+    .status-shipped { background: #d4edda; color: #155724; }
+    .status-delivered { background: #cff4fc; color: #055160; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-returned { background: #ffeaa7; color: #6c5ce7; }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #212529;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-value {
+      color: #6c757d;
+    }
+
+    .status-update-form {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-status {
+      padding: 0.4rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-status:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-confirm { background: #0dcaf0; color: white; }
+    .btn-process { background: #ffc107; color: white; }
+    .btn-ship { background: #198754; color: white; }
+    .btn-deliver { background: #0d6efd; color: white; }
+    .btn-cancel { background: #dc3545; color: white; }
+
+    .order-items-table {
+      margin-top: 1rem;
+    }
+
+    .table th {
+      background-color: #f8f9fa;
+      border: none;
+      font-weight: 600;
+      color: #212529;
+    }
+
+    @media (max-width: 768px) {
+      .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .quick-actions {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Admin Sidebar -->
+    <div class="col-md-2 admin-sidebar p-3">
+      <h4 class="text-white mb-4">
+        <i class="fas fa-user-shield me-2"></i>
+        Admin
+      </h4>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white-50" href="/admin">
+          <i class="fas fa-tachometer-alt me-2"></i>
+          Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/orders">
+          <i class="fas fa-shopping-cart me-2"></i>
+          Beställningar
+        </a>
+        <a class="nav-link text-white-50" href="/admin/products">
+          <i class="fas fa-box me-2"></i>
+          Produkter
+        </a>
+        <a class="nav-link text-white-50" href="/admin/users">
+          <i class="fas fa-users me-2"></i>
+          Användare
+        </a>
+        <a class="nav-link text-white-50" href="/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>
+          Logga ut
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10 admin-content">
+      <!-- Success/Error Messages -->
+      <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        Beställningen har uppdaterats framgångsrikt.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Ett fel uppstod</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <!-- Order Header -->
+      <div class="order-header">
+        <div class="row align-items-center">
+          <div class="col">
+            <h1 class="mb-2">
+              <i class="fas fa-receipt text-primary me-3"></i>
+              Beställningsdetaljer
+            </h1>
+            <h2 class="text-primary mb-0" th:text="${order.orderNumber}">CB2025070001</h2>
+          </div>
+          <div class="col-auto">
+                            <span th:if="${order.status}"
+                                  th:text="${order.status.swedishName}"
+                                  th:class="${'status-badge status-' + #strings.toLowerCase(order.status.name())}"
+                                  class="status-badge">
+                                PENDING
+                            </span>
+            <span th:unless="${order.status}" class="status-badge status-pending">OKÄND STATUS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Order Information -->
+        <div class="col-lg-8">
+          <!-- Basic Order Info -->
+          <div class="info-card">
+            <h4 class="mb-3">
+              <i class="fas fa-info-circle text-primary me-2"></i>
+              Orderinformation
+            </h4>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-hashtag"></i>
+                                    Ordernummer:
+                                </span>
+              <span class="detail-value" th:text="${order.orderNumber}">CB2025070001</span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Orderdatum:
+                                </span>
+              <span class="detail-value" th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy HH:mm')}">09 juli 2025 14:13</span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-user"></i>
+                                    Kund:
+                                </span>
+              <span class="detail-value">
+                                    <span th:if="${order.user}" th:text="${order.user.username}">Användare</span>
+                                    <span th:unless="${order.user}">Gästkund</span>
+                                </span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-credit-card"></i>
+                                    Betalmetod:
+                                </span>
+              <span class="detail-value">
+                                    <span th:if="${order.paymentMethod}" th:text="${order.paymentMethod}">Kort</span>
+                                    <span th:unless="${order.paymentMethod}">Kort</span>
+                                </span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-money-check-alt"></i>
+                                    Betalstatus:
+                                </span>
+              <span class="detail-value">
+                                    <span th:if="${order.paymentStatus}" th:text="${order.paymentStatus.swedishName}">Väntande</span>
+                                    <span th:unless="${order.paymentStatus}">Väntande</span>
+                                </span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-euro-sign"></i>
+                                    Totalt belopp:
+                                </span>
+              <span class="detail-value fw-bold text-primary">
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">70,997.00</span> kr
+                                </span>
+            </div>
+          </div>
+
+          <!-- Delivery Information -->
+          <div class="info-card" th:if="${order.deliveryName}">
+            <h4 class="mb-3">
+              <i class="fas fa-shipping-fast text-primary me-2"></i>
+              Leveransinformation
+            </h4>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-user"></i>
+                                    Namn:
+                                </span>
+              <span class="detail-value" th:text="${order.deliveryName}">Fredrik Arvidsson</span>
+            </div>
+
+            <div class="detail-row">
+                                <span class="detail-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Adress:
+                                </span>
+              <span class="detail-value">
+                                    <span th:text="${order.deliveryAddress}">Testgatan 123</span><br>
+                                    <span th:text="${order.deliveryPostalCode}">12345</span>
+                                    <span> </span>
+                                    <span th:text="${order.deliveryCity}">Stockholm</span>
+                                </span>
+            </div>
+
+            <div class="detail-row" th:if="${order.deliveryPhone}">
+                                <span class="detail-label">
+                                    <i class="fas fa-phone"></i>
+                                    Telefon:
+                                </span>
+              <span class="detail-value" th:text="${order.deliveryPhone}">070-123 45 67</span>
+            </div>
+
+            <div class="detail-row" th:if="${order.deliveryEmail}">
+                                <span class="detail-label">
+                                    <i class="fas fa-envelope"></i>
+                                    E-post:
+                                </span>
+              <span class="detail-value" th:text="${order.deliveryEmail}">fredrik@example.com</span>
+            </div>
+
+            <div class="detail-row" th:if="${order.deliveryNotes}">
+                                <span class="detail-label">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Leveransnotering:
+                                </span>
+              <span class="detail-value" th:text="${order.deliveryNotes}">-</span>
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="info-card" th:if="${order.orderItems}">
+            <h4 class="mb-3">
+              <i class="fas fa-shopping-bag text-primary me-2"></i>
+              Beställda artiklar
+            </h4>
+
+            <div class="table-responsive order-items-table">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>Artikel</th>
+                  <th class="text-center">Antal</th>
+                  <th class="text-end">Pris</th>
+                  <th class="text-end">Summa</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${order.orderItems}">
+                  <td>
+                    <strong th:text="${item.productName}">iPhone 15 Pro Max</strong>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary" th:text="${item.quantity}">1</span>
+                  </td>
+                  <td class="text-end">
+                    <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')}">13,499.00</span> kr
+                  </td>
+                  <td class="text-end fw-bold">
+                    <span th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 2, 'POINT')}">13,499.00</span> kr
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cost Breakdown -->
+          <div class="info-card">
+            <h4 class="mb-3">
+              <i class="fas fa-calculator text-primary me-2"></i>
+              Kostnadsuppdelning
+            </h4>
+
+            <div class="detail-row">
+              <span class="detail-label">Summa exkl. moms:</span>
+              <span class="detail-value">
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount / 1.25, 0, 'COMMA', 2, 'POINT')}">56,797.60</span> kr
+                                </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Moms (25%):</span>
+              <span class="detail-value">
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount - (order.totalAmount / 1.25), 0, 'COMMA', 2, 'POINT')}">14,199.40</span> kr
+                                </span>
+            </div>
+
+            <div class="detail-row" th:if="${order.shippingCost}">
+              <span class="detail-label">Frakt:</span>
+              <span class="detail-value">
+                                    <span th:text="${#numbers.formatDecimal(order.shippingCost, 0, 'COMMA', 2, 'POINT')}">0,00</span> kr
+                                </span>
+            </div>
+
+            <div class="detail-row" th:if="${order.discountAmount}">
+              <span class="detail-label">Rabatt:</span>
+              <span class="detail-value text-success">
+                                    -<span th:text="${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 2, 'POINT')}">0,00</span> kr
+                                </span>
+            </div>
+
+            <div class="detail-row border-top pt-3 mt-3">
+              <span class="detail-label fw-bold h5">TOTALT INKL. MOMS:</span>
+              <span class="detail-value fw-bold h5 text-primary">
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">70,997.00</span> kr
+                                </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Management -->
+        <div class="col-lg-4">
+          <div class="info-card">
+            <h4 class="mb-3">
+              <i class="fas fa-tasks text-primary me-2"></i>
+              Status-hantering
+            </h4>
+
+            <!-- Current Status -->
+            <div class="text-center mb-3">
+              <p class="mb-1"><strong>Nuvarande status:</strong></p>
+              <span th:if="${order.status}"
+                    th:text="${order.status.swedishName}"
+                    th:class="${'status-badge status-' + #strings.toLowerCase(order.status.name())}"
+                    class="status-badge">
+                                    PENDING
+                                </span>
+              <span th:unless="${order.status}" class="status-badge status-pending">OKÄND STATUS</span>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mb-3">
+              <p class="mb-2"><strong>Snabbåtgärder:</strong></p>
+              <div class="quick-actions">
+                <button class="btn btn-status btn-confirm btn-sm"
+                        onclick="updateStatus('CONFIRMED')">
+                  Bekräfta
+                </button>
+                <button class="btn btn-status btn-process btn-sm"
+                        onclick="updateStatus('PROCESSING')">
+                  Behandla
+                </button>
+                <button class="btn btn-status btn-ship btn-sm"
+                        onclick="updateStatus('SHIPPED')">
+                  Skicka
+                </button>
+                <button class="btn btn-status btn-deliver btn-sm"
+                        onclick="updateStatus('DELIVERED')">
+                  Leverera
+                </button>
+                <button class="btn btn-status btn-cancel btn-sm"
+                        onclick="updateStatus('CANCELLED')">
+                  Avbryt
+                </button>
+              </div>
+            </div>
+
+            <!-- Manual Status Update -->
+            <div class="status-update-form">
+              <form th:action="@{'/admin/orders/' + ${order.id} + '/status'}" method="post">
+                <div class="mb-3">
+                  <label for="status" class="form-label"><strong>Manuell statusuppdatering:</strong></label>
+                  <select class="form-select" id="status" name="status" required>
+                    <option value="">Välj ny status...</option>
+                    <option value="PENDING">Väntande</option>
+                    <option value="CONFIRMED">Bekräftad</option>
+                    <option value="PROCESSING">Behandlas</option>
+                    <option value="SHIPPED">Skickad</option>
+                    <option value="DELIVERED">Levererad</option>
+                    <option value="CANCELLED">Avbruten</option>
+                    <option value="RETURNED">Returnerad</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="notes" class="form-label">Anteckningar (valfritt):</label>
+                  <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Lägg till anteckningar om statusändringen..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fas fa-save me-2"></i>
+                  Uppdatera Status
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Additional Notes -->
+          <div class="info-card" th:if="${order.notes}">
+            <h5 class="mb-3">
+              <i class="fas fa-sticky-note text-warning me-2"></i>
+              Anteckningar
+            </h5>
+            <p class="text-muted mb-0" th:text="${order.notes}">Inga anteckningar</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="text-center mt-4">
+        <a href="/admin/orders" class="btn btn-secondary me-3">
+          <i class="fas fa-arrow-left me-2"></i>
+          Tillbaka till Beställningar
+        </a>
+
+        <button class="btn btn-outline-primary" onclick="window.print()">
+          <i class="fas fa-print me-2"></i>
+          Skriv ut
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateStatus(newStatus) {
+    if (confirm('Är du säker på att du vill ändra status till ' + getStatusText(newStatus) + '?')) {
+      const form = document.querySelector('form');
+      const statusSelect = document.getElementById('status');
+      statusSelect.value = newStatus;
+      form.submit();
+    }
+  }
+
+  function getStatusText(status) {
+    const statusTexts = {
+      'PENDING': 'Väntande',
+      'CONFIRMED': 'Bekräftad',
+      'PROCESSING': 'Behandlas',
+      'SHIPPED': 'Skickad',
+      'DELIVERED': 'Levererad',
+      'CANCELLED': 'Avbruten',
+      'RETURNED': 'Returnerad'
+    };
+    return statusTexts[status] || status;
+  }
+
+  // Auto-refresh every 30 seconds for status updates
+  setInterval(function() {
+    const statusBadge = document.querySelector('.status-badge');
+    if (statusBadge) {
+      const currentStatus = statusBadge.textContent.toUpperCase();
+      const activeStatuses = ['VÄNTANDE', 'BEKRÄFTAD', 'BEHANDLAS', 'SKICKAD'];
+
+      if (activeStatuses.includes(currentStatus)) {
+        location.reload();
+      }
+    }
+  }, 30000);
+</script>
+</body>
+</html>

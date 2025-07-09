@@ -37,58 +37,25 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="bi bi-box-seam"></i> Orderhantering</h2>
                 <div>
-                    <span class="badge bg-primary fs-6" th:text="'Totalt: ' + ${ordersPage.totalElements} + ' beställningar'">
+                    <span class="badge bg-primary fs-6" th:text="'Totalt: ' + ${totalOrders} + ' beställningar'">
                         Totalt: 0 beställningar
+                    </span>
+                    <span class="badge bg-success fs-6 ms-2" th:text="'Omsättning: ' + ${#numbers.formatDecimal(totalRevenue, 0, 2)} + ' kr'">
+                        Omsättning: 0 kr
                     </span>
                 </div>
             </div>
 
-            <!-- Pagination Info -->
-            <div class="row mb-3" th:if="${ordersPage.totalElements > 0}">
-                <div class="col-12">
-                    <nav aria-label="Order pagination">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted">
-                                Visar <span th:text="${ordersPage.number * ordersPage.size + 1}">1</span>-<span th:text="${ordersPage.number * ordersPage.size + ordersPage.numberOfElements}">10</span>
-                                av <span th:text="${ordersPage.totalElements}">100</span> beställningar
-                            </span>
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span th:text="${error}">Ett fel uppstod</span>
+            </div>
 
-                            <!-- Pagination Controls -->
-                            <ul class="pagination pagination-sm mb-0" th:if="${ordersPage.totalPages > 1}">
-                                <li class="page-item" th:classappend="${ordersPage.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/orders(page=0)}" aria-label="First">
-                                        <span aria-hidden="true">&laquo;&laquo;</span>
-                                    </a>
-                                </li>
-                                <li class="page-item" th:classappend="${ordersPage.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number - 1})}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-
-                                <!-- Page numbers -->
-                                <th:block th:each="pageNum : ${#numbers.sequence(0, ordersPage.totalPages - 1)}">
-                                    <li class="page-item"
-                                        th:if="${pageNum >= ordersPage.number - 2 and pageNum <= ordersPage.number + 2}"
-                                        th:classappend="${pageNum == ordersPage.number} ? 'active'">
-                                        <a class="page-link" th:href="@{/admin/orders(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
-                                    </li>
-                                </th:block>
-
-                                <li class="page-item" th:classappend="${ordersPage.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number + 1})}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                                <li class="page-item" th:classappend="${ordersPage.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.totalPages - 1})}" aria-label="Last">
-                                        <span aria-hidden="true">&raquo;&raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
-                </div>
+            <!-- Test Message -->
+            <div th:if="${message}" class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <span th:text="${message}">Test meddelande</span>
             </div>
 
             <!-- Orders Table -->
@@ -110,30 +77,30 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <!-- Loop through orders with null safety -->
-                            <th:block th:if="${ordersPage != null and ordersPage.content != null and !ordersPage.content.isEmpty()}">
-                                <tr th:each="order : ${ordersPage.content}">
+                            <!-- Loop through orders - FIXAD VERSION -->
+                            <th:block th:if="${orders != null and !#lists.isEmpty(orders)}">
+                                <tr th:each="order : ${orders}">
                                     <td>
                                         <strong th:text="${order.id}">#1</strong>
                                         <br>
                                         <small class="text-muted" th:text="${order.orderNumber != null ? order.orderNumber : 'ORD-' + order.id}">ORD-001</small>
                                     </td>
                                     <td>
-                                        <div th:text="${order.user != null ? order.user.email : 'Okänd'}">kund@example.com</div>
-                                        <small class="text-muted" th:text="${order.user != null ? order.user.username : 'N/A'}">användare</small>
+                                        <div th:text="${order.user != null ? order.user.email : 'Gäst'}">kund@example.com</div>
+                                        <small class="text-muted" th:text="${order.user != null ? order.user.username : 'Gäst-order'}">användare</small>
                                     </td>
                                     <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
                                     <td>
                                         <span class="badge bg-warning" th:if="${order.status.name()} == 'PENDING'" th:text="${order.status}">PENDING</span>
                                         <span class="badge bg-info" th:if="${order.status.name()} == 'CONFIRMED'" th:text="${order.status}">CONFIRMED</span>
+                                        <span class="badge bg-primary" th:if="${order.status.name()} == 'PROCESSING'" th:text="${order.status}">PROCESSING</span>
                                         <span class="badge bg-primary" th:if="${order.status.name()} == 'SHIPPED'" th:text="${order.status}">SHIPPED</span>
                                         <span class="badge bg-success" th:if="${order.status.name()} == 'DELIVERED'" th:text="${order.status}">DELIVERED</span>
-                                        <span class="badge bg-success" th:if="${order.status.name()} == 'COMPLETED'" th:text="${order.status}">COMPLETED</span>
                                         <span class="badge bg-danger" th:if="${order.status.name()} == 'CANCELLED'" th:text="${order.status}">CANCELLED</span>
-                                        <span class="badge bg-secondary" th:unless="${order.status.name()} == 'PENDING' or ${order.status.name()} == 'CONFIRMED' or ${order.status.name()} == 'SHIPPED' or ${order.status.name()} == 'DELIVERED' or ${order.status.name()} == 'COMPLETED' or ${order.status.name()} == 'CANCELLED'" th:text="${order.status}">UNKNOWN</span>
+                                        <span class="badge bg-secondary" th:unless="${order.status.name()} == 'PENDING' or ${order.status.name()} == 'CONFIRMED' or ${order.status.name()} == 'PROCESSING' or ${order.status.name()} == 'SHIPPED' or ${order.status.name()} == 'DELIVERED' or ${order.status.name()} == 'CANCELLED'" th:text="${order.status}">UNKNOWN</span>
                                     </td>
                                     <td>
-                                        <strong th:text="${order.totalAmount} + ' kr'">1000 kr</strong>
+                                        <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 2)} + ' kr'">1000 kr</strong>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
@@ -162,10 +129,11 @@
                             </th:block>
 
                             <!-- No orders message -->
-                            <tr th:if="${ordersPage == null or ordersPage.content == null or ordersPage.content.isEmpty()}">
+                            <tr th:if="${orders == null or #lists.isEmpty(orders)}">
                                 <td colspan="6" class="text-center py-4">
                                     <i class="bi bi-inbox display-4 text-muted"></i>
                                     <p class="text-muted mt-2">Inga beställningar att visa</p>
+                                    <small class="text-muted">När kunder lägger beställningar kommer de att visas här.</small>
                                 </td>
                             </tr>
                             </tbody>
@@ -182,25 +150,19 @@
 <script>
     function updateOrderStatus(orderId, newStatus) {
         if (confirm('Är du säker på att du vill ändra orderstatus?')) {
-            fetch('/admin/orders/' + orderId + '/status', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('Fel vid uppdatering av orderstatus');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Fel vid uppdatering av orderstatus');
-                });
+            // Använd POST istället för PUT för att matcha controller
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/orders/' + orderId + '/status';
+
+            const statusInput = document.createElement('input');
+            statusInput.type = 'hidden';
+            statusInput.name = 'status';
+            statusInput.value = newStatus;
+
+            form.appendChild(statusInput);
+            document.body.appendChild(form);
+            form.submit();
         }
     }
 </script>
