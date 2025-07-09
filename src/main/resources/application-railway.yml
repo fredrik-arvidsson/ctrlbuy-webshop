@@ -19,7 +19,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
       # NAMING STRATEGY BORTTAGEN - LÅT @COLUMN ANNOTATIONS STYRA
     properties:
       hibernate:
@@ -105,7 +105,7 @@ app:
     url: https://ctrlbuy-webshop-production.up.railway.app
 
   # =======================================
-  # ADMIN USER CONFIGURATION - FIXAD! 
+  # ADMIN USER CONFIGURATION - FIXAD! ❤️
   # =======================================
   admin:
     username: ${ADMIN_USERNAME:admin}
