@@ -19,15 +19,15 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop  # ÄNDRAT: Tvingar fullständig tabellåterskapning
       # NAMING STRATEGY BORTTAGEN - LÅT @COLUMN ANNOTATIONS STYRA
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true  # ÄNDRAT: Aktiverat för debugging
         use_sql_comments: false
         jdbc:
           time_zone: Europe/Stockholm
-    show-sql: false
+    show-sql: true  # ÄNDRAT: Aktiverat för att se SQL-statements
 
   thymeleaf:
     cache: true
@@ -83,7 +83,7 @@ logging:
     com.ctrlbuy.webshop: INFO
     org.springframework.security: WARN
     org.springframework.web: WARN
-    org.hibernate.SQL: WARN
+    org.hibernate.SQL: INFO  # ÄNDRAT: Visar SQL för debugging
     org.springframework.mail: WARN
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
