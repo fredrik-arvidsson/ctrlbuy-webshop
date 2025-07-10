@@ -15,14 +15,24 @@ jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:9.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpassword
+          MYSQL_DATABASE: ctrlbuy_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
@@ -32,8 +42,35 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -p'testpassword' --silent; do
+            echo 'Waiting for MySQL...'
+            sleep 2
+          done
+          echo 'MySQL is ready!'
+
+      - name: Create test database user
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -p'testpassword' -e "
+            CREATE USER IF NOT EXISTS 'ctrlbuy_test'@'%' IDENTIFIED BY 'testpassword';
+            GRANT ALL PRIVILEGES ON ctrlbuy_test.* TO 'ctrlbuy_test'@'%';
+            FLUSH PRIVILEGES;
+          "
+
       - name: Run tests and generate JaCoCo report
-        run: ./mvnw clean test jacoco:report
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ctrlbuy_test
+          SPRING_DATASOURCE_USERNAME: ctrlbuy_test
+          SPRING_DATASOURCE_PASSWORD: testpassword
+        run: mvn clean test jacoco:report
+
+      - name: Generate coverage badge
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
