@@ -1,13 +1,13 @@
 # =======================================
 # RAILWAY MILJÖ - PRODUCTION MySQL
-# KORRIGERAD VERSION MED RÄTTA VARIABLE NAMES
+# KORRIGERAD VERSION MED railway_user ANVÄNDARE
 # =======================================
 
 spring:
   datasource:
-    url: ${MYSQL_PUBLIC_URL}
-    username: ${MYSQLUSER}              # ← FIXAT! (var MYSQL_USER)
-    password: ${MYSQL_ROOT_PASSWORD}    # ← FIXAT! (var MYSQL_PASSWORD)
+    url: jdbc:mysql://shortline.proxy.rlwy.net:10114/railway
+    username: railway_user              # ← HÅRDKODAT - ingen variable
+    password: KmfWrJfpXMIRYVKKUBjFvkbjjzjDdSjt  # ← HÅRDKODAT - ingen variable
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 20000
