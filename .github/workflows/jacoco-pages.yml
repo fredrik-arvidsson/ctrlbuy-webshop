@@ -112,7 +112,12 @@ jobs:
                   <h1>📊 CtrlBuy Test Coverage Dashboard</h1>
                   <p>Full e-commerce platform running live on Railway cloud infrastructure</p>
                   <span class="live-badge">🟢 LIVE</span>
-                  <p style="margin-top: 1rem; color: #666;">Last updated: $(date)</p>
+                  <p style="margin-top: 1rem; color: #666;">Last updated: <span id="date"></span></p>
+                  <script>
+                    document.getElementById('date').textContent = new Date().toLocaleDateString('sv-SE', { 
+                      year: 'numeric', month: 'long', day: 'numeric' 
+                    });
+                  </script>
               </div>
               <div class="dashboard">
                   <div class="metrics-grid">
@@ -165,4 +170,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4C#
