@@ -39,6 +39,18 @@ spring:
     show-sql: false
 
   # =======================================
+  # OAUTH2 SOCIAL LOGIN
+  # =======================================
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH2_CLIENT_ID:}
+            client-secret: ${GOOGLE_OAUTH2_CLIENT_SECRET:}
+            scope: profile,email
+
+  # =======================================
   # EMAIL CONFIGURATION (SMTP)
   # =======================================
   mail:

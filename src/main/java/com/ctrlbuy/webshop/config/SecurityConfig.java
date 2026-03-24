@@ -1,5 +1,6 @@
 package com.ctrlbuy.webshop.config;
 
+import com.ctrlbuy.webshop.service.CustomOAuth2UserService;
 import com.ctrlbuy.webshop.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Value("${app.security.remember-me.token-validity-seconds:2592000}")
     private int rememberMeTokenValiditySeconds;
@@ -48,6 +52,9 @@ public class SecurityConfig {
 
                         // 🔐 Autentisering och registrering - publikt tillgängliga
                         .requestMatchers("/login", "/login/**", "/register", "/register/**").permitAll()
+
+                        // 🌐 OAuth2 login flow
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // 📧 E-postverifiering och relaterade endpoints
                         .requestMatchers("/verify-email", "/verify-email/**").permitAll()
@@ -90,6 +97,14 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/home", true)
                         .failureUrl("/login?error=true")
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/login?error=true")
                 )
                 .rememberMe(remember -> remember
                         .key(rememberMeKey)

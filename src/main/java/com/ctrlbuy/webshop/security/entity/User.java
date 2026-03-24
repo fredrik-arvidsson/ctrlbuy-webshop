@@ -53,11 +53,20 @@ public class User implements UserDetails {
 
     private LocalDateTime lastLoginAt;
 
+    @Column(length = 50)
+    private String oauthProvider;
+
+    @Column(length = 255)
+    private String oauthProviderId;
+
+    @Column(length = 500)
+    private String profilePictureUrl;
+
     // Default constructor
     public User() {}
 
     // Constructor with all fields
-    public User(Long id, String username, String email, String password, String firstName, String lastName, Role role, boolean enabled, boolean emailVerified, String verificationToken, LocalDateTime verificationTokenExpiry, String resetToken, LocalDateTime resetTokenExpiry, LocalDateTime createdAt, LocalDateTime lastLoginAt) {
+    public User(Long id, String username, String email, String password, String firstName, String lastName, Role role, boolean enabled, boolean emailVerified, String verificationToken, LocalDateTime verificationTokenExpiry, String resetToken, LocalDateTime resetTokenExpiry, LocalDateTime createdAt, LocalDateTime lastLoginAt, String oauthProvider, String oauthProviderId, String profilePictureUrl) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -73,6 +82,9 @@ public class User implements UserDetails {
         this.resetTokenExpiry = resetTokenExpiry;
         this.createdAt = createdAt;
         this.lastLoginAt = lastLoginAt;
+        this.oauthProvider = oauthProvider;
+        this.oauthProviderId = oauthProviderId;
+        this.profilePictureUrl = profilePictureUrl;
     }
 
     // Builder pattern
@@ -96,6 +108,9 @@ public class User implements UserDetails {
         private LocalDateTime resetTokenExpiry;
         private LocalDateTime createdAt = LocalDateTime.now();
         private LocalDateTime lastLoginAt;
+        private String oauthProvider;
+        private String oauthProviderId;
+        private String profilePictureUrl;
 
         public UserBuilder id(Long id) { this.id = id; return this; }
         public UserBuilder username(String username) { this.username = username; return this; }
@@ -112,6 +127,9 @@ public class User implements UserDetails {
         public UserBuilder resetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; return this; }
         public UserBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
         public UserBuilder lastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; return this; }
+        public UserBuilder oauthProvider(String oauthProvider) { this.oauthProvider = oauthProvider; return this; }
+        public UserBuilder oauthProviderId(String oauthProviderId) { this.oauthProviderId = oauthProviderId; return this; }
+        public UserBuilder profilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; return this; }
 
         // ADD THIS METHOD for DataInitializer compatibility
         public UserBuilder active(boolean active) {
@@ -133,7 +151,7 @@ public class User implements UserDetails {
         }
 
         public User build() {
-            return new User(id, username, email, password, firstName, lastName, role, enabled, emailVerified, verificationToken, verificationTokenExpiry, resetToken, resetTokenExpiry, createdAt, lastLoginAt);
+            return new User(id, username, email, password, firstName, lastName, role, enabled, emailVerified, verificationToken, verificationTokenExpiry, resetToken, resetTokenExpiry, createdAt, lastLoginAt, oauthProvider, oauthProviderId, profilePictureUrl);
         }
     }
 
@@ -182,6 +200,15 @@ public class User implements UserDetails {
 
     public LocalDateTime getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+
+    public String getOauthProvider() { return oauthProvider; }
+    public void setOauthProvider(String oauthProvider) { this.oauthProvider = oauthProvider; }
+
+    public String getOauthProviderId() { return oauthProviderId; }
+    public void setOauthProviderId(String oauthProviderId) { this.oauthProviderId = oauthProviderId; }
+
+    public String getProfilePictureUrl() { return profilePictureUrl; }
+    public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
 
     // 🎯 LÖSNING: Metod för Thymeleaf template
     public String getFormattedCreatedAt() {

@@ -26,6 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
+    Optional<User> findByOauthProviderAndOauthProviderId(String oauthProvider, String oauthProviderId);
+
     long countByEnabledTrue();
     long countByEnabledFalse();
 

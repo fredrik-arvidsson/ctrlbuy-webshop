@@ -190,6 +190,15 @@
       </div>
     </form>
 
+    <!-- OAuth2 Social Login -->
+    <div class="text-center mt-3 mb-3">
+      <hr>
+      <p class="text-muted">Eller logga in med</p>
+      <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-dark btn-block">
+        <i class="fab fa-google"></i> Logga in med Google
+      </a>
+    </div>
+
     <div class="text-center mt-3">
       <p><a th:href="@{/register}" class="text-decoration-none">Registrera nytt konto</a></p>
       <p><a th:href="@{/forgot-password}" class="text-decoration-none">Glömt lösenord?</a></p>
